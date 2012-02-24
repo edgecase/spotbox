@@ -1,0 +1,6 @@
+{
+  "files": [
+    "stylesheets/bootstrap/bootstrap.less",
+    "stylesheets/application.less"
+  ]
+}

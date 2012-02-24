@@ -1,0 +1,21 @@
+{
+  "name": "jukebox_frontend",
+  "version": "0.0.1",
+  "author": "Andrew Grieser <agrieser@gmail.com>, Aaron Christy <aaron@phad.com>, Alex Burkhart <saterus@gmail.com>",
+  "description": "Jukebox Frontend",
+  "dependencies": {
+    "async_collection_runner": "git://github.com/agrieser/async_collection_runner.git",
+    "asset_builder":           "git://github.com/agrieser/asset_builder.git",
+    "fs_utils":                "git://github.com/agrieser/fs_utils.git",
+    "express":                 "*",
+    "jade":                    "*",
+    "underscore":              "*",
+    "redis":                   "*",
+    "socket.io":               "*",
+    "vows":                    "*"
+  },
+  "license": "MIT",
+  "engine": {
+    "node": ">=0.6"
+  }
+}

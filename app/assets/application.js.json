@@ -1,0 +1,12 @@
+{
+  "files": [
+    "javascripts/lib/jquery.js",
+    "javascripts/lib/underscore.js",
+    "javascripts/lib/",
+    "javascripts/spotbox.js",
+    "javascripts/models/",
+    "javascripts/controllers/",
+    "javascripts/views/",
+    "javascripts/"
+  ]
+}
