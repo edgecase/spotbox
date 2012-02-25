@@ -1,7 +1,8 @@
-var http       = require("http");
-var path       = require("path");
-var underscore = require("underscore");
-var config     = require(path.join(__dirname, "..", "..", "config"));
+var http        = require("http");
+var path        = require("path");
+var querystring = require("querystring");
+var underscore  = require("underscore");
+var config      = require(path.join(__dirname, "..", "..", "config"));
 
 var settings = {
   host: "ws.spotify.com",
@@ -9,6 +10,7 @@ var settings = {
 };
 
 function request(opts, params, hollaback) {
+  console.log("===================");
   console.log("spotify request: ", new Date(), ": ", opts, params);
   options = {};
   options.host = settings.host
@@ -20,13 +22,11 @@ function request(opts, params, hollaback) {
 
   options.path += ".json";
 
-  options.path += "?" + underscore.map(params, function(value, key) {
-    return key + "=" + value;
-  }).join("&");
-  console.log("===================D");
+  options.path += "?" + querystring.stringify(params);
+
   console.log(opts);
   console.log(options);
-  console.log("===================D");
+  console.log("===================");
 
   http.request(options, function(response) {
     var metadata = "";

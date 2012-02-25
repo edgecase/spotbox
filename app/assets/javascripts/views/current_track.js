@@ -1,4 +1,5 @@
 Spotbox.Views.CurrentTrack = Ember.View.extend({
-  templateName: "track",
-  modelBinding: "Spotbox.Controllers.CurrentTrack.content.track"
+  templateName: "current_track",
+  classNames: ["current_track"],
+  modelBinding: "Spotbox.Controllers.CurrentTrack.content"
 });

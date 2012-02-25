@@ -1,3 +1,4 @@
 Spotbox.Views.Track = Ember.View.extend({
-  templateName: "track"
+  templateName: "track",
+  classNames: ["well"],
 });

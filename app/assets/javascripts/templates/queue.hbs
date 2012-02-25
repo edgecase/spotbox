@@ -1,7 +1,8 @@
 {{#if showContent}}
+  <h3>Queue</h3>
   <ul class="unstyled">
   {{#each content}}
-    {{view Spotbox.Views.SearchResult modelBinding="this"}}
+    {{view Spotbox.Views.Track modelBinding="this"}}
   {{/each}}
   </ul>
 {{/if}}

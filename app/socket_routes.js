@@ -10,48 +10,53 @@ module.exports = function(server) {
   var redis_subscriptions = redis.createClient();
   var io = socketio.listen(server);
 
+  function socketEmit(socket, channel, error, result) {
+    if (error) {
+      socket.emit(channel, {error: error});
+    } else {
+      socket.emit(channel, result);
+    }
+  };
+
   io.configure(function () {
     io.set("transports", ["websocket"]);
     io.disable("log");
   });
 
   io.sockets.on("connection", function(socket) {
-    config.redis.get("spotify_current", function(error, trackUri) {
-      Spotify.retrieve(trackUri, function(error, track) {
-        if (error) {
-          socket.emit("tracks/current", {error: error});
-        } else {
-          socket.emit("tracks/current", track);
-        }
+    Spotify.getCurrent(function(error, track) {
+      socketEmit(socket, "tracks/current", error, track);
+    });
+
+    Spotify.getQueue(function(error, queue) {
+      socketEmit(socket, "tracks/queue", error, queue);
+    });
+
+    socket.on("tracks/search", function(message) {
+      Spotify.search(message.query, function(error, result) {
+        socketEmit(socket, "tracks/search/result", error, result);
       });
     });
 
-    socket.on("search", function(message) {
-      Spotify.search(message.type, message.query, function(error, result) {
-        if (error) {
-          socket.emit("search/result", {error: error});
-        } else {
-          socket.emit("search/result", result);
-        }
+    socket.on("tracks/enqueue", function(message) {
+      Spotify.enqueue(message, function(error, queue) {
+        socketEmit(socket, "tracks/queue", error, queue);
       });
-    });
-
-    socket.on("enqueue", function() {
-      // retrieve from spotify
-      // push to redis
-      // >> broadcast to clients
     });
   });
 
-  redis_subscriptions.on("message", function(channel, trackUri) {
-    if (channel === "spotify_current_change") {
-      Spotify.retrieve(trackUri, function(error, track) {
-        io.sockets.emit("tracks/current", track );
+  redis_subscriptions.on("message", function(channel, message) {
+    if (channel === Spotify.namespace("current_change")) {
+      Spotify.getCurrent(function(error, result) {
+        socketEmit(io.sockets, "tracks/current", error, result);
+      });
+      Spotify.getQueue(function(error, queue) {
+        socketEmit(io.sockets, "tracks/queue", error, queue);
       });
     } else {
       console.log("unknown:", message);
     }
   });
 
-  redis_subscriptions.subscribe("spotify_current_change");
+  redis_subscriptions.subscribe(Spotify.namespace("current_change"));
 };

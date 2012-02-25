@@ -6,7 +6,6 @@
   "dependencies": {
     "async_collection_runner": "git://github.com/agrieser/async_collection_runner.git",
     "asset_builder":           "git://github.com/agrieser/asset_builder.git",
-    "fs_utils":                "git://github.com/agrieser/fs_utils.git",
     "express":                 "*",
     "jade":                    "*",
     "underscore":              "*",
