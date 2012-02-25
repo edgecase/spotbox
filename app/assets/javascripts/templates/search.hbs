@@ -1,0 +1,7 @@
+<div class="btn-group">
+  {{#view trackButton}}Track{{/view}}
+  {{#view albumButton}}Album{{/view}}
+  {{#view artistButton}}Artist{{/view}}
+</div>
+{{view Spotbox.Views.TextField valueBinding="model.query" placeholder="Search"}}
+{{#view searchButton}}Search{{/view}}

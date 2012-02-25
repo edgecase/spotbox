@@ -1,29 +1,10 @@
-var path   = require("path");
-var http   = require("http");
-var config = require(path.join(__dirname, "..", "..", "config"));
-
-var spotifyhost = "ws.spotify.com";
-var spotifypath = "/lookup/1/.json";
+var path       = require("path");
+var http       = require("http");
+var config     = require(path.join(__dirname, "..", "..", "config"));
+var SpotifyApi = require(path.join(config.root, "app", "lib", "spotify_api"));
 
 function namespaceUri(spotifyUri) {
   return "spotify_" + spotifyUri;
-};
-
-function request(spotifyUri, hollaback) {
-  var metadata = "";
-  var options = {
-    host: spotifyhost,
-    path: spotifypath + "?uri=" + spotifyUri
-  };
-
-  http.request(options, function(response) {
-    response.on("data", function(chunk) {
-      metadata += chunk.toString();
-    });
-    response.on("end", function() {
-      hollaback(null, metadata);
-    });
-  }).end();
 };
 
 function cache(spotifyUri, metadata) {
@@ -31,6 +12,7 @@ function cache(spotifyUri, metadata) {
 };
 
 var Spotify = function() {};
+
 Spotify.retrieve = function(spotifyUri, hollaback) {
   config.redis.get(namespaceUri(spotifyUri), function(error, metadata) {
     if (error) {
@@ -38,12 +20,21 @@ Spotify.retrieve = function(spotifyUri, hollaback) {
     } else if (metadata) {
       hollaback(null, JSON.parse(metadata));
     } else {
-      request(spotifyUri, function(error, metadata) {
+      SpotifyApi.lookup(spotifyUri, function(error, metadata) {
         cache(spotifyUri, metadata);
         hollaback(null, JSON.parse(metadata));
       });
     }
   });
+};
+
+Spotify.search = function(type, query, hollaback) {
+  config.redis.get(namespaceUri("search"), function(error, metadata) {
+    hollaback(error, JSON.parse(metadata));
+  });
+  // SpotifyApi.search(type, query, function(error, metadata) {
+  //   hollaback(error, JSON.parse(metadata));
+  // });
 };
 
 module.exports = Spotify;

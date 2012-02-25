@@ -1,10 +1,8 @@
 var path          = require("path");
 var fs            = require("fs");
 var underscore    = require("underscore");
-var http          = require("http");
 var config        = require(path.join(__dirname, "..", "config"));
 var RequestHelper = require(path.join(config.root, "app", "lib", "request_helper"));
-var Spotify       = require(path.join(config.root, "app", "lib", "spotify"));
 
 
 module.exports = function(server) {

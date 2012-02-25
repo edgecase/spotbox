@@ -1,0 +1,7 @@
+{{#if showResults}}
+  <ul class="unstyled">
+  {{#each content}}
+    {{view Spotbox.Views.SearchResult modelBinding="this"}}
+  {{/each}}
+  </ul>
+{{/if}}
