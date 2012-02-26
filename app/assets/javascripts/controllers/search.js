@@ -1,6 +1,6 @@
 Spotbox.Controllers.Search = Ember.ArrayController.create({
   content: [],
-  searchModel: {type: "track"},
+  searchModel: {},
   searching: false,
 
   init: function() {
