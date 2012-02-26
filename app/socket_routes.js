@@ -45,6 +45,8 @@ module.exports = function(server) {
       socketEmit(socket, "playlists/current", error, uri);
     });
 
+    socketEmit(socket, "airfoil", null, "connected");
+
 
     socket.on("tracks/search", function(message) {
       Spotify.search(message.query, function(error, result) {
