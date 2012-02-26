@@ -1,4 +1,5 @@
 {{#if showContent}}
+  <a class="btn btn-danger" {{action "clear"}}>Clear</a>
   <ul class="unstyled">
   {{#each content}}
     {{view Spotbox.Views.SearchResult modelBinding="this"}}

@@ -1,2 +1,4 @@
-{{view Spotbox.Views.Track modelBinding="model"}}
-<a class="btn" {{action "enqueue"}}>Enqueue</a>
+{{#if available}}
+  {{view Spotbox.Views.Track modelBinding="model"}}
+  <a class="btn" {{action "enqueue"}}>Enqueue</a>
+{{/if}}
