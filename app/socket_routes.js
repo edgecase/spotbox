@@ -65,6 +65,10 @@ module.exports = function(server) {
         socketEmit(io.sockets, "playlists/current", error, uri);
       });
     });
+
+    socket.on("player", function(message) {
+      config.redis.publish(Spotbox.namespace("player"), message);
+    });
   });
 
   redis_subscriptions.on("message", function(channel, message) {
