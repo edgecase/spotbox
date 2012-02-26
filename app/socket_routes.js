@@ -4,6 +4,7 @@ var underscore = require("underscore");
 var redis      = require("redis");
 var socketio   = require("socket.io");
 var config     = require(path.join(__dirname, "..", "config"));
+var Spotbox    = require(path.join(config.root, "app", "lib", "spotbox"));
 var Spotify    = require(path.join(config.root, "app", "lib", "spotify"));
 
 module.exports = function(server) {
@@ -65,7 +66,7 @@ module.exports = function(server) {
   });
 
   redis_subscriptions.on("message", function(channel, message) {
-    if (channel === Spotify.namespace("current_track_change")) {
+    if (channel === Spotbox.namespace("current_track_change")) {
       Spotify.getCurrentTrack(function(error, result) {
         socketEmit(io.sockets, "tracks/current", error, result);
       });
@@ -80,5 +81,5 @@ module.exports = function(server) {
     }
   });
 
-  redis_subscriptions.subscribe(Spotify.namespace("current_track_change"));
+  redis_subscriptions.subscribe(Spotbox.namespace("current_track_change"));
 };
