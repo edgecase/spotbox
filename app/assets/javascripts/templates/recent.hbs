@@ -1,0 +1,8 @@
+{{#if showContent}}
+  <h3>Recently Played</h3>
+  <ul class="unstyled">
+  {{#each content}}
+    {{view Spotbox.Views.Track modelBinding="this"}}
+  {{/each}}
+  </ul>
+{{/if}}

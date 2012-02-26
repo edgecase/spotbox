@@ -44,7 +44,7 @@ Spotify.search = function(query, hollaback) {
           return track;
         });
         config.redis.set(redisKey, JSON.stringify(tracks));
-        config.redis.expire(redisKey, 3600 * 24);
+        config.redis.expire(redisKey, 3600 * 24 * 7);
         hollaback(error, tracks);
       });
     }
@@ -67,8 +67,8 @@ Spotify.enqueue = function(spotifyUri, hollaback) {
   });
 };
 
-Spotify.getCurrent = function(hollaback) {
-  config.redis.get(Spotify.namespace("current"), function(error, trackUri) {
+Spotify.getCurrentTrack = function(hollaback) {
+  config.redis.get(Spotify.namespace("current_track"), function(error, trackUri) {
     if (trackUri) {
       Spotify.retrieve(trackUri, hollaback);
     } else {
@@ -83,6 +83,49 @@ Spotify.getQueue = function(hollaback) {
       hollaback(error);
     } else {
       new AsyncCollectionRunner(uris, Spotify.retrieve).run(hollaback);
+    }
+  });
+};
+
+Spotify.getRecentlyPlayed = function(hollaback) {
+  config.redis.lrange(Spotify.namespace("recently_played"), 0, -1, function(error, uris) {
+    if (error) {
+      hollaback(error);
+    } else {
+      new AsyncCollectionRunner(uris, Spotify.retrieve).run(hollaback);
+    }
+  });
+};
+
+Spotify.getPlaylists = function(hollaback) {
+  config.redis.lrange(Spotify.namespace("playlists"), 0, -1, function(error, uris) {
+    if (error) {
+      hollaback(error);
+    } else {
+      var runner = function(uri, hollaback) {
+        config.redis.get(Spotify.namespace(uri), function(error, playlist) {
+          if (error) {
+            hollaback(error);
+          } else {
+            hollaback(null, underscore.extend(JSON.parse(playlist), {href: uri}));
+          }
+        });
+      };
+      new AsyncCollectionRunner(uris, runner).run(hollaback);
+    }
+  });
+};
+
+Spotify.getCurrentPlaylistUri = function(hollaback) {
+  config.redis.get(Spotify.namespace("current_playlist"), hollaback);
+};
+
+Spotify.setCurrentPlaylist = function(uri, hollaback) {
+  config.redis.lrange(Spotify.namespace("playlists"), 0, -1, function(error, uris) {
+    if (underscore.include(uris, uri)) {
+      config.redis.set(Spotify.namespace("current_playlist"), uri, function(error) {
+        hollaback(error, uri);
+      });
     }
   });
 };

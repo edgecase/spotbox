@@ -1,4 +1,4 @@
-Spotbox.Controllers.CurrentTrack = Ember.Object.create({
+Spotbox.Controllers.Current = Ember.Object.create({
   content: null,
 
   init: function() {

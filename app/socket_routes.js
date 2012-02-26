@@ -24,13 +24,26 @@ module.exports = function(server) {
   });
 
   io.sockets.on("connection", function(socket) {
-    Spotify.getCurrent(function(error, track) {
+    Spotify.getCurrentTrack(function(error, track) {
       socketEmit(socket, "tracks/current", error, track);
     });
 
     Spotify.getQueue(function(error, queue) {
       socketEmit(socket, "tracks/queue", error, queue);
     });
+
+    Spotify.getRecentlyPlayed(function(error, tracks) {
+      socketEmit(socket, "tracks/recent", error, tracks);
+    });
+
+    Spotify.getPlaylists(function(error, playlists) {
+      socketEmit(socket, "playlists", error, playlists);
+    });
+
+    Spotify.getCurrentPlaylistUri(function(error, uri) {
+      socketEmit(socket, "playlists/current", error, uri);
+    });
+
 
     socket.on("tracks/search", function(message) {
       Spotify.search(message.query, function(error, result) {
@@ -40,23 +53,32 @@ module.exports = function(server) {
 
     socket.on("tracks/enqueue", function(message) {
       Spotify.enqueue(message, function(error, queue) {
-        socketEmit(socket, "tracks/queue", error, queue);
+        socketEmit(io.sockets, "tracks/queue", error, queue);
+      });
+    });
+
+    socket.on("playlists/set", function(message) {
+      Spotify.setCurrentPlaylist(message, function(error, uri) {
+        socketEmit(io.sockets, "playlists/current", error, uri);
       });
     });
   });
 
   redis_subscriptions.on("message", function(channel, message) {
-    if (channel === Spotify.namespace("current_change")) {
-      Spotify.getCurrent(function(error, result) {
+    if (channel === Spotify.namespace("current_track_change")) {
+      Spotify.getCurrentTrack(function(error, result) {
         socketEmit(io.sockets, "tracks/current", error, result);
       });
-      Spotify.getQueue(function(error, queue) {
-        socketEmit(io.sockets, "tracks/queue", error, queue);
+      Spotify.getQueue(function(error, tracks) {
+        socketEmit(io.sockets, "tracks/queue", error, tracks);
+      });
+      Spotify.getRecentlyPlayed(function(error, tracks) {
+        socketEmit(io.sockets, "tracks/recent", error, tracks);
       });
     } else {
       console.log("unknown:", message);
     }
   });
 
-  redis_subscriptions.subscribe(Spotify.namespace("current_change"));
+  redis_subscriptions.subscribe(Spotify.namespace("current_track_change"));
 };
