@@ -1,7 +1,6 @@
 var fs         = require("fs");
 var path       = require("path");
 var underscore = require("underscore");
-var fsutils    = require("fs_utils");
 var config     = require(path.join(__dirname, "..", "..", "config"));
 
 var RequestHelper = {};
