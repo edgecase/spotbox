@@ -9,7 +9,7 @@ var Spotify    = require(path.join(config.root, "app", "lib", "spotify"));
 var Activity   = require(path.join(config.root, "app", "lib", "activity"));
 
 module.exports = function(server) {
-  var redis_subscriptions = redis.createClient();
+  var redisSubscriptions = redis.createClient();
   var io = socketio.listen(server);
 
   function socketEmit(socket, channel, error, result) {
@@ -46,8 +46,8 @@ module.exports = function(server) {
       socketEmit(socket, "playlists/current", error, uri);
     });
 
-    socketEmit(socket, "airfoil", null, "connected");
-
+    config.redis.publish(Spotbox.namespace("airfoil:request"), "status");
+    socketEmit(socket, "airfoil", null, {volume: 80, status: "connected"});
 
     socket.on("tracks/search", function(message) {
       Spotify.search(message.query, function(error, result) {
@@ -77,9 +77,14 @@ module.exports = function(server) {
       config.redis.publish(Spotbox.namespace("player"), message);
       socketEmit(io.sockets, "activities", null, Activity.build(socket, "Pressed " + message));
     });
+
+    socket.on("airfoil", function(message) {
+      config.redis.publish(Spotbox.namespace("airfoil:request"), message);
+      socketEmit(io.sockets, "activities", null, Activity.build(socket, "Sent Airfoil commaned " + message));
+    });
   });
 
-  redis_subscriptions.on("message", function(channel, message) {
+  redisSubscriptions.on("message", function(channel, message) {
     if (channel === Spotbox.namespace("current_track_change")) {
       Spotify.getCurrentTrack(function(error, result) {
         socketEmit(io.sockets, "tracks/current", error, result);
@@ -90,10 +95,12 @@ module.exports = function(server) {
       Spotify.getRecentlyPlayed(function(error, tracks) {
         socketEmit(io.sockets, "tracks/recent", error, tracks);
       });
+    } else if (channel === Spotbox.namespace("airfoil:response")) {
+      socketEmit(io.sockets, "airfoil", null, JSON.parse(message));
     } else {
-      console.log("unknown:", message);
+      console.log("unknown socket message: ", message);
     }
   });
 
-  redis_subscriptions.subscribe(Spotbox.namespace("current_track_change"));
+  redisSubscriptions.subscribe(Spotbox.namespace("current_track_change"), Spotbox.namespace("airfoil:response"));
 };

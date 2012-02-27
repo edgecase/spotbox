@@ -1,4 +1,11 @@
 <h3>Airfoil</h3>
-<div class="btn-group">
-  {{#view toggleButton}}{{parentView.status}}{{/view}}
+<div class="btn-toolbar">
+  <div class="btn-group">
+    {{#view toggleButton}}{{parentView.status}}{{/view}}
+  </div>
+  <div class="btn-group">
+    <a {{action "volumeUp"}} class="btn btn-mini"><i class="icon-arrow-up"></i></a>
+    <a {{action "volumeDown"}} class="btn btn-mini"><i class="icon-arrow-down"></i></a>
+  </div>
+  {{volume}}
 </div>
