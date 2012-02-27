@@ -6,6 +6,7 @@ var socketio   = require("socket.io");
 var config     = require(path.join(__dirname, "..", "config"));
 var Spotbox    = require(path.join(config.root, "app", "lib", "spotbox"));
 var Spotify    = require(path.join(config.root, "app", "lib", "spotify"));
+var Activity   = require(path.join(config.root, "app", "lib", "activity"));
 
 module.exports = function(server) {
   var redis_subscriptions = redis.createClient();
@@ -57,17 +58,24 @@ module.exports = function(server) {
     socket.on("tracks/enqueue", function(message) {
       Spotify.enqueue(message, function(error, queue) {
         socketEmit(io.sockets, "tracks/queue", error, queue);
+        Spotify.retrieve(message, function(error, track) {
+          socketEmit(io.sockets, "activities", error, Activity.build(socket, "Enqueued " + track.track.name));
+        });
       });
     });
 
     socket.on("playlists/set", function(message) {
       Spotify.setCurrentPlaylist(message, function(error, uri) {
         socketEmit(io.sockets, "playlists/current", error, uri);
+        Spotify.getPlaylist(uri, function(error, playlist) {
+          socketEmit(io.sockets, "activities", error, Activity.build(socket, "Changed playlist to " + playlist.name));
+        });
       });
     });
 
     socket.on("player", function(message) {
       config.redis.publish(Spotbox.namespace("player"), message);
+      socketEmit(io.sockets, "activities", error, Activity.build(socket, "Pressed " + message));
     });
   });
 

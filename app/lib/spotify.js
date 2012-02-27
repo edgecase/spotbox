@@ -97,22 +97,23 @@ Spotify.getPlaylists = function(hollaback) {
     if (error) {
       hollaback(error);
     } else {
-      var runner = function(uri, hollaback) {
-        config.redis.get(Spotbox.namespace(uri), function(error, playlist) {
-          if (error) {
-            hollaback(error);
-          } else {
-            hollaback(null, underscore.extend(JSON.parse(playlist), {href: uri}));
-          }
-        });
-      };
-      new AsyncCollectionRunner(uris, runner).run(hollaback);
+      new AsyncCollectionRunner(uris, Spotify.getPlaylist).run(hollaback);
     }
   });
 };
 
 Spotify.getCurrentPlaylistUri = function(hollaback) {
   config.redis.get(Spotbox.namespace("current_playlist"), hollaback);
+};
+
+Spotify.getPlaylist = function(uri, hollaback) {
+  config.redis.get(Spotbox.namespace(uri), function(error, playlist) {
+    if (error) {
+      hollaback(error);
+    } else {
+      hollaback(null, underscore.extend(JSON.parse(playlist), {href: uri}));
+    }
+  });
 };
 
 Spotify.setCurrentPlaylist = function(uri, hollaback) {
