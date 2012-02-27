@@ -1,8 +1,8 @@
 {
-  "name": "jukebox_frontend",
+  "name": "spotbox_server",
   "version": "0.0.1",
   "author": "Andrew Grieser <agrieser@gmail.com>, Aaron Christy <aaron@phad.com>, Alex Burkhart <saterus@gmail.com>",
-  "description": "Jukebox Frontend",
+  "description": "Jukebox",
   "dependencies": {
     "async_collection_runner": "git://github.com/agrieser/async_collection_runner.git",
     "asset_builder":           "git://github.com/agrieser/asset_builder.git",
