@@ -2,17 +2,17 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
   templateName: "playback_controls",
   playButton: Spotbox.Views.Button.extend({
     click: function(event) {
-      Spotbox.Controllers.Current.play();
+      Spotbox.Controllers.Player.play();
     }
   }),
   stopButton: Spotbox.Views.Button.extend({
     click: function(event) {
-      Spotbox.Controllers.Current.stop();
+      Spotbox.Controllers.Player.stop();
     }
   }),
   nextButton: Spotbox.Views.Button.extend({
     click: function(event) {
-      Spotbox.Controllers.Current.next();
+      Spotbox.Controllers.Player.next();
     }
   })
 });

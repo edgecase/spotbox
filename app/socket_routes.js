@@ -75,7 +75,7 @@ module.exports = function(server) {
 
     socket.on("player", function(message) {
       config.redis.publish(Spotbox.namespace("player"), message);
-      socketEmit(io.sockets, "activities", error, Activity.build(socket, "Pressed " + message));
+      socketEmit(io.sockets, "activities", null, Activity.build(socket, "Pressed " + message));
     });
   });
 
