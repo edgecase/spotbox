@@ -1,5 +1,6 @@
 var path               = require("path");
 var express            = require("express");
+var assetbuilder       = require("asset_builder");
 var config             = require(path.join(__dirname, "config"));
 var http_routes        = require(path.join(config.root, "app", "http_routes"));
 var socket_routes      = require(path.join(config.root, "app", "socket_routes"));
@@ -13,7 +14,7 @@ server.configure(function() {
     showStack: true,
     dumpExceptions: true
   }));
-  this.use(config.asset_builder.middleware);
+  this.use(assetbuilder.middleware);
   this.use(express.static(path.join(config.root, "public")));
   this.use(express.bodyParser());
   this.use(express.methodOverride());
@@ -24,5 +25,9 @@ server.configure(function() {
   this.set("view options", {layout: false });
 });
 
-config.asset_builder.register(ember_preprocessor);
+assetbuilder.registerViewHelpers(server);
+assetbuilder.registerPreprocessor(ember_preprocessor);
+assetbuilder.configure({
+  env: config.env
+});
 server.listen(config.port);
