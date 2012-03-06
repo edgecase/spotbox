@@ -11,7 +11,8 @@
     "underscore":              "*",
     "redis":                   "*",
     "socket.io":               "*",
-    "vows":                    "*"
+    "vows":                    "*",
+    "zmq":                     "*"
   },
   "license": "MIT",
   "engine": {

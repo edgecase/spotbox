@@ -4,10 +4,12 @@ var assetbuilder       = require("asset_builder");
 var config             = require(path.join(__dirname, "config"));
 var http_routes        = require(path.join(config.root, "app", "http_routes"));
 var socket_routes      = require(path.join(config.root, "app", "socket_routes"));
+var message_bus        = require(path.join(config.root, "app", "message_bus"));
 var ember_preprocessor = require(path.join(config.root, "app", "lib", "preprocessors", "ember_preprocessor"));
 
 var server = express.createServer();
-socket_routes(server);
+/* socket_routes(server); */
+message_bus(server);
 
 server.configure(function() {
   this.use(express.errorHandler({
