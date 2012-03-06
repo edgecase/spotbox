@@ -2,11 +2,11 @@ var zmq = require("zmq");
 var sub = zmq.socket("sub");
 var pub = zmq.socket("pub");
 
-var sub_addr = "tcp://127.0.0.1:12000"
-var pub_addr = "tcp://127.0.0.1:12001"
+var sub_addr = "tcp://127.0.0.1:12000";
+var pub_addr = "tcp://127.0.0.1:12001";
 
 sub.connect(sub_addr);
-pub.bindSync(pub_addr)
+pub.bindSync(pub_addr);
 
 sub.subscribe("");
 sub.on("message", function(message) {
@@ -19,7 +19,7 @@ setTimeout(function() {
 }, 1000);
 
 setTimeout(function() {
-  console.log("send")
+  console.log("send");
   pub.send("spotbox:players:spotify::stop");
   pub.send("spotbox:players:spotify::play::spotify:track:07KHJvlYBeQVqrmifTEqEp");
 }, 10000);
