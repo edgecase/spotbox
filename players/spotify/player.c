@@ -221,8 +221,8 @@ void zmq_send_message (void *socket, char *string) {
   strcpy(&namespaced_msg[strlen(namespaced_msg)], string);
 
   zmq_msg_t message;
-  zmq_msg_init_size (&message, strlen(string));
-  memcpy (zmq_msg_data (&message), string, strlen(string));
+  zmq_msg_init_size (&message, strlen(namespaced_msg));
+  memcpy (zmq_msg_data (&message), namespaced_msg, strlen(namespaced_msg));
   zmq_send (socket, &message, 0);
   zmq_msg_close (&message);
 }
