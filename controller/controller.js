@@ -73,10 +73,10 @@ var Controller = (function(self, zmq) {
             // nothing in the queue
             uri = "spotify:track:18lwMD3frXxiVWBlztdijW";
           }
+          redis.set("spotbox:current_track", uri);
+          console.log(uri);
+          backend_pub.send("spotbox:players:spotify::play::" + uri);
         });
-        redis.set("spotbox:current_track", uri);
-        console.log(uri);
-        backend_pub.send("spotbox:players:spotify::play::" + uri);
       } else if (data.method === "stop") {
         redis.del("spotbox:current_track");
         backend_pub.send("spotbox:players:spotify::stop");

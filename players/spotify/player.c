@@ -228,11 +228,13 @@ void zmq_send_message (void *socket, char *string) {
 }
 
 void unload_current_track(void) {
+  // TODO: Figure out how to stop without perminantly losing audio
   if (g_currenttrack) {
     sp_track_release(g_currenttrack);
     g_currenttrack = NULL;
     sp_session_player_unload(g_sess);
   }
+  audio_fifo_flush(&g_audiofifo);
 }
 
 void track_ended(void) {
@@ -250,7 +252,7 @@ void status_update(void) {
   sp_link_as_string(track_link, url, sizeof(url));
   sp_link_release(track_link);
 
-  sprintf(time, "%.0lf", g_progress);
+  sprintf(time, "%.1lf", g_progress);
 
   strcpy(msg, "playing::");
   strcpy(&msg[strlen(msg)], url);
