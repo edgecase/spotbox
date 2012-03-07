@@ -235,6 +235,7 @@ void unload_current_track(void) {
     sp_session_player_unload(g_sess);
   }
   audio_fifo_flush(&g_audiofifo);
+  audio_init(&g_audiofifo);
 }
 
 void track_ended(void) {

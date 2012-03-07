@@ -30,16 +30,14 @@ var MessageBus = (function(self, zmq) {
   //   args[1] - progress in seconds
   //
   var reportTrackProgress = function(socket, args) {
-    console.log("report track progress: ", args);
     socket.emit("tracks/current/progress", { progress: args[1]});
   };
 
   var messageDispatch = function(socket) {
-    console.log("message dispatch init");
     sub.on("message", function(msg) {
       var data = parseMessage(msg);
 
-      if (data.method === "trackprogress") {
+      if (data.method === "track_progress") {
         reportTrackProgress(socket, data.args);
       } else {
         console.log("unsupported message: ", msg.toString());
@@ -55,10 +53,11 @@ var MessageBus = (function(self, zmq) {
     sub.connect(sub_addr);
     pub.bindSync(pub_addr);
     sub.subscribe("");
+
     sub.on("message", function(msg) {
       var data = parseMessage(msg);
 
-      if (data.method === "trackprogress") {
+      if (data.method === "track_progress") {
         reportTrackProgress(io.sockets, data.args);
       } else {
         console.log("unsupported message: ", msg.toString());
@@ -71,8 +70,6 @@ var MessageBus = (function(self, zmq) {
         pub.send(Spotbox.namespace("controller::" + message));
       });
     });
-
-    // set up messageDispatch handlers. Web socket is passed in.
   };
 
   return self;
@@ -80,3 +77,4 @@ var MessageBus = (function(self, zmq) {
 }({}, zmq));
 
 module.exports = MessageBus.init;
+
