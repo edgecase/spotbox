@@ -18,6 +18,8 @@ Spotbox.Controllers.Player = Ember.Object.create({
 
   stop: function() {
     Spotbox.socket.emit("player", "stop");
+    var track = this.get("content");
+    track.set("progress", 0);
   },
 
   next: function() {
