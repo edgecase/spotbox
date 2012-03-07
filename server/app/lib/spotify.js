@@ -21,8 +21,9 @@ Spotify.retrieve = function(spotifyUri, hollaback) {
       hollaback(null, JSON.parse(metadata));
     } else {
       SpotifyApi.lookup(spotifyUri, function(error, metadata) {
-        cache(spotifyUri, metadata);
-        hollaback(null, JSON.parse(metadata));
+        var track = JSON.parse(metadata).track;
+        cache(spotifyUri, JSON.stringify(track));
+        hollaback(null, track);
       });
     }
   });
@@ -35,9 +36,7 @@ Spotify.search = function(query, hollaback) {
       hollaback(error, JSON.parse(metadata));
     } else {
       SpotifyApi.search("track", query, function(error, metadata) {
-        tracks = underscore.map(JSON.parse(metadata).tracks, function(trackData) {
-          return {track: trackData};
-        });
+        var tracks = JSON.parse(metadata).tracks;
         config.redis.set(redisKey, JSON.stringify(tracks));
         config.redis.expire(redisKey, 3600 * 24 * 7);
         hollaback(error, tracks);
@@ -47,11 +46,11 @@ Spotify.search = function(query, hollaback) {
 };
 
 Spotify.enqueue = function(spotifyUri, hollaback) {
-  Spotify.retrieve(spotifyUri, function(error, result) {
+  Spotify.retrieve(spotifyUri, function(error, track) {
     if (error) {
       hollaback(error);
     } else {
-      config.redis.rpush(Spotbox.namespace("play_queue"), result.track.href, function(error, data) {
+      config.redis.rpush(Spotbox.namespace("play_queue"), track.href, function(error, data) {
         if (error) {
           hollaback(error);
         } else {

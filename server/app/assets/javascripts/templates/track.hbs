@@ -1,12 +1,12 @@
 <div>
-  <strong>Name:</strong> {{model.track.name}}
+  <strong>Name:</strong> {{model.name}}
 </div>
 <div>
   <strong>Artist:</strong>
-  {{#each model.track.artists}}
+  {{#each model.artists}}
     {{this.name}}
   {{/each}}
 </div>
 <div>
-  <strong>Album:</strong> {{model.track.album.name}}
+  <strong>Album:</strong> {{model.album.name}}
 </div>

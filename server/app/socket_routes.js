@@ -18,6 +18,8 @@ module.exports = function(io) {
 
   io.sockets.on("connection", function(socket) {
     Spotify.getCurrentTrack(function(error, track) {
+      console.log("error: ", error);
+      console.log("track: ", track);
       socketEmit(socket, "tracks/current", error, track);
     });
 
@@ -51,7 +53,7 @@ module.exports = function(io) {
       Spotify.enqueue(message, function(error, queue) {
         socketEmit(io.sockets, "tracks/queue", error, queue);
         Spotify.retrieve(message, function(error, track) {
-          socketEmit(io.sockets, "activities", error, Activity.build(socket, "Enqueued " + track.track.name));
+          socketEmit(io.sockets, "activities", error, Activity.build(socket, "Enqueued " + track.name));
         });
       });
     });
@@ -66,11 +68,13 @@ module.exports = function(io) {
     });
 
     socket.on("player", function(message) {
+      // TODO: ZMQ
       config.redis.publish(Spotbox.namespace("player"), message);
       socketEmit(io.sockets, "activities", null, Activity.build(socket, "Pressed " + message));
     });
 
     socket.on("airfoil", function(message) {
+      // TODO: ZMQ
       config.redis.publish(Spotbox.namespace("airfoil:request"), message);
       socketEmit(io.sockets, "activities", null, Activity.build(socket, "Sent Airfoil commaned " + message));
     });

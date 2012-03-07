@@ -1,4 +1,5 @@
-var zmq = require("zmq")
+var zmq   = require("zmq")
+var redis = require("redis").createClient();
 
 var Controller = (function(self, zmq) {
   var backend_sub       = zmq.socket("sub"),
@@ -43,7 +44,8 @@ var Controller = (function(self, zmq) {
     frontend_sub.connect(frontend_sub_addr);
     backend_pub.bindSync(backend_pub_addr);
     frontend_pub.bindSync(frontend_pub_addr);
-    backend_sub.subscribe("");
+    backend_sub.subscribe("spotbox:controller");
+    frontend_sub.subscribe("spotbox:controller");
 
     backend_sub.on("message", function(msg) {
       var data = parseMessage(msg);
@@ -59,11 +61,27 @@ var Controller = (function(self, zmq) {
       }
     });
 
-    // Simulations
-    setTimeout(function() {
-      backend_pub.send("spotbox:players:spotify::play::spotify:track:18lwMD3frXxiVWBlztdijW");
-    }, 10000);
-
+    frontend_sub.on("message", function(msg) {
+      var data = parseMessage(msg);
+      if (data.method === "play") {
+        var uri = null;
+        redis.lpop("spotbox:play_queue", function(error, data) {
+          // TODO this should work but doesn't
+          if (data) {
+            uri = data;
+          } else {
+            // nothing in the queue
+            uri = "spotify:track:18lwMD3frXxiVWBlztdijW";
+          }
+        });
+        redis.set("spotbox:current_track", uri);
+        console.log(uri);
+        backend_pub.send("spotbox:players:spotify::play::" + uri);
+      } else if (data.method === "stop") {
+        redis.del("spotbox:current_track");
+        backend_pub.send("spotbox:players:spotify::stop");
+      }
+    });
   };
 
   return self;

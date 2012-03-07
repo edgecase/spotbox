@@ -1,4 +1,7 @@
-var zmq      = require("zmq");
+var zmq     = require("zmq");
+var path    = require("path");
+var config  = require(path.join(__dirname, "..", "config"));
+var Spotbox = require(path.join(config.root, "app", "lib", "spotbox"));
 
 var MessageBus = (function(self, zmq) {
   var sub = zmq.socket("sub")
@@ -33,7 +36,6 @@ var MessageBus = (function(self, zmq) {
 
   var messageDispatch = function(socket) {
     console.log("message dispatch init");
-
     sub.on("message", function(msg) {
       var data = parseMessage(msg);
 
@@ -61,6 +63,13 @@ var MessageBus = (function(self, zmq) {
       } else {
         console.log("unsupported message: ", msg.toString());
       }
+    });
+
+    io.sockets.on("connection", function(socket) {
+      socket.on("player", function(message) {
+        console.log(message);
+        pub.send(Spotbox.namespace("controller::" + message));
+      });
     });
 
     // set up messageDispatch handlers. Web socket is passed in.

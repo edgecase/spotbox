@@ -7,6 +7,9 @@ Spotbox.Controllers.Search = Ember.ArrayController.create({
     var self = this;
     Spotbox.socket.on("tracks/search/result", function(results) {
       self.set("searching", false);
+      results = _.map(results, function(result) {
+        return Spotbox.Models.SearchResult.create(result);
+      });
       self.set("content", results);
     });
   },
