@@ -2,16 +2,12 @@ var path       = require("path");
 var fs         = require("fs");
 var underscore = require("underscore");
 var redis      = require("redis");
-var socketio   = require("socket.io");
 var config     = require(path.join(__dirname, "..", "config"));
 var Spotbox    = require(path.join(config.root, "app", "lib", "spotbox"));
 var Spotify    = require(path.join(config.root, "app", "lib", "spotify"));
 var Activity   = require(path.join(config.root, "app", "lib", "activity"));
 
-module.exports = function(server) {
-  var redisSubscriptions = redis.createClient();
-  var io = socketio.listen(server);
-
+module.exports = function(io) {
   function socketEmit(socket, channel, error, result) {
     if (error) {
       socket.emit(channel, {error: error});
@@ -19,11 +15,6 @@ module.exports = function(server) {
       socket.emit(channel, result);
     }
   };
-
-  io.configure(function () {
-    io.set("transports", ["websocket"]);
-    io.disable("log");
-  });
 
   io.sockets.on("connection", function(socket) {
     Spotify.getCurrentTrack(function(error, track) {
@@ -46,7 +37,8 @@ module.exports = function(server) {
       socketEmit(socket, "playlists/current", error, uri);
     });
 
-    config.redis.publish(Spotbox.namespace("airfoil:request"), "status");
+    // TODO: ZMQ
+    // config.redis.publish(Spotbox.namespace("airfoil:request"), "status");
     socketEmit(socket, "airfoil", null, {volume: 80, status: "connected"});
 
     socket.on("tracks/search", function(message) {
@@ -84,23 +76,23 @@ module.exports = function(server) {
     });
   });
 
-  redisSubscriptions.on("message", function(channel, message) {
-    if (channel === Spotbox.namespace("current_track_change")) {
-      Spotify.getCurrentTrack(function(error, result) {
-        socketEmit(io.sockets, "tracks/current", error, result);
-      });
-      Spotify.getQueue(function(error, tracks) {
-        socketEmit(io.sockets, "tracks/queue", error, tracks);
-      });
-      Spotify.getRecentlyPlayed(function(error, tracks) {
-        socketEmit(io.sockets, "tracks/recent", error, tracks);
-      });
-    } else if (channel === Spotbox.namespace("airfoil:response")) {
-      socketEmit(io.sockets, "airfoil", null, JSON.parse(message));
-    } else {
-      console.log("unknown socket message: ", message);
-    }
-  });
+  // redisSubscriptions.on("message", function(channel, message) {
+  //   if (channel === Spotbox.namespace("current_track_change")) {
+  //     Spotify.getCurrentTrack(function(error, result) {
+  //       socketEmit(io.sockets, "tracks/current", error, result);
+  //     });
+  //     Spotify.getQueue(function(error, tracks) {
+  //       socketEmit(io.sockets, "tracks/queue", error, tracks);
+  //     });
+  //     Spotify.getRecentlyPlayed(function(error, tracks) {
+  //       socketEmit(io.sockets, "tracks/recent", error, tracks);
+  //     });
+  //   } else if (channel === Spotbox.namespace("airfoil:response")) {
+  //     socketEmit(io.sockets, "airfoil", null, JSON.parse(message));
+  //   } else {
+  //     console.log("unknown socket message: ", message);
+  //   }
+  // });
 
-  redisSubscriptions.subscribe(Spotbox.namespace("current_track_change"), Spotbox.namespace("airfoil:response"));
+  // redisSubscriptions.subscribe(Spotbox.namespace("current_track_change"), Spotbox.namespace("airfoil:response"));
 };

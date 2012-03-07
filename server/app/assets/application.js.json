@@ -4,7 +4,6 @@
     "javascripts/lib/underscore.js",
     "javascripts/lib/",
     "javascripts/spotbox.js",
-    "javascripts/models/",
     "javascripts/controllers/",
     "javascripts/views/extensions.js",
     "javascripts/views/",

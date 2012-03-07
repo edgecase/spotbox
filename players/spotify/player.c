@@ -374,8 +374,8 @@ int main(int argc, char **argv) {
   void *context = zmq_init(1);
   g_zmq_sub = zmq_socket(context, ZMQ_SUB);
   g_zmq_pub = zmq_socket(context, ZMQ_PUB);
-  zmq_connect(g_zmq_sub, "tcp://127.0.0.1:12001");
-  zmq_bind(g_zmq_pub, "tcp://127.0.0.1:12000");
+  zmq_connect(g_zmq_sub, "tcp://127.0.0.1:12000");
+  zmq_bind(g_zmq_pub, "tcp://127.0.0.1:12001");
   zmq_setsockopt (g_zmq_sub, ZMQ_SUBSCRIBE, "spotbox:players:spotify::", 0);
   playloop();
   zmq_close(g_zmq_pub);

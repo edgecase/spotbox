@@ -1,11 +1,10 @@
-var zmq      = require("zmq")
-  , socketio = require("socket.io");
+var zmq      = require("zmq");
 
 var MessageBus = (function(self, zmq) {
   var sub = zmq.socket("sub")
     , pub = zmq.socket("pub")
-    , sub_addr = "tcp://127.0.0.1:12001"
-    , pub_addr = "tcp://127.0.0.1:12000";
+    , sub_addr = "tcp://127.0.0.1:12003"
+    , pub_addr = "tcp://127.0.0.1:12002";
 
   // Parses messages sent to controller from C land
   //   msg = destination::method::argument[::argument]
@@ -29,14 +28,13 @@ var MessageBus = (function(self, zmq) {
   //
   var reportTrackProgress = function(socket, args) {
     console.log("report track progress: ", args);
+    socket.emit("tracks/current/progress", { progress: args[1]});
   };
 
   var messageDispatch = function(socket) {
     console.log("message dispatch init");
 
     sub.on("message", function(msg) {
-      console.log("HEY", msg.toString());
-
       var data = parseMessage(msg);
 
       if (data.method === "trackprogress") {
@@ -51,16 +49,21 @@ var MessageBus = (function(self, zmq) {
   //   Web App <= Message Bus <= 0mq
   //   Web App => Message Bus => 0mq
   //
-  self.init = function(server) {
-    var io = socketio.listen(server);
-    /* io.configure(function () { io.disable("log") }); */
-
+  self.init = function(io) {
     sub.connect(sub_addr);
     pub.bindSync(pub_addr);
-    sub.subscribe("spotbox:server");
+    sub.subscribe("");
+    sub.on("message", function(msg) {
+      var data = parseMessage(msg);
+
+      if (data.method === "trackprogress") {
+        reportTrackProgress(io.sockets, data.args);
+      } else {
+        console.log("unsupported message: ", msg.toString());
+      }
+    });
 
     // set up messageDispatch handlers. Web socket is passed in.
-    io.sockets.on("connection", messageDispatch);
   };
 
   return self;
@@ -68,4 +71,3 @@ var MessageBus = (function(self, zmq) {
 }({}, zmq));
 
 module.exports = MessageBus.init;
-

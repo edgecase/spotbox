@@ -1,10 +1,14 @@
 var zmq = require("zmq")
 
 var Controller = (function(self, zmq) {
-  var sub = zmq.socket("sub"),
-      pub = zmq.socket("pub"),
-      sub_addr = "tcp://127.0.0.1:12000",
-      pub_addr = "tcp://127.0.0.1:12001";
+  var backend_sub       = zmq.socket("sub"),
+      frontend_sub      = zmq.socket("sub"),
+      backend_pub       = zmq.socket("pub"),
+      frontend_pub      = zmq.socket("pub"),
+      backend_sub_addr  = "tcp://127.0.0.1:12001",
+      frontend_sub_addr = "tcp://127.0.0.1:12002",
+      backend_pub_addr  = "tcp://127.0.0.1:12000";
+      frontend_pub_addr = "tcp://127.0.0.1:12003";
 
   // Parses messages sent to controller from C land
   //   msg = destination::method::argument[::argument]
@@ -29,17 +33,19 @@ var Controller = (function(self, zmq) {
             args[0],              // track
             args[1]].join("::");  // progress
 
-    pub.send(msg);
+    frontend_pub.send(msg);
   };
 
   // Initialize zmq message handlers
   //
   self.init = function() {
-    sub.connect(sub_addr);
-    pub.bindSync(pub_addr);
-    sub.subscribe("");
+    backend_sub.connect(backend_sub_addr);
+    frontend_sub.connect(frontend_sub_addr);
+    backend_pub.bindSync(backend_pub_addr);
+    frontend_pub.bindSync(frontend_pub_addr);
+    backend_sub.subscribe("");
 
-    sub.on("message", function(msg) {
+    backend_sub.on("message", function(msg) {
       var data = parseMessage(msg);
 
       console.log("controller msg: ", msg.toString());
@@ -55,13 +61,9 @@ var Controller = (function(self, zmq) {
 
     // Simulations
     setTimeout(function() {
-      pub.send("spotbox:players:spotify::play::spotify:track:18lwMD3frXxiVWBlztdijW");
-    }, 3000);
-
-    setTimeout(function() {
-      pub.send("spotbox:players:spotify::stop");
-      pub.send("spotbox:players:spotify::play::spotify:track:07KHJvlYBeQVqrmifTEqEp");
+      backend_pub.send("spotbox:players:spotify::play::spotify:track:18lwMD3frXxiVWBlztdijW");
     }, 10000);
+
   };
 
   return self;
