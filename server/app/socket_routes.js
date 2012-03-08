@@ -17,9 +17,8 @@ module.exports = function(io) {
   };
 
   io.sockets.on("connection", function(socket) {
+    // Populate initial state for new client
     Spotify.getCurrentTrack(function(error, track) {
-      console.log("error: ", error);
-      console.log("track: ", track);
       socketEmit(socket, "tracks/current", error, track);
     });
 
@@ -39,9 +38,8 @@ module.exports = function(io) {
       socketEmit(socket, "playlists/current", error, uri);
     });
 
-    // TODO: ZMQ
-    // config.redis.publish(Spotbox.namespace("airfoil:request"), "status");
-    socketEmit(socket, "airfoil", null, {volume: 80, status: "connected"});
+    // Get initial airfoil status
+
 
     socket.on("tracks/search", function(message) {
       Spotify.search(message.query, function(error, result) {
@@ -68,9 +66,7 @@ module.exports = function(io) {
     });
 
     socket.on("player", function(message) {
-      // TODO: ZMQ
-      config.redis.publish(Spotbox.namespace("player"), message);
-      socketEmit(io.sockets, "activities", null, Activity.build(socket, "Pressed " + message));
+      config.pub.send(Spotbox.namespace("controller::" + message));
     });
 
     socket.on("airfoil", function(message) {

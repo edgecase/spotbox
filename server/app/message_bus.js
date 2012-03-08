@@ -1,14 +1,8 @@
-var zmq     = require("zmq");
 var path    = require("path");
 var config  = require(path.join(__dirname, "..", "config"));
 var Spotbox = require(path.join(config.root, "app", "lib", "spotbox"));
 
 var MessageBus = (function(self, zmq) {
-  var sub = zmq.socket("sub")
-    , pub = zmq.socket("pub")
-    , sub_addr = "tcp://127.0.0.1:12003"
-    , pub_addr = "tcp://127.0.0.1:12002";
-
   // Parses messages sent to controller from C land
   //   msg = destination::method::argument[::argument]
   //
@@ -33,28 +27,12 @@ var MessageBus = (function(self, zmq) {
     socket.emit("tracks/current/progress", { progress: args[1]});
   };
 
-  var messageDispatch = function(socket) {
-    sub.on("message", function(msg) {
-      var data = parseMessage(msg);
-
-      if (data.method === "track_progress") {
-        reportTrackProgress(socket, data.args);
-      } else {
-        console.log("unsupported message: ", msg.toString());
-      }
-    });
-  };
-
   // Sets up following connections:
   //   Web App <= Message Bus <= 0mq
   //   Web App => Message Bus => 0mq
   //
   self.init = function(io) {
-    sub.connect(sub_addr);
-    pub.bindSync(pub_addr);
-    sub.subscribe("");
-
-    sub.on("message", function(msg) {
+    config.controller_sub.on("message", function(msg) {
       var data = parseMessage(msg);
 
       if (data.method === "track_progress") {
@@ -62,12 +40,6 @@ var MessageBus = (function(self, zmq) {
       } else {
         console.log("unsupported message: ", msg.toString());
       }
-    });
-
-    io.sockets.on("connection", function(socket) {
-      socket.on("player", function(message) {
-        pub.send(Spotbox.namespace("controller::" + message));
-      });
     });
   };
 
