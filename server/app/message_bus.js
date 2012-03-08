@@ -76,4 +76,3 @@ var MessageBus = (function(self, zmq) {
 }({}, zmq));
 
 module.exports = MessageBus.init;
-

@@ -67,8 +67,16 @@ static double g_progress;
 static bool g_playback_done;
 static pthread_mutex_t g_progress_mutex;
 
+enum status {
+   PLAY,
+   STOP,
+   PAUSE
+};
+
+static enum status playstatus = STOP;
 void zmq_send_message (void *socket, char *string);
 void unload_current_track();
+void play_current_track();
 
 /* ---------------------------  SESSION CALLBACKS  ------------------------- */
 /**
@@ -90,12 +98,11 @@ static void logged_in(sp_session *sess, sp_error error) {
  * @sa sp_session_callbacks#metadata_updated
  */
 static void metadata_updated(sp_session *sess) {
-  printf("yo meta has been updated\n");
   if (sp_track_error(g_currenttrack) != SP_ERROR_OK) {
     return;
   }
+  playstatus = PLAY;
   sp_session_player_load(g_sess, g_currenttrack);
-  // sp_session_player_seek(g_sess, g_progress * 1000);
   sp_session_player_play(g_sess, 1);
 }
 
@@ -230,6 +237,7 @@ void zmq_send_message (void *socket, char *string) {
 }
 
 void unload_current_track() {
+  playstatus = STOP;
   if (g_currenttrack) {
     sp_track_release(g_currenttrack);
     g_currenttrack = NULL;
@@ -269,36 +277,47 @@ void stop_track() {
 }
 
 void pause_track() {
-  printf("pause\n");
-  sp_session_player_unload(g_sess);
-  audio_fifo_flush(&g_audiofifo);
+  if (playstatus == PLAY) {
+    playstatus = PAUSE;
+    sp_session_player_unload(g_sess);
+    audio_fifo_flush(&g_audiofifo);
+    audio_init(&g_audiofifo);
+  }
 }
 
 void unpause_track() {
-  printf("unpause\n");
-  sp_session_player_load(g_sess, g_currenttrack);
-  sp_session_player_play(g_sess, 1);
+  if (playstatus == PAUSE) {
+    play_current_track();
+    sp_session_player_seek(g_sess, g_progress * 1000.0);
+  }
+}
+
+void play_current_track() {
+  if (playstatus != PLAY) {
+    if (sp_track_error(g_currenttrack) == SP_ERROR_OK) {
+      sp_session_player_load(g_sess, g_currenttrack);
+      sp_session_player_play(g_sess, 1);
+      playstatus = PLAY;
+    }
+  }
 }
 
 void play_track(char *trackuri) {
-  printf("play!\n");
-  if (g_currenttrack) {
-    unload_current_track();
-  }
+  if (playstatus != PLAY) {
+    if (g_currenttrack) {
+      unload_current_track();
+    }
 
-  sp_link *link;
-  link = sp_link_create_from_string(trackuri);
-  sp_track_add_ref(g_currenttrack = sp_link_as_track(link));
-  sp_link_release(link);
+    sp_link *link;
+    link = sp_link_create_from_string(trackuri);
+    sp_track_add_ref(g_currenttrack = sp_link_as_track(link));
+    sp_link_release(link);
 
-  pthread_mutex_lock(&g_progress_mutex);
-  g_progress = 0;
-  pthread_mutex_unlock(&g_progress_mutex);
+    pthread_mutex_lock(&g_progress_mutex);
+    g_progress = 0;
+    pthread_mutex_unlock(&g_progress_mutex);
 
-  if (sp_track_error(g_currenttrack) == SP_ERROR_OK) {
-    sp_session_player_load(g_sess, g_currenttrack);
-    // sp_session_player_seek(g_sess, offset);
-    sp_session_player_play(g_sess, 1);
+    play_current_track();
   }
 }
 
