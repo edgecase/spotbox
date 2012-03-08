@@ -14,5 +14,10 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
     click: function(event) {
       Spotbox.Controllers.Player.next();
     }
+  }),
+  pauseButton: Spotbox.Views.Button.extend({
+    click: function(event) {
+      Spotbox.Controllers.Player.pause();
+    }
   })
 });

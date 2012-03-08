@@ -68,7 +68,7 @@ static bool g_playback_done;
 static pthread_mutex_t g_progress_mutex;
 
 void zmq_send_message (void *socket, char *string);
-void unload_current_track(void);
+void unload_current_track();
 
 /* ---------------------------  SESSION CALLBACKS  ------------------------- */
 /**
@@ -90,10 +90,12 @@ static void logged_in(sp_session *sess, sp_error error) {
  * @sa sp_session_callbacks#metadata_updated
  */
 static void metadata_updated(sp_session *sess) {
+  printf("yo meta has been updated\n");
   if (sp_track_error(g_currenttrack) != SP_ERROR_OK) {
     return;
   }
   sp_session_player_load(g_sess, g_currenttrack);
+  // sp_session_player_seek(g_sess, g_progress * 1000);
   sp_session_player_play(g_sess, 1);
 }
 
@@ -227,8 +229,7 @@ void zmq_send_message (void *socket, char *string) {
   zmq_msg_close (&message);
 }
 
-void unload_current_track(void) {
-  // TODO: Figure out how to stop without perminantly losing audio
+void unload_current_track() {
   if (g_currenttrack) {
     sp_track_release(g_currenttrack);
     g_currenttrack = NULL;
@@ -238,12 +239,12 @@ void unload_current_track(void) {
   audio_init(&g_audiofifo);
 }
 
-void track_ended(void) {
+void track_ended() {
   unload_current_track();
   zmq_send_message(g_zmq_pub, "stopped");
 }
 
-void status_update(void) {
+void status_update() {
   // should this do something when not playing?
   // IE an idle status update?
   char time[256];
@@ -267,7 +268,20 @@ void stop_track() {
   zmq_send_message(g_zmq_pub, "stopped");
 }
 
+void pause_track() {
+  printf("pause\n");
+  sp_session_player_unload(g_sess);
+  audio_fifo_flush(&g_audiofifo);
+}
+
+void unpause_track() {
+  printf("unpause\n");
+  sp_session_player_load(g_sess, g_currenttrack);
+  sp_session_player_play(g_sess, 1);
+}
+
 void play_track(char *trackuri) {
+  printf("play!\n");
   if (g_currenttrack) {
     unload_current_track();
   }
@@ -283,6 +297,7 @@ void play_track(char *trackuri) {
 
   if (sp_track_error(g_currenttrack) == SP_ERROR_OK) {
     sp_session_player_load(g_sess, g_currenttrack);
+    // sp_session_player_seek(g_sess, offset);
     sp_session_player_play(g_sess, 1);
   }
 }
@@ -292,10 +307,14 @@ void dispatch(char *message) {
     play_track(&message[6]);
   } else if (strncmp(message, "stop", 4) == 0) {
     stop_track();
+  } else if (strncmp(message, "pause", 5) == 0) {
+    pause_track();
+  } else if (strncmp(message, "unpause", 7) == 0) {
+    unpause_track();
   }
 }
 
-void receive_messages(void) {
+void receive_messages() {
   bool continue_receiving = true;
   while(continue_receiving) {
     zmq_msg_t message;

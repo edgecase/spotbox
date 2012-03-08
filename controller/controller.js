@@ -2,7 +2,8 @@ var zmq   = require("zmq");
 var redis = require("redis").createClient();
 
 var Controller = (function(self, zmq, redis) {
-  var backend_sub       = zmq.socket("sub"),
+  var playState         = "stop",
+      backend_sub       = zmq.socket("sub"),
       frontend_sub      = zmq.socket("sub"),
       backend_pub       = zmq.socket("pub"),
       frontend_pub      = zmq.socket("pub"),
@@ -40,6 +41,7 @@ var Controller = (function(self, zmq, redis) {
   var stopPlaying = function() {
     redis.del("spotbox:current_track");
     backend_pub.send("spotbox:players:spotify::stop");
+    playState = "stop";
   };
 
   var playNext = function(args) {
@@ -50,6 +52,19 @@ var Controller = (function(self, zmq, redis) {
       redis.set("spotbox:current_track", uri);
       backend_pub.send("spotbox:players:spotify::play::" + uri);
     });
+    playState = "play";
+  };
+
+  var pauseTrack = function() {
+    if (playState == "play") {
+      backend_pub.send("spotbox:players:spotify::pause");
+      playState = "pause";
+    } else if (playState == "pause") {
+      backend_pub.send("spotbox:players:spotify::unpause");
+      playState = "play";
+    } else if (playState == "stop") {
+      // lol wut?
+    }
   };
 
   // Initialize zmq message handlers
@@ -79,6 +94,8 @@ var Controller = (function(self, zmq, redis) {
         playNext();
       } else if (data.method === "stop") {
         stopPlaying();
+      } else if (data.method === "pause") {
+        pauseTrack();
       } else {
         console.log("unsupported message: ", msg.toString());
       }

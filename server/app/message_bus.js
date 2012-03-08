@@ -66,7 +66,6 @@ var MessageBus = (function(self, zmq) {
 
     io.sockets.on("connection", function(socket) {
       socket.on("player", function(message) {
-        console.log(message);
         pub.send(Spotbox.namespace("controller::" + message));
       });
     });
