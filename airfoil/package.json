@@ -5,7 +5,7 @@
   "description": "Airfoil integration for spotbox",
   "dependencies": {
     "underscore":              "*",
-    "redis":                   "*"
+    "zmq":                     "*"
   },
   "license": "MIT",
   "engine": {

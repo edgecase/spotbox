@@ -1,27 +1,27 @@
 Spotbox.Views.Airfoil = Ember.View.extend({
   templateName: "airfoil",
-  statusBinding: "Spotbox.Controllers.Airfoil.status",
+  connection_statusBinding: "Spotbox.Controllers.Airfoil.connection_status",
   volumeBinding: "Spotbox.Controllers.Airfoil.volume",
   toggleButton: Spotbox.Views.Button.extend({
     activeBinding: "connected",
     classNameBindings: ["disconnected:btn-danger", "connected:btn-success"],
     click: function(event) {
-      Spotbox.Controllers.Airfoil.toggleConnection();
+      Spotbox.Controllers.Airfoil.toggle_connection();
     },
-    statusUpdate: function() {
-      if (this.getPath("parentView.status") === "connected") {
+    connection_status_update: function() {
+      if (this.getPath("parentView.connection_status") === "connected") {
         this.set("connected", true);
         this.set("disconnected", false);
       } else {
         this.set("connected", false);
         this.set("disconnected", true);
       }
-    }.observes("parentView.status")
+    }.observes("parentView.connection_status")
   }),
-  volumeUp: function() {
-    Spotbox.Controllers.Airfoil.volumeUp();
+  volume_up: function() {
+    Spotbox.Controllers.Airfoil.volume_up();
   },
-  volumeDown: function() {
-    Spotbox.Controllers.Airfoil.volumeDown();
+  volume_down: function() {
+    Spotbox.Controllers.Airfoil.volume_down();
   }
 });

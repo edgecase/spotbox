@@ -5,17 +5,21 @@ var socketio           = require("socket.io");
 var config             = require(path.join(__dirname, "config"));
 var http_routes        = require(path.join(config.root, "app", "http_routes"));
 var socket_routes      = require(path.join(config.root, "app", "socket_routes"));
-var message_bus        = require(path.join(config.root, "app", "message_bus"));
+var player_routes      = require(path.join(config.root, "app", "player_routes"));
+var airfoil_routes     = require(path.join(config.root, "app", "airfoil_routes"));
 var ember_preprocessor = require(path.join(config.root, "app", "lib", "preprocessors", "ember_preprocessor"));
 
 var server = express.createServer();
+
 var io = socketio.listen(server);
 io.configure(function () {
   io.set("transports", ["websocket"]);
   io.disable("log");
 });
+
 socket_routes(io);
-message_bus(io);
+player_routes();
+airfoil_routes();
 
 server.configure(function() {
   this.use(express.errorHandler({

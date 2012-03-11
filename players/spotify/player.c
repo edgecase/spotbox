@@ -224,7 +224,7 @@ static sp_session_config spconfig = {
 /* -------------------------  END SESSION CALLBACKS  ----------------------- */
 
 void zmq_send_message (void *socket, char *string) {
-  char *namespace = "spotbox:controller::";
+  char *namespace = "spotbox:server::";
   char namespaced_msg[strlen(string) + 1 + strlen(namespace)];
   strcpy(namespaced_msg, namespace);
   strcpy(&namespaced_msg[strlen(namespaced_msg)], string);

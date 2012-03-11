@@ -1,22 +1,32 @@
-var path  = require("path");
-var redis = require("redis");
-var zmq   = require("zmq");
+var path    = require("path");
+var redis   = require("redis");
+var zmq     = require("zmq");
+var Spotbox = require(path.join(__dirname, "app", "lib", "spotbox"));
+
 
 module.exports = function(config) {
-  var controller_sub  = zmq.socket("sub");
-  var pub             = zmq.socket("pub");
-  var controller_addr = "tcp://127.0.0.1:12003";
-  var pub_addr        = "tcp://127.0.0.1:12002";
+  var pub_addr              = "tcp://127.0.0.1:12000";
+  var spotify_player_addr   = "tcp://127.0.0.1:12001";
+  var airfoil_addr          = "tcp://127.0.0.1:12002";
+  var pub_socket            = zmq.socket("pub");
+  var spotify_player_socket = zmq.socket("sub");
+  var airfoil_socket        = zmq.socket("sub");
 
-  controller_sub.connect(sub_addr);
-  pub.bindSync(pub_addr);
-  controller_sub.subscribe(Spotbox.namespace("webapp"));
+  spotify_player_socket.connect(spotify_player_addr);
+  spotify_player_socket.subscribe(Spotbox.namespace("server::"));
 
-  config.env            = process.env.APP_ENV || "development";
-  config.redis          = redis.createClient();
-  config.port           = process.env.APP_PORT || 3000;
-  config.root           = path.normalize(path.join(__dirname));
-  config.controller_sub = controller_sub;
-  config.pub            = pub;
+  airfoil_socket.connect(airfoil_addr);
+  airfoil_socket.subscribe(Spotbox.namespace("server::"));
+
+  pub_socket.bindSync(pub_addr);
+
+  config.env                   = process.env.APP_ENV || "development";
+  config.redis                 = redis.createClient();
+  config.port                  = process.env.APP_PORT || 3000;
+  config.root                  = path.normalize(path.join(__dirname));
+  config.pub_socket            = pub_socket;
+  config.spotify_player_socket = spotify_player_socket;
+  config.airfoil_socket        = airfoil_socket;
+
   return config;
 }({});

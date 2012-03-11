@@ -2,13 +2,18 @@ Spotbox.Controllers.Player = Ember.Object.create({
   content: null,
   init: function() {
     var self = this;
-    Spotbox.socket.on("tracks/current", function(track) {
+    Spotbox.socket.on("player/track", function(track) {
+      console.log("track", track);
       self.set("content", Spotbox.Models.Track.create(track));
     });
 
-    Spotbox.socket.on("tracks/current/progress", function(data) {
+    Spotbox.socket.on("player/progress", function(data) {
       var track = self.get("content");
-      track.set("progress", data.progress);
+      if (track) {
+        track.set("progress", data.progress);
+      } else {
+        console.log("no track");
+      }
     });
   },
 

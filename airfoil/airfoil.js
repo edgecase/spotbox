@@ -1,8 +1,8 @@
-var child_process = require("child_process");
 var zmq           = require("zmq");
-var webapp_addr   = "tcp://127.0.0.1:12003";
-var pub_addr      = "tcp://127.0.0.1:12004";
-var webapp_sub    = zmq.socket("sub");
+var child_process = require("child_process");
+var server_addr   = "tcp://127.0.0.1:12000";
+var pub_addr      = "tcp://127.0.0.1:12002";
+var server_sub    = zmq.socket("sub");
 var pub           = zmq.socket("pub");
 
 var volume = 20;
@@ -10,24 +10,29 @@ var volume = 20;
 function shell_out(command, args, hollaback) {
   var child = child_process.spawn(command, args);
   var result = "";
+  var error = ""
   child.stdout.on("data", function(chunk) {
     result += chunk.toString();
   });
   child.stderr.on("data", function(chunk) {
-    hollaback(chunk.toString());
+    error += chunk.toString();
   });
   child.on("exit", function(code) {
-    hollaback(null, result);
+    if (error) {
+      hollaback(error);
+    } else {
+      hollaback(null, result);
+    }
   });
 };
 
-function publishStatus(error, data) {
+function publish_status(error, data) {
   if (!error) {
     var payload = [
-      Spotbox.namespace("webapp"), // destination
+      Spotbox.namespace("server"), // destination
       "status",                    // method
-      data.status,                 // status
-      data.volume                  // volume
+      data.volume,                 // volume
+      data.status                  // status
     ].join("::");
     pub.send(payload);
   }
@@ -39,21 +44,25 @@ Spotbox.namespace = function(str) {
 };
 
 Spotbox.parse_message = function(msg) {
-  var fullMessage = msg.toString().split("::");
+  var full_message = msg.toString().split("::");
   return {
-      destination : fullMessage[0]
-    , method      : fullMessage[1]
-    , args        : fullMessage.slice(2)
+      destination : full_message[0]
+    , method      : full_message[1]
+    , args        : full_message.slice(2)
   }
 };
 
 var Airfoil = function() {};
 Airfoil.status = function(hollaback) {
   shell_out("osascript", ["./airfoil_status.scpt"], function(error, result) {
-    if (result.trim() === "true") {
+    if (error) {
       hollaback(null, {volume: volume, status: "connected"});
     } else {
-      hollaback(null, {volume: volume, status: "disconnected"});
+      if (result.trim() === "true") {
+        hollaback(null, {volume: volume, status: "connected"});
+      } else {
+        hollaback(null, {volume: volume, status: "disconnected"});
+      }
     }
   });
 };
@@ -70,28 +79,28 @@ Airfoil.disconnect = function(hollaback) {
   });
 };
 
-Airfoil.setVolume = function(hollaback) {
+Airfoil.set_volume = function(hollaback) {
   shell_out("osascript", ["./airfoil_volume.scpt", volume / 100.0], function(error, result) {
     Airfoil.status(hollaback);
   });
 }
 
-pub.bindSync();
-webapp_sub.connect();
-webapp_sub.subscribe(Spotbox.namespace("airfoil::"));
-webapp_sub.on("message", function(msg) {
+pub.bindSync(pub_addr);
+server_sub.connect(server_addr);
+server_sub.subscribe(Spotbox.namespace("airfoil::"));
+server_sub.on("message", function(msg) {
   var method = Spotbox.parse_message(msg).method;
-  if (method === "volumeUp") {
+  if (method === "volume_up") {
     volume += 5;
-    Airfoil.setVolume(publishStatus);
-  } else if (method === "volumeDown") {
+    Airfoil.set_volume(publish_status);
+  } else if (method === "volume_down") {
     volume -= 5;
-    Airfoil.setVolume(publishStatus);
+    Airfoil.set_volume(publish_status);
   } else if (method === "connect") {
-    Airfoil.connect(publishStatus);
+    Airfoil.connect(publish_status);
   } else if (method === "disconnect") {
-    Airfoil.disconnect(publishStatus);
+    Airfoil.disconnect(publish_status);
   } else if (method === "status") {
-    Airfoil.status(publishStatus);
+    Airfoil.status(publish_status);
   }
 });
