@@ -49,7 +49,7 @@ function send_stop() {
 function send_play(uri) {
   set_property("state", "playing");
   set_property("track", uri);
-  config.pub_socket.send(Spotbox.namespace("players:spotity::play::" + uri));
+  config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
 };
 
 var Player = function() {};
