@@ -12,6 +12,8 @@ module.exports  = function() {
     } else if (data.method === "stopped") {
       Player.set_progress("0");
       Player.set_track(null);
+    } else if (data.method === "track_progress") {
+      Player.set_progress(data.args[0])
     } else {
       console.log("unsupported message: ", msg.toString());
     }
