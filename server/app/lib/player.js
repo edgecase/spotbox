@@ -46,6 +46,11 @@ function send_stop() {
   config.pub_socket.send(Spotbox.namespace("players:spotify::stop"));
 };
 
+function send_pause() {
+  set_property("state", "paused");
+  config.pub_socket.send(Spotbox.namespace("players:spotify::pause"));
+};
+
 function send_play(uri) {
   set_property("state", "playing");
   set_property("track", uri);
@@ -70,6 +75,10 @@ Player.play = function(uri) {
 
 Player.stop = function() {
   send_stop();
+};
+
+Player.pause = function() {
+  send_pause();
 };
 
 Player.add_to_queue = function(uri) {

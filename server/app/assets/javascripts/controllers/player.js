@@ -3,7 +3,6 @@ Spotbox.Controllers.Player = Ember.Object.create({
   init: function() {
     var self = this;
     Spotbox.socket.on("player/track", function(track) {
-      console.log("track", track);
       self.set("content", Spotbox.Models.Track.create(track));
     });
 
