@@ -15,21 +15,29 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
 
     click: function(event) {
       event.preventDefault();
-      Spotbox.Controllers.Player.togglePlayback();
-      if (Spotbox.Controllers.Player.playing) {
+      var playbackState = Spotbox.Controllers.Player.playbackState;
+
+      if (playbackState === "stopped") {
         Spotbox.Controllers.Player.play();
-      } else {
+        Spotbox.Controllers.Player.set("playbackState", "playing");
+      } else if (playbackState === "paused") {
+        Spotbox.Controllers.Player.unpause();
+        Spotbox.Controllers.Player.set("playbackState", "playing");
+      } else if (playbackState === "playing") {
         Spotbox.Controllers.Player.pause();
+        Spotbox.Controllers.Player.set("playbackState", "paused");
       }
     },
 
     setPlaybackIcon: function() {
-      if (Spotbox.Controllers.Player.playing === true) {
-        this.set("playbackIcon", "icon-pause");
-      } else {
+      var playbackState = Spotbox.Controllers.Player.playbackState;
+
+      if (playbackState === "stopped" || playbackState === "paused") {
         this.set("playbackIcon", "icon-play");
+      } else if (playbackState === "playing") {
+        this.set("playbackIcon", "icon-pause");
       }
-    }.observes("Spotbox.Controllers.Player.playing")
+    }.observes("Spotbox.Controllers.Player.playbackState")
   }),
 
   playbackProgress: Ember.View.extend({

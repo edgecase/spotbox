@@ -5,7 +5,7 @@ Spotbox.Controllers.Player = Ember.Object.create({
     album: { name: "Challet", released: "2005" },
     artists: [{name:"EdgeCase"}]
   }),
-  playing: false,
+  playbackState: "stopped",
 
   init: function() {
     var self = this;
@@ -23,16 +23,16 @@ Spotbox.Controllers.Player = Ember.Object.create({
     });
   },
 
-  togglePlayback: function() {
-    this.set("playing", (!this.get("playing")));
-  },
-
   play: function() {
     Spotbox.socket.emit("player", "play");
   },
 
   pause: function() {
     Spotbox.socket.emit("player", "pause");
+  },
+
+  unpause: function() {
+    Spotbox.socket.emit("player", "unpause");
   },
 
   stop: function() {
