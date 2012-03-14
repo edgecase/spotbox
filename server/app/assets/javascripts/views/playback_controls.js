@@ -1,23 +1,47 @@
 Spotbox.Views.PlaybackControls = Ember.View.extend({
   templateName: "playback_controls",
-  playButton: Spotbox.Views.Button.extend({
-    click: function(event) {
-      Spotbox.Controllers.Player.play();
-    }
+  classNames: ["well"],
+
+  trackInfo: Ember.View.extend({
+    classNames: ["well"],
+
+    modelBinding: "Spotbox.Controllers.Player.content",
   }),
-  stopButton: Spotbox.Views.Button.extend({
+
+  playbackControl: Ember.View.extend({
+    tagName: "a",
+    classNames: ["btn", "btn-large"],
+    playbackIcon: "icon-play",
+
     click: function(event) {
-      Spotbox.Controllers.Player.stop();
-    }
+      event.preventDefault();
+      Spotbox.Controllers.Player.togglePlayback();
+      if (Spotbox.Controllers.Player.playing) {
+        Spotbox.Controllers.Player.play();
+      } else {
+        Spotbox.Controllers.Player.pause();
+      }
+    },
+
+    setPlaybackIcon: function() {
+      if (Spotbox.Controllers.Player.playing === true) {
+        this.set("playbackIcon", "icon-pause");
+      } else {
+        this.set("playbackIcon", "icon-play");
+      }
+    }.observes("Spotbox.Controllers.Player.playing")
   }),
-  nextButton: Spotbox.Views.Button.extend({
+
+  playbackProgress: Ember.View.extend({
+    classNames: ["progress", "progress-success"],
+  }),
+
+  nextTrackControl: Ember.View.extend({
+    tagName: "a",
+    classNames: ["btn", "btn-mini"],
+
     click: function(event) {
       Spotbox.Controllers.Player.next();
     }
   }),
-  pauseButton: Spotbox.Views.Button.extend({
-    click: function(event) {
-      Spotbox.Controllers.Player.pause();
-    }
-  })
 });

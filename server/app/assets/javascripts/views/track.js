@@ -1,4 +1,9 @@
 Spotbox.Views.Track = Ember.View.extend({
   templateName: "track",
-  classNames: ["well"],
+  tagName: "tr",
+
+  enqueue: function() {
+    Spotbox.Controllers.Queue.enqueue(this.get("model"));
+    this.remove();
+  }
 });

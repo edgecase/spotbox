@@ -4,7 +4,10 @@ Spotbox.Controllers.Queue = Ember.ArrayController.create({
   init: function() {
     var self = this;
     Spotbox.socket.on("tracks/queue", function(tracks) {
-      self.set("content", tracks);
+      var queue = _.map(tracks, function(track) {
+        return Spotbox.Models.Track.create(track);
+      });
+      self.set("content", queue);
     });
   },
 

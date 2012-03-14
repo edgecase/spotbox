@@ -1,5 +1,12 @@
 Spotbox.Controllers.Player = Ember.Object.create({
-  content: null,
+  content: Spotbox.Models.Track.create({
+    name: "Nothing Playing",
+    length: 0.00,
+    album: { name: "Challet", released: "2005" },
+    artists: [{name:"EdgeCase"}]
+  }),
+  playing: false,
+
   init: function() {
     var self = this;
     Spotbox.socket.on("player/track", function(track) {
@@ -14,6 +21,10 @@ Spotbox.Controllers.Player = Ember.Object.create({
         console.log("no track");
       }
     });
+  },
+
+  togglePlayback: function() {
+    this.set("playing", (!this.get("playing")));
   },
 
   play: function() {

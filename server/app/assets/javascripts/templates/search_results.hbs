@@ -1,8 +1,17 @@
 {{#if showContent}}
-  <a class="btn btn-danger" {{action "clear"}}>Clear</a>
-  <ul class="unstyled">
-  {{#each content}}
-    {{view Spotbox.Views.SearchResult modelBinding="this"}}
-  {{/each}}
-  </ul>
+  <thead>
+    <tr>
+      <th><a href="#">Track</a></th>
+      <th><a href="#">Artist</a></th>
+      <th><a href="#">Time</a></th>
+      <th><a href="#">Album</a></th>
+      <th><a href="#">Year</a></th>
+      <th></th>
+    </tr>
+  </head>
+  <tbody>
+    {{#each content}}
+      {{view Spotbox.Views.Track modelBinding="this"}}
+    {{/each}}
+  </tbody>
 {{/if}}

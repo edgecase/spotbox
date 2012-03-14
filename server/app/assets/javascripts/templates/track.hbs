@@ -1,12 +1,6 @@
-<div>
-  <strong>Name:</strong> {{model.name}}
-</div>
-<div>
-  <strong>Artist:</strong>
-  {{#each model.artists}}
-    {{this.name}}
-  {{/each}}
-</div>
-<div>
-  <strong>Album:</strong> {{model.album.name}}
-</div>
+<td>{{model.name}}</td>
+<td>{{model.display_artist_name}}</td>
+<td>{{model.display_duration}}</td>
+<td>{{model.album.name}}</td>
+<td>{{model.album.released}}</td>
+<td><a class="btn btn-success" {{action "enqueue"}}>Enqueue</a></td>

@@ -68,7 +68,7 @@ Player.play = function(uri) {
     send_play(uri);
   } else {
     uri = properties.queue.shift();
-    uri = uri || "spotify:track:18lwMD3frXxiVWBlztdijW";
+    uri = uri || "spotify:track:4qjqO5m5e5vebk9upd7xUU";
     send_play(uri);
   }
 };

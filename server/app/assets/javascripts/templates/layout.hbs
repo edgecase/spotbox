@@ -1,11 +1,32 @@
+<!-- Header -->
+{{view Spotbox.Views.Header}}
+<!-- End Header -->
+
+<!-- Container -->
 <div class="container-fluid">
-  {{view Spotbox.Views.Airfoil}}
-  {{view Spotbox.Views.PlaybackControls}}
-  {{view Spotbox.Views.Playlists}}
-  {{view Spotbox.Views.Search}}
-  {{view Spotbox.Views.SearchResults}}
-  {{view Spotbox.Views.CurrentTrack}}
-  {{view Spotbox.Views.Queue}}
-  {{view Spotbox.Views.Recent}}
-  {{view Spotbox.Views.Activities}}
+  <!-- Row -->
+  <div class="row-fluid">
+
+    <!-- Player -->
+    <div id="player-container" class="span3">
+      {{view Spotbox.Views.Airfoil}}
+      {{view Spotbox.Views.PlaybackControls id="playback-controls"}}
+    </div>
+    <!-- End Player -->
+
+    <!-- Lists -->
+    <div id="lists-container" class="span9">
+      {{view Spotbox.Views.Search}}
+
+      {{view Spotbox.Views.ListToggler}}
+
+      {{view Spotbox.Views.SearchResults}}
+      {{view Spotbox.Views.Queue}}
+      {{view Spotbox.Views.Recent}}
+    </div>
+    <!-- End Lists -->
+
+  </div>
+  <!-- End Row -->
 </div>
+<!-- End Container -->

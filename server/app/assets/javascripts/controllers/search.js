@@ -7,8 +7,11 @@ Spotbox.Controllers.Search = Ember.ArrayController.create({
     var self = this;
     Spotbox.socket.on("tracks/search/result", function(results) {
       self.set("searching", false);
-      results = _.map(results, function(result) {
-        return Spotbox.Models.SearchResult.create(result);
+      var valid_results = _.filter(results, function(result) {
+        return _.include(result.album.availability.territories.split(" "), "US");
+      });
+      results = _.map(valid_results, function(result) {
+        return Spotbox.Models.Track.create(result);
       });
       self.set("content", results);
     });
