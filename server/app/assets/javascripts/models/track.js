@@ -1,4 +1,10 @@
 Spotbox.Models.Track = Ember.Object.extend({
+  progress: 0,
+
+  percent: function() {
+    return this.get("progress") / this.get("length") * 100;
+  }.property("progress"),
+
   artistName: function() {
     var artist_name = _.map(this.get('artists'), function(artist) {
       return artist.name;

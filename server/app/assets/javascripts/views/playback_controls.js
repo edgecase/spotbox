@@ -42,6 +42,11 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
 
   playbackProgress: Ember.View.extend({
     classNames: ["progress", "progress-success"],
+    modelBinding: "Spotbox.Controllers.Player.content",
+
+    style: function() {
+      return "width: " + this.getPath("model.percent") + "%;";
+    }.property("model.percent")
   }),
 
   nextTrackControl: Ember.View.extend({

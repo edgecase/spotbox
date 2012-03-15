@@ -12,13 +12,13 @@ module.exports = function(config) {
   var spotify_player_socket = zmq.socket("sub");
   var airfoil_socket        = zmq.socket("sub");
 
+  pub_socket.bindSync(pub_addr);
+
   spotify_player_socket.connect(spotify_player_addr);
-  spotify_player_socket.subscribe(Spotbox.namespace("server::"));
+  spotify_player_socket.subscribe("");
 
   airfoil_socket.connect(airfoil_addr);
   airfoil_socket.subscribe(Spotbox.namespace("server::"));
-
-  pub_socket.bindSync(pub_addr);
 
   config.env                   = process.env.APP_ENV || "development";
   config.redis                 = redis.createClient();
