@@ -8,7 +8,6 @@ var Activity   = require(path.join(config.root, "app", "lib", "activity"));
 var Airfoil    = require(path.join(config.root, "app", "lib", "airfoil"));
 var Player     = require(path.join(config.root, "app", "lib", "player"));
 
-
 module.exports = function(io) {
   function socket_emit(socket, channel, error, result) {
     if (error) {
@@ -19,7 +18,12 @@ module.exports = function(io) {
   };
 
   io.sockets.on("connection", function(socket) {
+
     // Populate initial state for new client
+    Player.get_state(function(error, state) {
+      socket_emit(socket, "player/state", error, state);
+    });
+
     Player.get_track(function(error, track) {
       socket_emit(socket, "player/track", error, track);
     });

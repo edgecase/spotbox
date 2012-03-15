@@ -41,27 +41,6 @@ function trigger(key) {
   });
 };
 
-function send_stop() {
-  set_property("state", "stopped");
-  config.pub_socket.send(Spotbox.namespace("players:spotify::stop"));
-};
-
-function send_pause() {
-  set_property("state", "paused");
-  config.pub_socket.send(Spotbox.namespace("players:spotify::pause"));
-};
-
-function send_unpause() {
-  set_property("state", "playing");
-  config.pub_socket.send(Spotbox.namespace("players:spotify::unpause"));
-};
-
-function send_play(uri) {
-  set_property("state", "playing");
-  set_property("track", uri);
-  config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
-};
-
 var Player = function() {};
 
 Player.on = function(key, hollaback) {
@@ -70,24 +49,30 @@ Player.on = function(key, hollaback) {
 
 Player.play = function(uri) {
   if (uri) {
-    send_play(uri);
+    config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
+  } else if (properties.state === "paused") {
+    config.pub_socket.send(Spotbox.namespace("players:spotify::unpause"));
   } else {
     uri = properties.queue.shift();
     uri = uri || "spotify:track:4qjqO5m5e5vebk9upd7xUU";
-    send_play(uri);
+    config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
   }
 };
 
 Player.stop = function() {
-  send_stop();
+  config.pub_socket.send(Spotbox.namespace("players:spotify::stop"));
 };
 
 Player.pause = function() {
-  send_pause();
+  config.pub_socket.send(Spotbox.namespace("players:spotify::pause"));
 };
 
-Player.unpause = function() {
-  send_unpause();
+Player.set_state = function(state) {
+  set_property("state", state);
+};
+
+Player.get_state = function(hollaback) {
+  hollaback(null, { state: properties.state });
 };
 
 Player.add_to_queue = function(uri) {

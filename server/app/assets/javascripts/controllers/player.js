@@ -10,8 +10,14 @@ Spotbox.Controllers.Player = Ember.Object.create({
 
   init: function() {
     var self = this;
-    Spotbox.socket.on("player/track", function(track) {
-      self.set("content", Spotbox.Models.Track.create(track));
+
+    Spotbox.socket.on("player/state", function(data) {
+      console.log(data);
+      self.set("playbackState", data.state);
+    });
+
+    Spotbox.socket.on("player/track", function(data) {
+      self.set("content", Spotbox.Models.Track.create(data.track));
     });
 
     Spotbox.socket.on("player/progress", function(data) {
@@ -30,10 +36,6 @@ Spotbox.Controllers.Player = Ember.Object.create({
 
   pause: function() {
     Spotbox.socket.emit("player", "pause");
-  },
-
-  unpause: function() {
-    Spotbox.socket.emit("player", "unpause");
   },
 
   stop: function() {

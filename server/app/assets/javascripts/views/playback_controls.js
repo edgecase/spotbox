@@ -19,13 +19,10 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
 
       if (playbackState === "stopped") {
         Spotbox.Controllers.Player.play();
-        Spotbox.Controllers.Player.set("playbackState", "playing");
       } else if (playbackState === "paused") {
-        Spotbox.Controllers.Player.unpause();
-        Spotbox.Controllers.Player.set("playbackState", "playing");
+        Spotbox.Controllers.Player.play();
       } else if (playbackState === "playing") {
         Spotbox.Controllers.Player.pause();
-        Spotbox.Controllers.Player.set("playbackState", "paused");
       }
     },
 
