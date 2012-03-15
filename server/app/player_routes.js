@@ -5,10 +5,11 @@ var Player  = require(path.join(config.root, "app", "lib", "player"));
 
 module.exports  = function() {
   config.spotify_player_socket.on("message", function(msg) {
+
     var data = Spotbox.parse_message(msg);
+
     if (data.method === "playing") {
       Player.set_state("playing");
-      console.log("current_track", data.args[0]);
       Player.set_track(data.args[0]);
     } else if (data.method === "unpaused") {
       Player.set_state("playing");
@@ -23,5 +24,6 @@ module.exports  = function() {
     } else {
       console.log("unsupported message: ", msg.toString());
     }
+
   });
 };

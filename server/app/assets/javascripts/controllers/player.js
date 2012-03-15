@@ -12,7 +12,6 @@ Spotbox.Controllers.Player = Ember.Object.create({
     var self = this;
 
     Spotbox.socket.on("player/state", function(data) {
-      console.log(data);
       self.set("playbackState", data.state);
     });
 
