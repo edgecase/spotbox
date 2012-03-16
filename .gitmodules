@@ -1,3 +1,3 @@
 [submodule "players/cocoa_spotify"]
 	path = players/cocoa_spotify
-	url = ./players/cocoa_spotify/.git
+	url = git@github.com:edgecase/cocoa_spotify.git
