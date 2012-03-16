@@ -21,11 +21,13 @@ module.exports = function(io) {
 
     // Populate initial state for new client
     Player.get_state(function(error, state) {
+      console.log("on connect state:", state);
       socket_emit(socket, "player/state", error, state);
     });
 
     Player.get_track(function(error, track) {
-      socket_emit(socket, "player/track", error, track);
+      console.log("on connect state:", track);
+      socket_emit(socket, "player/track", error, { track: track });
     });
 
     Player.get_queue(function(error, queue) {
