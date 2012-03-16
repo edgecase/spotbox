@@ -53,9 +53,7 @@ Player.play = function(uri) {
   } else if (properties.state === "paused") {
     config.pub_socket.send(Spotbox.namespace("players:spotify::unpause"));
   } else {
-    uri = properties.queue.shift();
-    uri = uri || "spotify:track:4qjqO5m5e5vebk9upd7xUU";
-    config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
+    Player.next();
   }
 };
 
@@ -65,6 +63,11 @@ Player.stop = function() {
 
 Player.pause = function() {
   config.pub_socket.send(Spotbox.namespace("players:spotify::pause"));
+};
+
+Player.next = function() {
+  var uri = properties.queue.shift() || "spotify:track:4qjqO5m5e5vebk9upd7xUU";
+  config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
 };
 
 Player.set_state = function(state) {

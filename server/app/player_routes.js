@@ -20,7 +20,7 @@ module.exports  = function() {
     } else if (data.method === "track_progress") {
       Player.set_progress(data.args[0])
     } else if (data.method === "track_ended") {
-      // not handled yet
+      Player.next();
     } else {
       console.log("unsupported message: ", msg.toString());
     }
