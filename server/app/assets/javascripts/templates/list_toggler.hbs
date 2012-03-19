@@ -1,9 +1,15 @@
-<li {{bindAttr class="displayingQueue:active"}}>
-  <a href="#queue" {{action "setDisplayQueue" on="click"}}>Queue</a>
-</li>
-<li {{bindAttr class="displayingSearch:active"}}>
-  <a href="#search" {{action "setDisplaySearch" on="click"}}>Search</a>
-</li>
-<li {{bindAttr class="displayingRecent:active"}}>
-  <a href="#recent" {{action "setDisplayRecent" on="click"}}>Recent</a>
-</li>
+{{#view QueueTab classBinding="active"}}
+  <a href="#" {{action "setCurrentTab" target="parentView"}} data-tab="queue">Queue</a>
+{{/view}}
+
+{{#view SearchTab classBinding="active"}}
+  <a href="#" {{action "setCurrentTab" target="parentView"}} data-tab="search">Search</a>
+{{/view}}
+
+{{#view RecentTab classBinding="active"}}
+  <a href="#" {{action "setCurrentTab" target="parentView"}} data-tab="recent">Recent</a>
+{{/view}}
+
+{{#view PlaylistsTab classBinding="active"}}
+  <a href="#" {{action "setCurrentTab" target="parentView"}} data-tab="playlists">Playlists</a>
+{{/view}}

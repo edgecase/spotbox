@@ -2,34 +2,40 @@ Spotbox.Views.ListToggler = Ember.View.extend({
   templateName: "list_toggler",
   tagName: "ul",
   classNames: ["nav", "nav-tabs"],
-  activeClass: "active",
-  displayingQueue: true,
 
-  currentViewObserver: function() {
-    this.set("displayingQueue", false);
-    this.set("displayingRecent", false);
-    this.set("displayingSearch", false);
-
-    var currentView = Spotbox.Controllers.ListToggler.get("currentView");
-
-    if (currentView === "queuedTracks") {
-      this.set("displayingQueue", true);
-    } else if (currentView === "searchTracks") {
-      this.set("displayingSearch", true);
-    } else if (currentView === "recentTracks") {
-      this.set("displayingRecent", true);
-    }
-  }.observes("Spotbox.Controllers.ListToggler.currentView"),
-
-  setDisplayRecent: function() {
-    Spotbox.Controllers.ListToggler.set("currentView", "recentTracks");
+  setCurrentTab: function(view, event, ctx) {
+    event.preventDefault();
+    var tab = $(event.target).data("tab");
+    Spotbox.Controllers.ListToggler.set("currentTab", tab);
   },
 
-  setDisplayQueue: function() {
-    Spotbox.Controllers.ListToggler.set("currentView", "queuedTracks");
-  },
+  // Tab Views
 
-  setDisplaySearch: function() {
-    Spotbox.Controllers.ListToggler.set("currentView", "searchTracks");
-  }
+  QueueTab: Ember.View.extend({
+    tagName: "li",
+    active: function() {
+      return Spotbox.Controllers.ListToggler.get("currentTab") === "queue";
+    }.property("Spotbox.Controllers.ListToggler.currentTab")
+  }),
+
+  SearchTab: Ember.View.extend({
+    tagName: "li",
+    active: function() {
+      return Spotbox.Controllers.ListToggler.get("currentTab") === "search";
+    }.property("Spotbox.Controllers.ListToggler.currentTab")
+  }),
+
+  RecentTab: Ember.View.extend({
+    tagName: "li",
+    active: function() {
+      return Spotbox.Controllers.ListToggler.get("currentTab") === "recent";
+    }.property("Spotbox.Controllers.ListToggler.currentTab")
+  }),
+
+  PlaylistsTab: Ember.View.extend({
+    tagName: "li",
+    active: function() {
+      return Spotbox.Controllers.ListToggler.get("currentTab") === "playlists";
+    }.property("Spotbox.Controllers.ListToggler.currentTab")
+  })
 });

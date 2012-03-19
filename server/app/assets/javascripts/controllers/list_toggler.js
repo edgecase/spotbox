@@ -1,15 +1,19 @@
 Spotbox.Controllers.ListToggler = Ember.Object.create({
-  currentView: "queuedTracks",
+  currentTab: "queue",
 
   isDisplayingQueue: function() {
-    return this.get("currentView") === "queuedTracks";
-  }.property("currentView"),
+    return this.get("currentTab") === "queue";
+  }.property("currentTab"),
 
   isDisplayingRecent: function() {
-    return this.get("currentView") === "recentTracks";
-  }.property("currentView"),
+    return this.get("currentTab") === "recent";
+  }.property("currentTab"),
 
   isDisplayingSearch: function() {
-    return this.get("currentView") === "searchTracks";
-  }.property("currentView")
+    return this.get("currentTab") === "search";
+  }.property("currentTab"),
+
+  isDisplayingPlaylists: function() {
+    return this.get("currentTab") === "playlists";
+  }.property("currentTab")
 });
