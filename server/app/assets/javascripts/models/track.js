@@ -26,6 +26,6 @@ Spotbox.Models.Track = Ember.Object.extend({
 
   releaseDate: function() {
     return this.get("album").released;
-  }.property("album")
+  }.property("album"),
 
 });

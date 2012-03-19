@@ -2,6 +2,7 @@ Spotbox.Controllers.Search = Ember.ArrayController.create({
   content: [],
   searchModel: {},
   searching: false,
+  sortKey: null,
 
   init: function() {
     var self = this;
@@ -21,5 +22,22 @@ Spotbox.Controllers.Search = Ember.ArrayController.create({
     this.set("searching", true);
     var model = this.get("searchModel");
     Spotbox.socket.emit("tracks/search", model);
-  }
+  },
+
+  sortContent: function() {
+    var key     = this.get("sortKey");
+    var results = this.get("content");
+
+    if (_.isNull(key)) {
+      // TODO: Temp Hack
+      // For some reason reverse by itself doesn't force a render.
+      // Perhaps something to do with reverse happening in place?
+      this.set("content", results.slice().reverse());
+    } else {
+      this.set("content", _.sortBy(results, function(result) {
+        return result.get(key);
+      }));
+    }
+  }.observes("sortKey")
+
 });
