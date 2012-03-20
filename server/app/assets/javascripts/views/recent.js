@@ -1,8 +1,8 @@
 Spotbox.Views.Recent = Ember.View.extend({
   templateName: "recent",
+  className: ["tab-pane"],
 
   contentBinding: "Spotbox.Controllers.Recent.content",
-  isVisibleBinding: "Spotbox.Controllers.ListToggler.isDisplayingRecent",
 
   showContent: function() {
     return Spotbox.Controllers.Recent.get("content").length > 0;;

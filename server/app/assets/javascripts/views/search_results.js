@@ -1,10 +1,9 @@
 Spotbox.Views.SearchResults = Ember.View.extend({
   templateName: "search_results",
   tagName: "table",
-  classNames: ["table", "table-striped", "search_results"],
+  classNames: ["table", "table-striped", "search_results", "tab-pane"],
 
   contentBinding: "Spotbox.Controllers.Search.content",
-  isVisibleBinding: "Spotbox.Controllers.ListToggler.isDisplayingSearch",
 
   clear: function() {
     Spotbox.Controllers.Search.set("content", []);

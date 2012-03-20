@@ -17,10 +17,30 @@
     <!-- Lists -->
     <div id="lists-container" class="span9">
       {{view Spotbox.Views.Search}}
-      {{view Spotbox.Views.ListToggler}}
-      {{view Spotbox.Views.SearchResults}}
-      {{view Spotbox.Views.Queue}}
-      {{view Spotbox.Views.Recent}}
+
+      <ul id='tab-bar' class='nav nav-tabs'>
+        <li class="active"><a id="queue-tab" href="#queue" data-toggle="tab">Queue</a></li>
+        <li><a href="#search" id="search-tab" data-toggle="tab">Search</a></li>
+        <li><a href="#recent" id="recent-tab" data-toggle="tab">Recent</a></li>
+
+        <li class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown" href="#playlists">Playlists <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            {{#each Spotbox.Controllers.Playlists.content}}
+              <li><a href='#'>{{name}}</a></li>
+            {{/each}}
+          </ul>
+        </li>
+      </ul>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        {{view Spotbox.Views.Queue         id="queue"}}
+        {{view Spotbox.Views.SearchResults id="search"}}
+        {{view Spotbox.Views.Recent        id="recent"}}
+      </div>
+      <!-- End Tab Content -->
+
     </div>
     <!-- End Lists -->
 

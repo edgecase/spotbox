@@ -1,7 +1,7 @@
 Spotbox.Views.SearchField = Spotbox.Views.TextField.extend({
 
   focusIn: function() {
-    Spotbox.Controllers.ListToggler.set("currentTab", "search");
+    $('#search-tab').tab('show');
   },
 
   click: function() {
