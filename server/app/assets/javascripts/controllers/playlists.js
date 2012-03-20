@@ -1,5 +1,6 @@
 Spotbox.Controllers.Playlists = Ember.ArrayController.create({
   content: [],
+  prefix: '',
 
   init: function() {
     var self = this;
