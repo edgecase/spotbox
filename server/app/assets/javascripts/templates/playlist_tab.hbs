@@ -8,7 +8,7 @@
 
   {{#each Spotbox.Controllers.Playlists}}
     {{#view Spotbox.Views.PlaylistEntry contentBinding="this"}}
-      <a href='#'>{{content.name}}</a>
+      <a href="#{{unbound content.name}}" data-toggle='tab'>{{content.name}}</a>
     {{/view}}
   {{/each}}
 </ul>
