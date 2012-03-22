@@ -1,7 +1,7 @@
 Spotbox.Views.Playlist = Ember.View.extend({
   templateName: "playlist",
   tagName: "table",
-  classNames: ["table", "table-striped", "search_results", "tab-pane"],
+  classNames: ["table", "table-striped", "track-list", "tab-pane"],
   // currentUriBinding: "Spotbox.Controllers.Playlists.currentUri",
   // didInsertElement: function() {
   //   this.setActive();
