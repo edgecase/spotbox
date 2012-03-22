@@ -44,6 +44,6 @@ Spotbox.Controllers.Player = Ember.Object.create({
   },
 
   next: function() {
-    Spotbox.socket.emit("player", "next");
+    Spotbox.socket.emit("player", "play");
   }
 });

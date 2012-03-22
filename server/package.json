@@ -12,7 +12,8 @@
     "redis":                   "*",
     "socket.io":               "*",
     "vows":                    "*",
-    "zmq":                     "*"
+    "zmq":                     "*",
+    "secure_random":           "*"
   },
   "license": "MIT",
   "engine": {

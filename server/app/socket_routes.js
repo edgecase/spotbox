@@ -1,12 +1,13 @@
-var path       = require("path");
-var fs         = require("fs");
-var underscore = require("underscore");
-var config     = require(path.join(__dirname, "..", "config"));
-var Spotbox    = require(path.join(config.root, "app", "lib", "spotbox"));
-var Spotify    = require(path.join(config.root, "app", "lib", "spotify"));
-var Activity   = require(path.join(config.root, "app", "lib", "activity"));
-var Airfoil    = require(path.join(config.root, "app", "lib", "airfoil"));
-var Player     = require(path.join(config.root, "app", "lib", "player"));
+var path            = require("path");
+var fs              = require("fs");
+var underscore      = require("underscore");
+var config          = require(path.join(__dirname, "..", "config"));
+var Spotbox         = require(path.join(config.root, "app", "lib", "spotbox"));
+var Spotify         = require(path.join(config.root, "app", "lib", "spotify"));
+var Activity        = require(path.join(config.root, "app", "lib", "activity"));
+var Airfoil         = require(path.join(config.root, "app", "lib", "airfoil"));
+var Player          = require(path.join(config.root, "app", "lib", "player"));
+var PlaylistManager = require(path.join(config.root, "app", "lib", "playlist_manager"));
 
 module.exports = function(io) {
   function socket_emit(socket, channel, error, result) {
@@ -21,12 +22,10 @@ module.exports = function(io) {
 
     // Populate initial state for new client
     Player.get_state(function(error, state) {
-      console.log("on connect state:", state);
       socket_emit(socket, "player/state", error, state);
     });
 
     Player.get_track(function(error, track) {
-      console.log("on connect state:", track);
       socket_emit(socket, "player/track", error, { track: track });
     });
 
@@ -38,11 +37,11 @@ module.exports = function(io) {
       socket_emit(socket, "tracks/recent", error, tracks);
     });
 
-    Player.get_playlists(function(error, playlists) {
+    PlaylistManager.get_playlists(function(error, playlists) {
       socket_emit(socket, "playlists", error, playlists);
     });
 
-    Player.get_playlist_uri(function(error, uri) {
+    PlaylistManager.get_playlist_uri(function(error, uri) {
       socket_emit(socket, "playlists/current", error, uri);
     });
 
@@ -66,11 +65,11 @@ module.exports = function(io) {
       });
     });
 
-    socket.on("playlists/set", function(message) {
-      Player.get_playlist(message, function(error, playlist) {
+    socket.on("playlists/set", function(uri) {
+      PlaylistManager.get_playlist(uri, function(error, playlist) {
         if (playlist) {
-          socket_emit(io.sockets, "activities", null, Activity.build(socket, "Changed playlist to " + playlist.name));
-          Player.set_playlist_uri(playlist.href);
+          /* socket_emit(io.sockets, "activities", null, Activity.build(socket, "Changed playlist to " + playlist.name)); */
+          PlaylistManager.set_current(playlist.url);
         }
       });
     });
@@ -103,10 +102,6 @@ module.exports = function(io) {
     }
   });
 
-  Player.on("playlist", function(properties) {
-    socket_emit(io.sockets, "playlists/current", null, properties.playlist);
-  });
-
   Player.on("queue", function(properties) {
     Player.get_queue(function(errors, tracks) {
       socket_emit(io.sockets, "tracks/queue", errors, tracks);
@@ -117,6 +112,10 @@ module.exports = function(io) {
     Player.get_recent(function(errors, tracks) {
       socket_emit(io.sockets, "tracks/recent", errors, tracks);
     });
+  });
+
+  PlaylistManager.on("current", function(properties) {
+    socket_emit(io.sockets, "playlists/current", null, properties.current);
   });
 
 

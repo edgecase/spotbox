@@ -1,14 +1,11 @@
-<a class="dropdown-toggle" data-toggle="dropdown" href="#playlists">Playlists <b class="caret"></b></a>
+<a class="dropdown-toggle" data-toggle="dropdown" href="#playlists" {{action "shiftFocus"}}>Playlists <b class="caret"></b></a>
 <ul class="dropdown-menu">
-  <li>
-    {{#view filterBox}}{{/view}}
-  </li>
-
+  <li>{{#view filterBox}}{{/view}}</li>
   <li class="divider"></li>
-
+  <li class="nav-header">Spotify Playlists</li>
   {{#each Spotbox.Controllers.Playlists}}
     {{#view Spotbox.Views.PlaylistEntry contentBinding="this"}}
-      <a href="#{{unbound content.name}}" data-toggle='tab'>{{content.name}}</a>
+    <a href="{{unbound content.url}}" data-toggle='tab'>{{content.name}}</a>
     {{/view}}
   {{/each}}
 </ul>

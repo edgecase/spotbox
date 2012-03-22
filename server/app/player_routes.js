@@ -2,6 +2,7 @@ var path    = require("path");
 var config  = require(path.join(__dirname, "..", "config"));
 var Spotbox = require(path.join(config.root, "app", "lib", "spotbox"));
 var Player  = require(path.join(config.root, "app", "lib", "player"));
+var PlaylistManager  = require(path.join(config.root, "app", "lib", "playlist_manager"));
 
 module.exports  = function() {
   config.spotify_player_socket.on("message", function(msg) {
@@ -20,7 +21,17 @@ module.exports  = function() {
     } else if (data.method === "track_progress") {
       Player.set_progress(data.args[0])
     } else if (data.method === "track_ended") {
-      Player.next();
+      Player.play();
+    } else if (data.method === "playlist_loaded") {
+
+      var playlist_data = data.args[0].split(",");
+
+      PlaylistManager.sync_playlist({
+        url    : playlist_data[0],
+        name   : playlist_data[1],
+        tracks : playlist_data.slice(2)
+      });
+
     } else {
       console.log("unsupported message: ", msg.toString());
     }

@@ -6,8 +6,15 @@ Spotbox.Views.PlaylistEntry = Ember.View.extend({
     if (prefix.length === 0) {
       return true;
     } else {
-      return new RegExp("^" +prefix, "i").test(this.getPath('content.name'));
+      return new RegExp("^" + prefix, "i").test(this.getPath('content.name'));
     }
-  }.property('Spotbox.Controllers.Playlists.prefix')
+  }.property('Spotbox.Controllers.Playlists.prefix'),
+
+  click: function(event) {
+    event.preventDefault();
+
+    var playlist_uri = $(event.target).attr("href");
+    Spotbox.Controllers.Playlists.changePlaylist(playlist_uri);
+  }
 
 })
