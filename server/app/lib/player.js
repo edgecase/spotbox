@@ -59,10 +59,6 @@ Player.play = function(uri) {
   }
 };
 
-Player.next = function() {
-  PlaylistManager.next(); //lol need reorg
-};
-
 Player.stop = function() {
   config.pub_socket.send(Spotbox.namespace("players:spotify::stop"));
 };
