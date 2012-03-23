@@ -80,6 +80,12 @@ Player.add_to_queue = function(uri) {
   trigger("queue");
 };
 
+Player.remove_from_queue = function(uri) {
+  set_property("queue", underscore.filter(properties.queue, function(track) {
+    return track !== uri
+  }));
+};
+
 Player.get_queue = function(hollaback) {
   new AsyncCollectionRunner(properties.queue, Spotify.retrieve).run(hollaback);
 };

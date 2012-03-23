@@ -42,4 +42,5 @@ assetbuilder.registerPreprocessor(ember_preprocessor);
 assetbuilder.configure({
   env: config.env
 });
+console.log("app running on " + config.port + " in " + config.env);
 server.listen(config.port);
