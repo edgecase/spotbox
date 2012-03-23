@@ -24,7 +24,7 @@ Spotbox.Controllers.Playlists = Ember.ArrayController.create({
     var current_playlist = _.find(self.get("content"), function(playlist) {
       return playlist.url === self.get("currentUri");
     });
-    return " : " + (current_playlist ? current_playlist.name : "[No Playlist]");
+    return "playing " + (current_playlist ? current_playlist.name : "[No Playlist]");
   }.property("content", "currentUri")
 
 });
