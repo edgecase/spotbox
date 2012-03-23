@@ -1,7 +1,7 @@
 Spotbox.Views.Queue = Ember.View.extend({
   templateName: "queue",
   tagName: "table",
-  classNames: ["table", "table-striped", "track-list", "tab-pane", "active"],
+  classNames: ["table", "table-striped", "track-list", "active"],
 
   contentBinding: "Spotbox.Controllers.Queue.content",
 

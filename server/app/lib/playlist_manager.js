@@ -8,7 +8,7 @@ var Spotbox     = require(path.join(config.root, "app", "lib", "spotbox"));
 var Spotify     = require(path.join(config.root, "app", "lib", "spotify"));
 
 var properties = {
-  current: null,
+  current: "spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg",
   tracks: [],
   known_playlists: [
     "spotify:user:mikedoel:playlist:05m1Zj1ixCNoCb3kJd5of7",

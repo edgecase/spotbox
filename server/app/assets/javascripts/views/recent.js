@@ -1,6 +1,5 @@
 Spotbox.Views.Recent = Ember.View.extend({
   templateName: "recent",
-  className: ["tab-pane"],
 
   contentBinding: "Spotbox.Controllers.Recent.content",
 

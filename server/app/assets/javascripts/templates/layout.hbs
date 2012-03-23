@@ -27,10 +27,9 @@
 
       <!-- Tab Content -->
       <div class="tab-content">
-        {{view Spotbox.Views.Queue         id="queue"}}
-        {{view Spotbox.Views.SearchResults id="search"}}
-        {{view Spotbox.Views.Recent        id="recent"}}
-        {{view Spotbox.Views.Playlist      id="playlist"}}
+        <div class="tab-pane" id="queue">{{view Spotbox.Views.Queue}}</div>
+        <div class="tab-pane" id="search">{{view Spotbox.Views.SearchResults}}</div>
+        <div class="tab-pane" id="recent">{{view Spotbox.Views.Recent}}</div>
       </div>
       <!-- End Tab Content -->
 
