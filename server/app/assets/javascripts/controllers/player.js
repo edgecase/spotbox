@@ -17,6 +17,7 @@ Spotbox.Controllers.Player = Ember.Object.create({
 
     Spotbox.socket.on("player/track", function(data) {
       self.set("content", Spotbox.Models.Track.create(data.track));
+      $("title").text(self.get("content").get("artistAndTrack"));
     });
 
     Spotbox.socket.on("player/progress", function(data) {

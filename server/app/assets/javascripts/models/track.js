@@ -28,4 +28,8 @@ Spotbox.Models.Track = Ember.Object.extend({
     return this.getPath("album.released");
   }.property("album"),
 
+  artistAndTrack: function() {
+    return this.get("artistName") + " - " + this.get("name");
+  }.property("artists", "name")
+
 });
