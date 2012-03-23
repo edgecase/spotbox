@@ -21,11 +21,11 @@ Spotbox.Models.Track = Ember.Object.extend({
   }.property("length"),
 
   albumName: function() {
-    return this.get("album").name;
+    return this.getPath("album.name");
   }.property("album"),
 
   releaseDate: function() {
-    return this.get("album").released;
+    return this.getPath("album.released");
   }.property("album"),
 
 });

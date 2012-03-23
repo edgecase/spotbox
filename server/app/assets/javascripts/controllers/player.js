@@ -5,7 +5,7 @@ Spotbox.Controllers.Player = Ember.Object.create({
     name: "Nothing Playing",
     length: 0.00,
     album: { name: "Challet", released: "2005" },
-    artists: [{name:"EdgeCase"}]
+    artists: [{name: "EdgeCase"}]
   }),
 
   init: function() {
