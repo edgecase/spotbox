@@ -8,7 +8,7 @@ var Spotbox     = require(path.join(config.root, "app", "lib", "spotbox"));
 var Spotify     = require(path.join(config.root, "app", "lib", "spotify"));
 
 var properties = {
-  current: "spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg",
+  current: null,
   tracks: [],
   known_playlists: [
     "spotify:user:mikedoel:playlist:05m1Zj1ixCNoCb3kJd5of7",
@@ -46,21 +46,25 @@ PlaylistManager.on = function(key, hollaback) {
 };
 
 PlaylistManager.next = function() {
-  srandom.getRandomInt(0, properties.tracks.length, function(error, value) {
-    var uri = properties.tracks[value];
-    config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
-  });
+  if (properties.current && properties.tracks.length > 0) {
+    srandom.getRandomInt(0, properties.tracks.length, function(error, value) {
+      var uri = properties.tracks[value];
+      config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
+    });
+  }
 };
 
 PlaylistManager.set_current = function(uri) {
+  // TODO: need to start getting/setting this in redis
   set_property("current", uri);
   config.redis.lrange(Spotbox.namespace(uri), 0, -1, function(error, tracks) {
     set_property("tracks", tracks);
   });
 };
 
-PlaylistManager.get_playlist_uri = function() {
-  return underscore.clone(properties.current);
+PlaylistManager.get_playlist_uri = function(hollaback) {
+  // TODO: need to start getting/setting this in redis
+  hollaback(null, properties.current)
 };
 
 PlaylistManager.get_playlist = function(uri, hollaback) {
