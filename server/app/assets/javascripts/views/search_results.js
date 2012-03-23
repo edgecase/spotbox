@@ -5,13 +5,17 @@ Spotbox.Views.SearchResults = Ember.View.extend({
 
   contentBinding: "Spotbox.Controllers.Search.content",
 
+  spinner: new Spinner(),
+
   clear: function() {
     Spotbox.Controllers.Search.set("content", []);
   },
 
   showContent: function() {
-    return Spotbox.Controllers.Search.get("content").length > 0;
-  }.property("Spotbox.Controllers.Search.content"),
+    return Spotbox.Controllers.Search.get("content").length > 0 &&
+           !Spotbox.Controllers.Search.get("searching");
+  }.property("Spotbox.Controllers.Search.content",
+             "Spotbox.Controllers.Search.searching"),
 
   setSortKey: function(view, event, ctx) {
     event.preventDefault();
@@ -23,6 +27,14 @@ Spotbox.Views.SearchResults = Ember.View.extend({
     } else {
       Spotbox.Controllers.Search.set("sortKey", key);
     }
-  }
+  },
+
+  displaySpinner: function() {
+    if (Spotbox.Controllers.Search.get("searching")) {
+      $("#search").prepend(this.spinner.spin().el);
+    } else {
+      this.spinner.stop();
+    }
+  }.observes("Spotbox.Controllers.Search.searching"),
 
 });
