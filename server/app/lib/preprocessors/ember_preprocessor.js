@@ -19,9 +19,13 @@ module.exports = {
   preprocessor: function(data, filepath, hollaback) {
     var filename = path.basename(filepath, ".hbs");
     var hbars = "Ember.TEMPLATES." + filename + " = Ember.Handlebars.template(";
-    hbars += context.Ember.Handlebars.precompile(data).toString();
-    hbars += ")";
-
-    hollaback(null, hbars);
+    try {
+      hbars += context.Ember.Handlebars.precompile(data).toString();
+      hbars += ")";
+      hollaback(null, hbars);
+    } catch (error) {
+      console.log("error compiling handlebar template: ", filename);
+      hollaback(error);
+    }
   }
 };
