@@ -2,7 +2,7 @@ var path        = require("path");
 var fs          = require("fs");
 var underscore  = require("underscore");
 var AsyncRunner = require("async_collection_runner");
-var srandom     = require("secure_random");
+var sec_random  = require("secure_random");
 var config      = require(path.join(__dirname, "..", "..", "config"));
 var Spotbox     = require(path.join(config.root, "app", "lib", "spotbox"));
 var Spotify     = require(path.join(config.root, "app", "lib", "spotify"));
@@ -10,16 +10,16 @@ var Spotify     = require(path.join(config.root, "app", "lib", "spotify"));
 var properties = {
   current: null,
   tracks: [],
-  known_playlists: [
-    "spotify:user:mikedoel:playlist:05m1Zj1ixCNoCb3kJd5of7",
-    "spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg"
-  ],
+  playlists: {
+    "spotify:user:mikedoel:playlist:05m1Zj1ixCNoCb3kJd5of7": null,
+    "spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg": null
+  },
 };
 
 var event_hollabacks = {
   current: [],
   tracks: [],
-  known_playlists: [],
+  playlists: [],
 };
 
 function set_property(key, new_value) {
@@ -39,23 +39,43 @@ function trigger(key) {
   });
 };
 
+function get_track(hollaback) {
+  if (properties.tracks.length > 0) {
+    sec_random.getRandomInt(0, properties.tracks.length, function(error, value) {
+      if (error) {
+        hollaback(error);
+      } else {
+        var uri = properties.tracks[value];
+        hollaback(null, uri);
+      }
+    });
+  } else {
+    hollaback({error: "not found", message: "no tracks available"});
+  }
+};
+
 var PlaylistManager = function() {};
 
 PlaylistManager.on = function(key, hollaback) {
   event_hollabacks[key].push(hollaback);
 };
 
-PlaylistManager.next = function() {
-  if (properties.current && properties.tracks.length > 0) {
-    srandom.getRandomInt(0, properties.tracks.length, function(error, value) {
-      var uri = properties.tracks[value];
-      config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
+PlaylistManager.random = function(hollaback) {
+  if (properties.tracks.length === 0) {
+    PlaylistManager.refresh_playlist(function() {
+      get_track(hollaback);
     });
+  } else {
+    get_track(hollaback);
   }
 };
 
-PlaylistManager.set_current = function(uri) {
-  // TODO: need to start getting/setting this in redis
+PlaylistManager.remove_track = function(track) {
+  properties.tracks = underscore.without(properties.tracks, track);
+};
+
+PlaylistManager.set_playlist_uri = function(uri) {
+  PlaylistManager.load_playlist(uri);
   set_property("current", uri);
   config.redis.lrange(Spotbox.namespace(uri), 0, -1, function(error, tracks) {
     set_property("tracks", tracks);
@@ -63,51 +83,55 @@ PlaylistManager.set_current = function(uri) {
 };
 
 PlaylistManager.get_playlist_uri = function(hollaback) {
-  // TODO: need to start getting/setting this in redis
   hollaback(null, properties.current)
 };
 
 PlaylistManager.get_playlist = function(uri, hollaback) {
-  config.redis.lrange(Spotbox.namespace("playlists"), 0, -1, function(error, playlists) {
-    if (error) {
-      hollaback(error);
-    } else {
-      var playlist_objs = underscore.map(playlists, function(str) { return JSON.parse(str) });
-      var playlist = underscore.find(playlist_objs, function(playlist) {
-        return playlist.url === uri;
-      });
-      hollaback(null, playlist);
-    }
-  });
+  var playlist = properties.playlists[uri];
+  if (playlist) {
+    hollaback(null, properties.playlists[uri]);
+  } else {
+    hollaback({error: "not found", message: "playlist not found"});
+  }
 };
 
 PlaylistManager.get_playlists = function(hollaback) {
-  config.redis.lrange(Spotbox.namespace("playlists"), 0, -1, function(error, playlists) {
-    if (error) {
-      hollaback(error);
-    } else {
-      var playlist_objs = underscore.map(playlists, function(str) { return JSON.parse(str) });
-      hollaback(null, playlist_objs);
-    }
-  });
+  hollaback(null, properties.playlists);
 };
 
 PlaylistManager.load_playlists = function() {
-  underscore.each(properties.known_playlists, function(playlist_url) {
-    setTimeout(function() {
-      config.pub_socket.send(Spotbox.namespace("players:spotify::load_playlist::" + playlist_url));
-    }, 100);
-  });
+  // wait until zqm is ready to send messages. Even though we are using a
+  // blocking bind, it appears to not work if messages are sent immediately.
+  // Bug?
+  setTimeout(function() {
+    underscore.each(properties.playlists, function(value, key) {
+      PlaylistManager.load_playlist(key);
+    });
+  }, 537); // Magic numbers!
+};
+
+PlaylistManager.load_playlist = function(uri) {
+  config.pub_socket.send(Spotbox.namespace("players:spotify::load_playlist::" + uri));
 };
 
 PlaylistManager.sync_playlist = function(playlist_data) {
-  config.redis.rpush(Spotbox.namespace("playlists"), JSON.stringify({
-    name: playlist_data.name,
-    url : playlist_data.url
-  }));
+  var key = Spotbox.namespace(playlist_data.uri);
+  properties.playlists[playlist_data.uri] = playlist_data.name;
 
-  underscore.each(playlist_data.tracks, function(track) {
-    config.redis.rpush(Spotbox.namespace(playlist_data.url), track);
+  // if it is the current playlist, update it now
+  if (properties.current === playlist_data.uri) {
+    properties.tracks = playlist_data.tracks;
+  }
+
+  config.redis.del(key, function() {
+    config.redis.rpush(Spotbox.namespace(playlist_data.uri), playlist_data.tracks);
+  });
+};
+
+PlaylistManager.refresh_playlist = function(hollaback) {
+  config.redis.lrange(Spotbox.namespace(properties.current), 0, -1, function(error, tracks) {
+    properties.tracks = tracks;
+    hollaback();
   });
 };
 

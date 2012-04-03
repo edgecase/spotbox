@@ -4,7 +4,6 @@ var underscore      = require("underscore");
 var config          = require(path.join(__dirname, "..", "config"));
 var Spotbox         = require(path.join(config.root, "app", "lib", "spotbox"));
 var Spotify         = require(path.join(config.root, "app", "lib", "spotify"));
-var Activity        = require(path.join(config.root, "app", "lib", "activity"));
 var Airfoil         = require(path.join(config.root, "app", "lib", "airfoil"));
 var Player          = require(path.join(config.root, "app", "lib", "player"));
 var PlaylistManager = require(path.join(config.root, "app", "lib", "playlist_manager"));
@@ -38,6 +37,9 @@ module.exports = function(io) {
     });
 
     PlaylistManager.get_playlists(function(error, playlists) {
+      playlists = underscore.map(playlists, function(value, key) {
+        return { uri: key, name: value };
+      });
       socket_emit(socket, "playlists", error, playlists);
     });
 
@@ -60,7 +62,6 @@ module.exports = function(io) {
       Spotify.retrieve(message, function(error, track) {
         if (track) {
           Player.add_to_queue(track.href);
-          socket_emit(io.sockets, "activities", null, Activity.build(socket, "Enqueued " + track.name));
         }
       });
     });
@@ -69,11 +70,10 @@ module.exports = function(io) {
       Player.remove_from_queue(track);
     });
 
-    socket.on("playlists/set", function(uri) {
+    socket.on("playlists/set", function(error, uri) {
       PlaylistManager.get_playlist(uri, function(error, playlist) {
         if (playlist) {
-          /* socket_emit(io.sockets, "activities", null, Activity.build(socket, "Changed playlist to " + playlist.name)); */
-          PlaylistManager.set_current(playlist.url);
+          PlaylistManager.set_playlist_uri(playlist.url);
         }
       });
     });
@@ -84,7 +84,6 @@ module.exports = function(io) {
 
     socket.on("airfoil", function(message) {
       Airfoil[message]();
-      socket_emit(io.sockets, "activities", null, Activity.build(socket, "Sent Airfoil commaned " + message));
     });
   });
 

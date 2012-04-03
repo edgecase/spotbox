@@ -12,9 +12,6 @@ Spotbox.Views.PlaylistEntry = Ember.View.extend({
 
   click: function(event) {
     event.preventDefault();
-
-    var playlist_uri = $(event.target).attr("href");
-    Spotbox.Controllers.Playlists.changePlaylist(playlist_uri);
+    Spotbox.Controllers.Playlists.changePlaylist(this.getPath("content.uri"));
   }
-
-})
+});

@@ -5,7 +5,7 @@
   <li class="nav-header">Spotify Playlists</li>
   {{#each Spotbox.Controllers.Playlists}}
     {{#view Spotbox.Views.PlaylistEntry contentBinding="this"}}
-    <a href="{{unbound content.url}}">{{content.name}}</a>
+      <a href="javascript:void(0)">{{content.name}}</a>
     {{/view}}
   {{/each}}
 </ul>

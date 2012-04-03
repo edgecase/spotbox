@@ -3,7 +3,10 @@ Spotbox.Controllers.Recent = Ember.ArrayController.create({
   init: function() {
     var self = this;
     Spotbox.socket.on("tracks/recent", function(tracks) {
-      self.set("content", tracks);
+      var recent = _.map(tracks, function(track) {
+        return Spotbox.Models.Track.create(track);
+      });
+      self.set("content", recent);
     });
   }
 });

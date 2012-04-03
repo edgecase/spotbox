@@ -40,6 +40,28 @@ function trigger(key) {
   });
 };
 
+function play(uri) {
+  config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
+  PlaylistManager.remove_track(uri);
+  Player.add_to_recent(uri);
+}
+
+function play_next() {
+  if (properties.queue.length > 0) {
+    uri = properties.queue.shift();
+    trigger("queue");
+    play(uri);
+  } else {
+    PlaylistManager.random(function(error, uri) {
+      if (error) {
+        console.log(error);
+      } else {
+        play(uri);
+      }
+    });
+  }
+};
+
 var Player = function() {};
 
 Player.on = function(key, hollaback) {
@@ -47,15 +69,14 @@ Player.on = function(key, hollaback) {
 };
 
 Player.play = function(uri) {
-  if (uri) {
-    config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
-  } else if (properties.state === "paused") {
+  if (properties.state === "paused") {
     config.pub_socket.send(Spotbox.namespace("players:spotify::unpause"));
-  } else if (properties.queue.length > 0) {
-    uri = properties.queue.shift();
-    config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
   } else {
-    PlaylistManager.next();
+    if (uri) {
+      play(uri);
+    } else {
+      play_next();
+    }
   }
 };
 
