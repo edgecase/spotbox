@@ -77,9 +77,7 @@ PlaylistManager.remove_track = function(track) {
 PlaylistManager.set_playlist_uri = function(uri) {
   PlaylistManager.load_playlist(uri);
   set_property("current", uri);
-  config.redis.lrange(Spotbox.namespace(uri), 0, -1, function(error, tracks) {
-    set_property("tracks", tracks);
-  });
+  PlaylistManager.refresh_playlist(function() {});
 };
 
 PlaylistManager.get_playlist_uri = function(hollaback) {
@@ -118,19 +116,16 @@ PlaylistManager.sync_playlist = function(playlist_data) {
   var key = Spotbox.namespace(playlist_data.uri);
   properties.playlists[playlist_data.uri] = playlist_data.name;
 
-  // if it is the current playlist, update it now
-  if (properties.current === playlist_data.uri) {
-    properties.tracks = playlist_data.tracks;
-  }
-
   config.redis.del(key, function() {
-    config.redis.rpush(Spotbox.namespace(playlist_data.uri), playlist_data.tracks);
+    config.redis.rpush(Spotbox.namespace(playlist_data.uri), playlist_data.tracks, function() {
+      PlaylistManager.refresh_playlist(function() {});
+    });
   });
 };
 
 PlaylistManager.refresh_playlist = function(hollaback) {
   config.redis.lrange(Spotbox.namespace(properties.current), 0, -1, function(error, tracks) {
-    properties.tracks = tracks;
+    properties.tracks = underscore.shuffle(tracks);
     hollaback();
   });
 };
