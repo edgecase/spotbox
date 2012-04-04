@@ -10,8 +10,6 @@ var settings = {
 };
 
 function request(opts, params, hollaback) {
-  console.log("===================");
-  console.log("spotify request: ", new Date(), ": ", opts, params);
   options = {};
   options.host = settings.host
   options.path = "/" + opts.type + "/" +  settings.version + "/"
@@ -23,10 +21,6 @@ function request(opts, params, hollaback) {
   options.path += ".json";
 
   options.path += "?" + querystring.stringify(params);
-
-  console.log(opts);
-  console.log(options);
-  console.log("===================");
 
   http.request(options, function(response) {
     var metadata = "";

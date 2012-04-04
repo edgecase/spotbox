@@ -1,11 +1,11 @@
-var path        = require("path");
-var fs          = require("fs");
-var underscore  = require("underscore");
-var AsyncRunner = require("async_collection_runner");
-var sec_random  = require("secure_random");
-var config      = require(path.join(__dirname, "..", "..", "config"));
-var Spotbox     = require(path.join(config.root, "app", "lib", "spotbox"));
-var Spotify     = require(path.join(config.root, "app", "lib", "spotify"));
+var path          = require("path");
+var fs            = require("fs");
+var underscore    = require("underscore");
+var AsyncRunner   = require("async_collection_runner");
+var secure_random = require("secure_random");
+var config        = require(path.join(__dirname, "..", "..", "config"));
+var Spotbox       = require(path.join(config.root, "app", "lib", "spotbox"));
+var Spotify       = require(path.join(config.root, "app", "lib", "spotify"));
 
 var properties = {
   current: null,
@@ -41,7 +41,7 @@ function trigger(key) {
 
 function get_track(hollaback) {
   if (properties.tracks.length > 0) {
-    sec_random.getRandomInt(0, properties.tracks.length, function(error, value) {
+    secure_random.getRandomInt(0, properties.tracks.length, function(error, value) {
       if (error) {
         hollaback(error);
       } else {

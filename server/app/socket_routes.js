@@ -70,10 +70,10 @@ module.exports = function(io) {
       Player.remove_from_queue(track);
     });
 
-    socket.on("playlists/set", function(error, uri) {
+    socket.on("playlists/set", function(uri) {
       PlaylistManager.get_playlist(uri, function(error, playlist) {
         if (playlist) {
-          PlaylistManager.set_playlist_uri(playlist.url);
+          PlaylistManager.set_playlist_uri(uri);
         }
       });
     });
