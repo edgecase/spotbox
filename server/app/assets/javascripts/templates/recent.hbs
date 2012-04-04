@@ -1,8 +1,17 @@
 {{#if showContent}}
-  <h3>Recently Played</h3>
-  <ul class="unstyled">
-  {{#each content}}
-    {{view Spotbox.Views.Track modelBinding="this"}}
-  {{/each}}
-  </ul>
+  <thead>
+    <tr>
+      <th>Track</th>
+      <th>Artist</th>
+      <th>Time</th>
+      <th>Album</th>
+      <th>Year</th>
+      <th></th>
+    </tr>
+  </head>
+  <tbody>
+    {{#each content}}
+      {{view Spotbox.Views.Track modelBinding="this"}}
+    {{/each}}
+  </tbody>
 {{/if}}
