@@ -28,6 +28,10 @@ module.exports = function(io) {
       socket_emit(socket, "player/track", error, { track: track });
     });
 
+    Player.get_next_votes(function(error, votes) {
+      socket_emit(socket, "player/next_votes", error, votes);
+    });
+
     Player.get_queue(function(error, queue) {
       socket_emit(socket, "tracks/queue", error, queue);
     });
@@ -79,7 +83,15 @@ module.exports = function(io) {
     });
 
     socket.on("player", function(message) {
-      Player[message]();
+      if (message === "play") {
+        Player.play();
+      } else if (message === "pause") {
+        Player.pause();
+      } else if (message === "stop") {
+        Player.stop();
+      } else if (message === "next") {
+        Player.next_vote(socket.handshake.address.address);
+      }
     });
 
     socket.on("airfoil", function(message) {
@@ -115,6 +127,10 @@ module.exports = function(io) {
     Player.get_recent(function(errors, tracks) {
       socket_emit(io.sockets, "tracks/recent", errors, tracks);
     });
+  });
+
+  Player.on("next_votes", function(properties) {
+    socket_emit(io.sockets, "player/next_votes", null, underscore.size(properties.next_votes));
   });
 
   PlaylistManager.on("current", function(properties) {

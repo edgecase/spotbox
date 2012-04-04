@@ -20,6 +20,10 @@ Spotbox.Controllers.Player = Ember.Object.create({
       $("title").text(self.get("content").get("artistAndTrack"));
     });
 
+    Spotbox.socket.on("player/next_votes", function(data) {
+      self.set("nextVotes", data);
+    });
+
     Spotbox.socket.on("player/progress", function(data) {
       var track = self.get("content");
       if (track) {
@@ -45,6 +49,6 @@ Spotbox.Controllers.Player = Ember.Object.create({
   },
 
   next: function() {
-    Spotbox.socket.emit("player", "play");
+    Spotbox.socket.emit("player", "next");
   }
 });

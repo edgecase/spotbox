@@ -8,6 +8,7 @@ var Spotify               = require(path.join(config.root, "app", "lib", "spotif
 var PlaylistManager       = require(path.join(config.root, "app", "lib", "playlist_manager"));
 
 var RECENT_TRACK_SIZE = 25;
+var QUOREM_SIZE = 3;
 
 var properties = {
   state: "stopped",
@@ -15,6 +16,7 @@ var properties = {
   queue: [],
   recent: [],
   progress: "0",
+  next_votes: {}
 };
 
 var event_hollabacks = {
@@ -23,6 +25,7 @@ var event_hollabacks = {
   queue: [],
   recent: [],
   progress: [],
+  next_votes: []
 };
 
 function set_property(key, new_value) {
@@ -46,6 +49,7 @@ function play(uri) {
   config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
   PlaylistManager.remove_track(uri);
   Player.add_to_recent(uri);
+  set_property("next_votes", {});
 }
 
 function play_next() {
@@ -96,6 +100,18 @@ Player.set_state = function(state) {
 
 Player.get_state = function(hollaback) {
   hollaback(null, { state: properties.state });
+};
+
+Player.next_vote = function(id) {
+  properties.next_votes[id] = true;
+  if (underscore.size(properties.next_votes) >= QUOREM_SIZE) {
+    play_next();
+  }
+  trigger("next_votes");
+};
+
+Player.get_next_votes = function(hollaback) {
+  hollaback(null, underscore.size(properties.next_votes));
 };
 
 Player.add_to_queue = function(uri) {

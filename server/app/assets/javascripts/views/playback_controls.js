@@ -2,6 +2,8 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
   templateName: "playback_controls",
   classNames: ["well"],
 
+  nextVotesBinding: "Spotbox.Controllers.Player.nextVotes",
+
   trackInfo: Ember.View.extend({
     classNames: ["well"],
 
