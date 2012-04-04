@@ -7,6 +7,8 @@ var Spotbox               = require(path.join(config.root, "app", "lib", "spotbo
 var Spotify               = require(path.join(config.root, "app", "lib", "spotify"));
 var PlaylistManager       = require(path.join(config.root, "app", "lib", "playlist_manager"));
 
+var RECENT_TRACK_SIZE = 25;
+
 var properties = {
   state: "stopped",
   track: null,
@@ -113,6 +115,9 @@ Player.get_queue = function(hollaback) {
 
 Player.add_to_recent = function(uri) {
   properties.recent.push(uri);
+  while (properties.recent.length > RECENT_TRACK_SIZE) {
+    properties.recent.shift();
+  }
   trigger("recent");
 };
 
