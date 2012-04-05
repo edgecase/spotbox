@@ -7,14 +7,20 @@ Spotbox.Controllers.Search = Ember.ArrayController.create({
   init: function() {
     var self = this;
     Spotbox.socket.on("tracks/search/result", function(results) {
-      self.set("searching", false);
-      var valid_results = _.filter(results, function(result) {
-        return _.include(result.album.availability.territories.split(" "), "US");
-      });
-      results = _.map(valid_results, function(result) {
-        return Spotbox.Models.Track.create(result);
-      });
-      self.set("content", results);
+      if (results.error) {
+        // TODO: Need some global way to display errors. See interchange.
+        self.set("content", []);
+        self.set("searching", false);
+      } else {
+        var valid_results = _.filter(results, function(result) {
+          return _.include(result.album.availability.territories.split(" "), "US");
+        });
+        results = _.map(valid_results, function(result) {
+          return Spotbox.Models.Track.create(result);
+        });
+        self.set("content", results);
+        self.set("searching", false);
+      }
     });
   },
 

@@ -20,9 +20,14 @@ Spotify.retrieve = function(spotify_uri, hollaback) {
       hollaback(null, JSON.parse(metadata));
     } else {
       SpotifyApi.lookup(spotify_uri, function(error, metadata) {
-        var track = JSON.parse(metadata).track;
-        cache(spotify_uri, JSON.stringify(track));
-        hollaback(null, track);
+        if (error) {
+          console.log("Spotify retrieve error:", error)
+          hollaback(error);
+        } else {
+          var track = JSON.parse(metadata).track;
+          cache(spotify_uri, JSON.stringify(track));
+          hollaback(null, track);
+        }
       });
     }
   });
@@ -35,10 +40,15 @@ Spotify.search = function(query, hollaback) {
       hollaback(error, JSON.parse(metadata));
     } else {
       SpotifyApi.search("track", query, function(error, metadata) {
-        var tracks = JSON.parse(metadata).tracks;
-        config.redis.set(redis_key, JSON.stringify(tracks));
-        config.redis.expire(redis_key, 3600 * 24 * 7);
-        hollaback(error, tracks);
+        if (error) {
+          console.log("Spotify search error:", error)
+          hollaback(error);
+        } else {
+          var tracks = JSON.parse(metadata).tracks;
+          config.redis.set(redis_key, JSON.stringify(tracks));
+          config.redis.expire(redis_key, 3600 * 24 * 7);
+          hollaback(null, tracks);
+        }
       });
     }
   });
