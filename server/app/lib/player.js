@@ -48,7 +48,9 @@ function trigger(key) {
 function play(uri) {
   config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + uri));
   PlaylistManager.remove_track(uri);
-  Player.add_to_recent(uri);
+  if (properties.track) {
+    add_to_recent(properties.track);
+  }
   set_property("next_votes", {});
 }
 
@@ -66,6 +68,12 @@ function play_next() {
       }
     });
   }
+};
+
+function add_to_recent(uri) {
+  properties.recent.unshift(uri);
+  properties.recent.slice(0, RECENT_TRACK_SIZE);
+  trigger("recent");
 };
 
 var Player = function() {};
@@ -127,14 +135,6 @@ Player.remove_from_queue = function(uri) {
 
 Player.get_queue = function(hollaback) {
   new AsyncCollectionRunner(properties.queue, Spotify.retrieve).run(hollaback);
-};
-
-Player.add_to_recent = function(uri) {
-  properties.recent.push(uri);
-  while (properties.recent.length > RECENT_TRACK_SIZE) {
-    properties.recent.shift();
-  }
-  trigger("recent");
 };
 
 Player.get_recent = function(hollaback) {
