@@ -18,12 +18,22 @@
     <!-- Lists -->
     <div id="lists-container" class="span9">
 
+      <div class="row-fluid">
+        <div class="span12">
+          <!-- Alert -->
+          {{view Spotbox.Views.Alert}}
+          <!-- End Alert -->
+        </div>
+      </div>
+
+      <!-- Tab Bar -->
       <ul id='tab-bar' class='nav nav-tabs'>
         <li class="active"><a id="queue-tab" href="#queue" data-toggle="tab">Queue</a></li>
         <li><a href="#search" id="search-tab" data-toggle="tab">Search</a></li>
         <li><a href="#recent" id="recent-tab" data-toggle="tab">Recent</a></li>
         {{view Spotbox.Views.PlaylistTab}}
       </ul>
+      <!-- End Tab Bar -->
 
       <!-- Tab Content -->
       <div class="tab-content">

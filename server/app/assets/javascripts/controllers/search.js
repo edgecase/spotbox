@@ -8,7 +8,12 @@ Spotbox.Controllers.Search = Ember.ArrayController.create({
     var self = this;
     Spotbox.socket.on("tracks/search/result", function(results) {
       if (results.error) {
-        // TODO: Need some global way to display errors. See interchange.
+        Spotbox.Controllers.Alert.set("content", Spotbox.Models.Alert.create({
+          tagLine: "Search Error",
+          description: "encountered while searching for tracks.",
+          level: "error"
+        }));
+
         self.set("content", []);
         self.set("searching", false);
       } else {
