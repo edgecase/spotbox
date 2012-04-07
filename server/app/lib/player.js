@@ -133,8 +133,10 @@ Player.get_next_votes = function(hollaback) {
 };
 
 Player.add_to_queue = function(id) {
-  properties.queue.push(id);
-  trigger("queue");
+  if (!underscore.include(properties.queue, id)) {
+    properties.queue.push(id);
+    trigger("queue");
+  }
 };
 
 Player.remove_from_queue = function(id) {
