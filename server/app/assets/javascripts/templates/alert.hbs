@@ -1,5 +1,5 @@
-<a class="close" data-dismiss="alert">×</a>
-{{#if model.tagLine}}
-  <strong>{{model.tagLine}}</strong>
+<a class="close" {{action "remove"}}>×</a>
+{{#if tagline}}
+  <strong>{{tagline}}</strong>
 {{/if}}
-{{model.description}}
+{{description}}
