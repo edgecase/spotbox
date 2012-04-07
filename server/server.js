@@ -8,6 +8,7 @@ var socket_routes      = require(path.join(config.root, "app", "socket_routes"))
 var player_routes      = require(path.join(config.root, "app", "player_routes"));
 var airfoil_routes     = require(path.join(config.root, "app", "airfoil_routes"));
 var ember_preprocessor = require(path.join(config.root, "app", "lib", "preprocessors", "ember_preprocessor"));
+var Player             = require(path.join(config.root, "app", "lib", "player"));
 var PlaylistManager    = require(path.join(config.root, "app", "lib", "playlist_manager"));
 var importer           = require(path.join(config.root, "app", "lib", "importer"));
 
@@ -45,8 +46,9 @@ assetbuilder.configure({
   env: config.env
 });
 
-importer(server);
+importer();
 
+Player.load_recent();
 PlaylistManager.load_playlists();
 PlaylistManager.set_playlist_id("spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg");
 

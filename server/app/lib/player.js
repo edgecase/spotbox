@@ -77,13 +77,13 @@ function play_next() {
 
 function add_to_recent(id) {
   properties.recent.unshift(id);
-  properties.recent.slice(0, RECENT_TRACK_SIZE);
+  properties.recent = properties.recent.slice(0, RECENT_TRACK_SIZE);
   trigger("recent");
   Spotify.retrieve(id, function(error, track) {
     if (error) {
       console.log("error saving recent track", error);
     } else {
-      config.db.save(underscore.extend(track, {type: "played_track"}), function () {});
+      config.db.save(underscore.extend(track, {type: "played_track", created_at: new Date()}), function () {});
     }
   });
 };
@@ -165,6 +165,18 @@ Player.get_track = function(hollaback) {
 
 Player.set_progress = function(progress) {
   set_property("progress", progress);
+};
+
+Player.load_recent = function() {
+  config.db.view("played_tracks/recent", {limit: RECENT_TRACK_SIZE, descending: true }, function(error, response) {
+    if (error) {
+      console.log("error loading recent tracks", error);
+    } else {
+      properties.recent = underscore.map(response, function(track) {
+        return track.value.id;
+      });
+    }
+  });
 };
 
 module.exports = Player;
