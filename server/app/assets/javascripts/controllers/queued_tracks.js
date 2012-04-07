@@ -13,9 +13,5 @@ Spotbox.Controllers.QueuedTracks = Ember.ArrayController.create({
 
   enqueue: function(searchResult) {
     Spotbox.socket.emit("tracks/enqueue", searchResult.id);
-  },
-
-  dequeue: function(track) {
-    Spotbox.socket.emit("tracks/dequeue", track.href);
   }
 });

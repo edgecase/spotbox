@@ -70,10 +70,6 @@ module.exports = function(io) {
       });
     });
 
-    socket.on("tracks/dequeue", function(track) {
-      Player.remove_from_queue(track);
-    });
-
     socket.on("playlists/set", function(id) {
       PlaylistManager.get_playlist(id, function(error, playlist) {
         if (playlist) {

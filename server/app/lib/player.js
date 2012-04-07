@@ -139,12 +139,6 @@ Player.add_to_queue = function(id) {
   }
 };
 
-Player.remove_from_queue = function(id) {
-  set_property("queue", underscore.filter(properties.queue, function(track) {
-    return track !== id
-  }));
-};
-
 Player.get_queue = function(hollaback) {
   new AsyncCollectionRunner(properties.queue, Spotify.retrieve).run(hollaback);
 };
