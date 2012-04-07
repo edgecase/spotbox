@@ -52,7 +52,6 @@ function trigger(key) {
 
 function play(id) {
   config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + id));
-  PlaylistManager.remove_track(id);
   if (properties.track) {
     add_to_recent(properties.track);
   }

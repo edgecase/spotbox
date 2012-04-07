@@ -2,14 +2,12 @@ var path          = require("path");
 var fs            = require("fs");
 var underscore    = require("underscore");
 var AsyncRunner   = require("async_collection_runner");
-var secure_random = require("secure_random");
 var config        = require(path.join(__dirname, "..", "..", "config"));
 var Spotbox       = require(path.join(config.root, "app", "lib", "spotbox"));
 var Spotify       = require(path.join(config.root, "app", "lib", "spotify"));
 
 var properties = {
   current: null,
-  tracks: [],
   playlists: {
     "spotify:user:mikedoel:playlist:05m1Zj1ixCNoCb3kJd5of7": null,
     "spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg": null
@@ -18,7 +16,6 @@ var properties = {
 
 var event_hollabacks = {
   current: [],
-  tracks: [],
   playlists: [],
 };
 
@@ -39,19 +36,56 @@ function trigger(key) {
   });
 };
 
+function refresh_playlist_pool(playlist_id, hollaback) {
+  var playlist_key = Spotbox.namespace(playlist_id);
+  var playlist_pool_key = playlist_key + "_pool";
+  config.redis.lrange(playlist_key, 0, -1, function(error, tracks) {
+    if (error) {
+      hollaback({error: "redis error", message: error});
+    } else {
+      config.redis.del(playlist_pool_key, function(error) {
+        if (error) {
+          hollaback({error: "redis error", message: error});
+        } else {
+          config.redis.rpush(playlist_pool_key, underscore.shuffle(tracks), function(error) {
+            if (error) {
+              hollaback({error: "redis error", message: error});
+            } else {
+              hollaback();
+            }
+          });
+        }
+      });
+    }
+  });
+};
+
 function get_track(hollaback) {
-  if (properties.tracks.length > 0) {
-    secure_random.getRandomInt(0, properties.tracks.length, function(error, value) {
-      if (error) {
-        hollaback(error);
+  var playlist_id = properties.current;
+  var playlist_pool_key = Spotbox.namespace(playlist_id + "_pool");
+  config.redis.llen(playlist_pool_key, function(error, length) {
+    if (error) {
+      hollaback({error: "redis error", message: error});
+    } else {
+      if (length > 0) {
+        config.redis.lpop(playlist_pool_key, function(error, track) {
+          if (error) {
+            hollaback({error: "redis error", message: error});
+          } else {
+            hollaback(null, track);
+          }
+        });
       } else {
-        var id = properties.tracks[value];
-        hollaback(null, id);
+        refresh_playlist_pool(playlist_id, function(error) {
+          if (error) {
+            hollaback(error);
+          } else {
+            hollaback({error: "refresh"});
+          }
+        });
       }
-    });
-  } else {
-    hollaback({error: "not found", message: "no tracks available"});
-  }
+    }
+  });
 };
 
 var PlaylistManager = function() {};
@@ -61,23 +95,24 @@ PlaylistManager.on = function(key, hollaback) {
 };
 
 PlaylistManager.random = function(hollaback) {
-  if (properties.tracks.length === 0) {
-    PlaylistManager.refresh_playlist(function() {
-      get_track(hollaback);
+  if (properties.current) {
+    get_track(function(error, track) {
+      if (error) {
+        if (error.error == "refresh") {
+          get_track(hollaback);
+        }
+      } else {
+        hollaback(null, track);
+      }
     });
   } else {
-    get_track(hollaback);
+    hollaback({error: "not found", message: "no playlist selected"});
   }
-};
-
-PlaylistManager.remove_track = function(track) {
-  set_property("tracks", underscore.without(properties.tracks, track));
 };
 
 PlaylistManager.set_playlist_id = function(id) {
   PlaylistManager.load_playlist(id);
   set_property("current", id);
-  PlaylistManager.refresh_playlist(function() {});
 };
 
 PlaylistManager.get_playlist_id = function(hollaback) {
@@ -118,16 +153,7 @@ PlaylistManager.sync_playlist = function(playlist_data) {
   trigger("playlists");
 
   config.redis.del(key, function() {
-    config.redis.rpush(Spotbox.namespace(playlist_data.id), playlist_data.tracks, function() {
-      PlaylistManager.refresh_playlist(function() {});
-    });
-  });
-};
-
-PlaylistManager.refresh_playlist = function(hollaback) {
-  config.redis.lrange(Spotbox.namespace(properties.current), 0, -1, function(error, tracks) {
-    set_property("tracks", underscore.shuffle(tracks));
-    hollaback();
+    config.redis.rpush(Spotbox.namespace(playlist_data.id), playlist_data.tracks);
   });
 };
 
