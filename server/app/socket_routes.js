@@ -36,8 +36,8 @@ module.exports = function(io) {
       socket_emit(socket, "tracks/queue", error, queue);
     });
 
-    Player.get_recent(function(error, tracks) {
-      socket_emit(socket, "tracks/recent", error, tracks);
+    Player.get_played_tracks(function(error, tracks) {
+      socket_emit(socket, "tracks/played", error, tracks);
     });
 
     PlaylistManager.get_playlists(function(error, playlists) {
@@ -123,9 +123,9 @@ module.exports = function(io) {
     });
   });
 
-  Player.on("recent", function(properties) {
-    Player.get_recent(function(errors, tracks) {
-      socket_emit(io.sockets, "tracks/recent", errors, tracks);
+  Player.on("played", function(properties) {
+    Player.get_played_tracks(function(errors, tracks) {
+      socket_emit(io.sockets, "tracks/played", errors, tracks);
     });
   });
 

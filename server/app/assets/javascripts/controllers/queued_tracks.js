@@ -1,11 +1,11 @@
-Spotbox.Controllers.Queue = Ember.ArrayController.create({
+Spotbox.Controllers.QueuedTracks = Ember.ArrayController.create({
   content: [],
 
   init: function() {
     var self = this;
     Spotbox.socket.on("tracks/queue", function(tracks) {
       var queue = _.map(tracks, function(track) {
-        return Spotbox.Models.Track.create(track);
+        return Spotbox.Models.QueuedTrack.create(track);
       });
       self.set("content", queue);
     });

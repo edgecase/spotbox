@@ -3,9 +3,9 @@ Spotbox.Views.Queue = Ember.View.extend({
   tagName: "table",
   classNames: ["table", "table-striped", "track-list", "active"],
 
-  contentBinding: "Spotbox.Controllers.Queue.content",
+  contentBinding: "Spotbox.Controllers.QueuedTracks.content",
 
   showContent: function() {
-    return Spotbox.Controllers.Queue.get("content").length > 0;
-  }.property("Spotbox.Controllers.Queue.content")
+    return this.get("content").length > 0;
+  }.property("content")
 });

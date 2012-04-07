@@ -7,7 +7,7 @@ var Spotbox               = require(path.join(config.root, "app", "lib", "spotbo
 var Spotify               = require(path.join(config.root, "app", "lib", "spotify"));
 var PlaylistManager       = require(path.join(config.root, "app", "lib", "playlist_manager"));
 
-var RECENT_TRACK_SIZE = 25;
+var HISTORY_LIMIT = 25;
 var QUOREM_SIZE = 3;
 
 if (config.env === "development") {
@@ -19,7 +19,6 @@ var properties = {
   state: "stopped",
   track: null,
   queue: [],
-  recent: [],
   progress: "0",
   next_votes: {}
 };
@@ -28,7 +27,7 @@ var event_hollabacks = {
   state: [],
   track: [],
   queue: [],
-  recent: [],
+  played: [],
   progress: [],
   next_votes: []
 };
@@ -53,7 +52,7 @@ function trigger(key) {
 function play(id) {
   config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + id));
   if (properties.track) {
-    add_to_recent(properties.track);
+    save_played(properties.track);
   }
   set_property("next_votes", {});
 }
@@ -74,15 +73,15 @@ function play_next() {
   }
 };
 
-function add_to_recent(id) {
-  properties.recent.unshift(id);
-  properties.recent = properties.recent.slice(0, RECENT_TRACK_SIZE);
-  trigger("recent");
+function save_played(id) {
   Spotify.retrieve(id, function(error, track) {
     if (error) {
-      console.log("error saving recent track", error);
+      console.log("error saving played track", error);
     } else {
-      config.db.save(underscore.extend(track, {type: "played_track", created_at: new Date()}), function () {});
+      underscore.extend(track, {type: "played_track", created_at: new Date()});
+      config.db.save(track, function (error, response) {
+        trigger("played");
+      });
     }
   });
 };
@@ -148,10 +147,6 @@ Player.get_queue = function(hollaback) {
   new AsyncCollectionRunner(properties.queue, Spotify.retrieve).run(hollaback);
 };
 
-Player.get_recent = function(hollaback) {
-  new AsyncCollectionRunner(properties.recent, Spotify.retrieve).run(hollaback);
-};
-
 Player.set_track = function(id) {
   set_property("track", id);
 };
@@ -166,14 +161,12 @@ Player.set_progress = function(progress) {
   set_property("progress", progress);
 };
 
-Player.load_recent = function() {
-  config.db.view("played_tracks/recent", {limit: RECENT_TRACK_SIZE, descending: true }, function(error, response) {
+Player.get_played_tracks = function(hollaback) {
+  config.db.view("played_tracks/recent", {limit: HISTORY_LIMIT, descending: true }, function(error, response) {
     if (error) {
-      console.log("error loading recent tracks", error);
+      hollaback({error: "couchdb error", message: error});
     } else {
-      properties.recent = underscore.map(response, function(track) {
-        return track.value.id;
-      });
+      hollaback(null, underscore.pluck(response, "value"));
     }
   });
 };

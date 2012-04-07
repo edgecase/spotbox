@@ -48,7 +48,6 @@ assetbuilder.configure({
 
 importer();
 
-Player.load_recent();
 PlaylistManager.load_playlists();
 PlaylistManager.set_playlist_id("spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg");
 

@@ -1,17 +1,15 @@
-{{#if showContent}}
-  <thead>
-    <tr>
-      <th>Track</th>
-      <th>Artist</th>
-      <th>Time</th>
-      <th>Album</th>
-      <th>Year</th>
-      <th></th>
-    </tr>
-  </head>
-  <tbody>
-    {{#each content}}
-      {{view Spotbox.Views.Track modelBinding="this"}}
-    {{/each}}
-  </tbody>
-{{/if}}
+<thead>
+  <tr>
+    <th>Track</th>
+    <th>Artist</th>
+    <th>Time</th>
+    <th>Album</th>
+    <th>Year</th>
+    <th class="span2">Played</th>
+  </tr>
+</head>
+<tbody>
+  {{#each content}}
+    {{view Spotbox.Views.PlayedTrack modelBinding="this"}}
+  {{/each}}
+</tbody>
