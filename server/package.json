@@ -4,16 +4,16 @@
   "author": "Andrew Grieser <agrieser@gmail.com>, Tony Schneider <tonywok@gmail.com>",
   "description": "Jukebox",
   "dependencies": {
-    "async_collection_runner": "git://github.com/agrieser/async_collection_runner.git",
-    "asset_builder":           "0.2",
     "express":                 "*",
-    "jade":                    "*",
-    "underscore":              "*",
+    "asset_builder":           "0.2",
     "redis":                   "*",
-    "socket.io":               "*",
-    "vows":                    "*",
+    "cradle":                  "*",
     "zmq":                     "*",
-    "secure_random":           "*"
+    "underscore":              "*",
+    "jade":                    "*",
+    "socket.io":               "*",
+    "secure_random":           "*",
+    "async_collection_runner": "git://github.com/agrieser/async_collection_runner.git"
   },
   "license": "MIT",
   "engine": {

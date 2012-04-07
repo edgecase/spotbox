@@ -27,7 +27,7 @@ module.exports  = function() {
       var playlist_data = data.args[0].split(",");
 
       PlaylistManager.sync_playlist({
-        uri    : playlist_data[0],
+        id     : playlist_data[0],
         name   : playlist_data[1],
         tracks : playlist_data.slice(2)
       });

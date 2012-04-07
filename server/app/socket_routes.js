@@ -42,13 +42,13 @@ module.exports = function(io) {
 
     PlaylistManager.get_playlists(function(error, playlists) {
       playlists = underscore.map(playlists, function(value, key) {
-        return { uri: key, name: value };
+        return { id: key, name: value };
       });
       socket_emit(socket, "playlists", error, playlists);
     });
 
-    PlaylistManager.get_playlist_uri(function(error, uri) {
-      socket_emit(socket, "playlists/current", error, uri);
+    PlaylistManager.get_playlist_id(function(error, id) {
+      socket_emit(socket, "playlists/current", error, id);
     });
 
     Airfoil.check_status();
@@ -65,7 +65,7 @@ module.exports = function(io) {
     socket.on("tracks/enqueue", function(message) {
       Spotify.retrieve(message, function(error, track) {
         if (track) {
-          Player.add_to_queue(track.href);
+          Player.add_to_queue(track.id);
         }
       });
     });
@@ -74,10 +74,10 @@ module.exports = function(io) {
       Player.remove_from_queue(track);
     });
 
-    socket.on("playlists/set", function(uri) {
-      PlaylistManager.get_playlist(uri, function(error, playlist) {
+    socket.on("playlists/set", function(id) {
+      PlaylistManager.get_playlist(id, function(error, playlist) {
         if (playlist) {
-          PlaylistManager.set_playlist_uri(uri);
+          PlaylistManager.set_playlist_id(id);
         }
       });
     });

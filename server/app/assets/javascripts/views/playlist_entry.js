@@ -12,6 +12,6 @@ Spotbox.Views.PlaylistEntry = Ember.View.extend({
 
   click: function(event) {
     event.preventDefault();
-    Spotbox.Controllers.Playlists.changePlaylist(this.getPath("content.uri"));
+    Spotbox.Controllers.Playlists.changePlaylist(this.getPath("content.id"));
   }
 });

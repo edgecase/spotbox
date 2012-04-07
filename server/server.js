@@ -9,6 +9,7 @@ var player_routes      = require(path.join(config.root, "app", "player_routes"))
 var airfoil_routes     = require(path.join(config.root, "app", "airfoil_routes"));
 var ember_preprocessor = require(path.join(config.root, "app", "lib", "preprocessors", "ember_preprocessor"));
 var PlaylistManager    = require(path.join(config.root, "app", "lib", "playlist_manager"));
+var importer           = require(path.join(config.root, "app", "lib", "importer"));
 
 var server = express.createServer();
 
@@ -44,8 +45,10 @@ assetbuilder.configure({
   env: config.env
 });
 
+importer(server);
+
 PlaylistManager.load_playlists();
-PlaylistManager.set_playlist_uri("spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg");
+PlaylistManager.set_playlist_id("spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg");
 
 console.log("app running on " + config.port + " in " + config.env);
 server.listen(config.port);
