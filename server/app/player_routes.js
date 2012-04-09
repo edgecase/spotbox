@@ -18,11 +18,11 @@ module.exports  = function() {
       Player.set_state("stopped");
     } else if (data.method === "paused") {
       Player.set_state("paused");
-    } else if (data.method === "track_progress") {
+    } else if (data.method === "trackProgress") {
       Player.set_progress(data.args[0])
-    } else if (data.method === "track_ended") {
+    } else if (data.method === "trackEnded") {
       Player.play();
-    } else if (data.method === "playlist_loaded") {
+    } else if (data.method === "playlistLoaded") {
 
       var playlist_data = data.args[0].split(",");
 

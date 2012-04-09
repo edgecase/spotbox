@@ -144,7 +144,7 @@ PlaylistManager.load_playlists = function() {
 };
 
 PlaylistManager.load_playlist = function(id) {
-  config.pub_socket.send(Spotbox.namespace("players:spotify::load_playlist::" + id));
+  config.pub_socket.send(Spotbox.namespace("players:spotify::loadPlaylist::" + id));
 };
 
 PlaylistManager.sync_playlist = function(playlist_data) {
