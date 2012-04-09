@@ -1,5 +1,5 @@
 Spotbox.Controllers.Player = Ember.Object.create({
-  playbackState: "stopped",
+  playbackState: null,
 
   content: Spotbox.Models.Track.create({
     name: "Nothing Playing",
@@ -40,12 +40,6 @@ Spotbox.Controllers.Player = Ember.Object.create({
 
   pause: function() {
     Spotbox.socket.emit("player", "pause");
-  },
-
-  stop: function() {
-    Spotbox.socket.emit("player", "stop");
-    var track = this.get("content");
-    track.set("progress", 0);
   },
 
   next: function() {
