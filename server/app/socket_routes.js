@@ -6,6 +6,7 @@ var Spotbox         = require(path.join(config.root, "app", "lib", "spotbox"));
 var Spotify         = require(path.join(config.root, "app", "lib", "spotify"));
 var Airfoil         = require(path.join(config.root, "app", "lib", "airfoil"));
 var Player          = require(path.join(config.root, "app", "lib", "player"));
+var Stats           = require(path.join(config.root, "app", "lib", "stats"));
 var PlaylistManager = require(path.join(config.root, "app", "lib", "playlist_manager"));
 
 module.exports = function(io) {
@@ -49,6 +50,18 @@ module.exports = function(io) {
 
     PlaylistManager.get_playlist_id(function(error, id) {
       socket_emit(socket, "playlists/current", error, id);
+    });
+
+    Stats.top_played(function(error, result) {
+      socket_emit(socket, "stats/top_played", error, result);
+    });
+
+    Stats.top_skipped(function(error, result) {
+      socket_emit(socket, "stats/top_skipped", error, result);
+    });
+
+    Stats.top_artists(function(error, result) {
+      socket_emit(socket, "stats/top_artists", error, result);
     });
 
     Airfoil.check_status();

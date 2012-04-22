@@ -25,9 +25,17 @@
 
       <!-- Tab Bar -->
       <ul id='tab-bar' class='nav nav-tabs'>
-        <li class="active"><a id="queue-tab" href="#queue" data-toggle="tab">Queue</a></li>
+        <li class="active"><a href="#queue" data-toggle="tab">Queue</a></li>
         <li><a href="#search" id="search-tab" data-toggle="tab">Search</a></li>
-        <li><a href="#recent" id="recent-tab" data-toggle="tab">Recent</a></li>
+        <li><a href="#recent" data-toggle="tab">Recent</a></li>
+        <li class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown">Stats <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="#stats-top-played" data-toggle="tab">Top Tracks</a></li>
+            <li><a href="#stats-top-artists" data-toggle="tab">Top Artists</a></li>
+            <li><a href="#stats-top-skipped" data-toggle="tab">Top Skipped</a></li>
+          </ul>
+        </li>
         {{view Spotbox.Views.PlaylistTab}}
       </ul>
       <!-- End Tab Bar -->
@@ -37,6 +45,9 @@
         <div class="tab-pane active" id="queue">{{view Spotbox.Views.Queue}}</div>
         <div class="tab-pane" id="search">{{view Spotbox.Views.SearchResults}}</div>
         <div class="tab-pane" id="recent">{{view Spotbox.Views.Recent}}</div>
+        <div class="tab-pane" id="stats-top-played">{{view Spotbox.Views.TopTracks contentBinding="Spotbox.Controllers.Stats.topPlayed"}}</div>
+        <div class="tab-pane" id="stats-top-artists">{{view Spotbox.Views.TopArtists contentBinding="Spotbox.Controllers.Stats.topArtists"}}</div>
+        <div class="tab-pane" id="stats-top-skipped">{{view Spotbox.Views.TopTracks contentBinding="Spotbox.Controllers.Stats.topSkipped"}}</div>
       </div>
       <!-- End Tab Content -->
 
