@@ -9,6 +9,7 @@ var PlaylistManager       = require(path.join(config.root, "app", "lib", "playli
 
 var HISTORY_LIMIT = 25;
 var QUOREM_SIZE = 3;
+var PLAYED_THRESHOLD = 0.5; // minimum fraction of song that has been played in order to mark as played
 
 if (config.env === "development") {
   // Skip tracks without needing a quorem in dev mode
@@ -50,11 +51,24 @@ function trigger(key) {
 };
 
 function play(id) {
+  var prev_id = properties.track;
+  var prev_progress = properties.progress;
   config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + id));
-  if (properties.track) {
-    save_played(properties.track);
-  }
   set_property("next_votes", {});
+
+  if (prev_id) {
+    Spotify.retrieve(prev_id, function(error, metadata) {
+      if (error) {
+        console.log(error);
+      } else {
+        if (prev_progress > (metadata.length * PLAYED_THRESHOLD)) {
+          save_played(prev_id);
+        } else {
+          save_skipped(prev_id);
+        }
+      }
+    });
+  }
 }
 
 function play_next() {
@@ -82,6 +96,17 @@ function save_played(id) {
       config.db.save(track, function (error, response) {
         trigger("played");
       });
+    }
+  });
+};
+
+function save_skipped(id) {
+  Spotify.retrieve(id, function(error, track) {
+    if (error) {
+      console.log("error saving skipped track", error);
+    } else {
+      underscore.extend(track, {type: "skipped_track", created_at: new Date()});
+      config.db.save(track, function (error, response) {});
     }
   });
 };
