@@ -1,25 +1,25 @@
 Spotbox.Controllers.Airfoil = Ember.Object.create({
   volume: 0,
-  connection_status: "disconnected",
+  connectionStatus: "disconnected",
   init: function() {
     var self = this;
     Spotbox.socket.on("airfoil", function(message) {
-      self.set("connection_status", message.connection_status);
+      self.set("connectionStatus", message.connection_status);
       self.set("volume", message.volume);
     });
   },
 
-  toggle_connection: function() {
-    if (this.get("connection_status") === "connected") {
+  toggleConnection: function() {
+    if (this.get("connectionStatus") === "connected") {
       Spotbox.socket.emit("airfoil", "disconnect");
-      this.set("connection_status", "disconnected");
+      this.set("connectionStatus", "disconnected");
     } else {
       Spotbox.socket.emit("airfoil", "connect");
-      this.set("connection_status", "connected");
+      this.set("connectionStatus", "connected");
     }
   },
 
-  volume_up: function() {
+  volumeUp: function() {
     Spotbox.socket.emit("airfoil", "volume_up");
     volume = this.get("volume");
     if (volume < 100) {
@@ -28,7 +28,7 @@ Spotbox.Controllers.Airfoil = Ember.Object.create({
     this.set("volume", volume);
   },
 
-  volume_down: function() {
+  volumeDown: function() {
     Spotbox.socket.emit("airfoil", "volume_down");
     volume = this.get("volume");
     if (volume > 0) {
