@@ -19,7 +19,9 @@ module.exports  = function() {
     } else if (data.method === "paused") {
       Player.set_state("paused");
     } else if (data.method === "trackProgress") {
+      Player.set_state("playing");
       Player.set_progress(data.args[0])
+      Player.set_track(data.args[1]);
     } else if (data.method === "trackEnded") {
       Player.play();
     } else if (data.method === "playlistLoaded") {
