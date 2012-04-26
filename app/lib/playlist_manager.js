@@ -10,7 +10,8 @@ var properties = {
   current: null,
   playlists: {
     "spotify:user:mikedoel:playlist:05m1Zj1ixCNoCb3kJd5of7": null,
-    "spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg": null
+    "spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg": null,
+    "spotify:user:twymer:playlist:5iQM6SRXrs9NkZrbmfEutp": null
   },
 };
 
