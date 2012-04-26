@@ -54,7 +54,7 @@ Spotbox.parse_message = function(msg) {
 
 var Airfoil = function() {};
 Airfoil.status = function(hollaback) {
-  shell_out("osascript", ["./airfoil_status.scpt"], function(error, result) {
+  shell_out("osascript", ["./applescript/airfoil_status.scpt"], function(error, result) {
     if (error) {
       hollaback(null, {volume: volume, status: "connected"});
     } else {
@@ -68,19 +68,19 @@ Airfoil.status = function(hollaback) {
 };
 
 Airfoil.connect = function(hollaback) {
-  shell_out("osascript", ["./airfoil_connect.scpt", volume / 100.0], function(error, result) {
+  shell_out("osascript", ["./applescript/airfoil_connect.scpt", volume / 100.0], function(error, result) {
     setTimeout(function() {Airfoil.status(hollaback)}, 4000);
   });
 };
 
 Airfoil.disconnect = function(hollaback) {
-  shell_out("osascript", ["./airfoil_disconnect.scpt"], function(error, result) {
+  shell_out("osascript", ["./applescript/airfoil_disconnect.scpt"], function(error, result) {
     Airfoil.status(hollaback);
   });
 };
 
 Airfoil.set_volume = function(hollaback) {
-  shell_out("osascript", ["./airfoil_volume.scpt", volume / 100.0], function(error, result) {
+  shell_out("osascript", ["./applescript/airfoil_volume.scpt", volume / 100.0], function(error, result) {
     Airfoil.status(hollaback);
   });
 }
