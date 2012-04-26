@@ -5,6 +5,8 @@ Spotbox is the official jukebox of the [EdgeCase](http://edgecase.com) lab; 100%
 Gone are the days of fighting over airfoil, adding to a central database, and putting up with the songs no one wants to hear.
 Others have tried, Spotbox will prevail.
 
+![](http://i.imgur.com/wotR9.png)
+
 
 ## What Spotbox Does
 
@@ -47,6 +49,24 @@ Spotbox has two components, the player and the web server.
 
 The production environment minifies assets and requires a quorem to skip tracks.
 The development environment serves unminified assets and requires only one vote to skip.
+
+
+## Screenshots
+
+Queue
+![](http://i.imgur.com/wotR9.png)
+
+Search
+![](http://i.imgur.com/KxlMZ.png)
+
+Recent
+![](http://i.imgur.com/a95ba.png)
+
+Stats
+![](http://i.imgur.com/qNYGC.png)
+
+Playlists
+![](http://i.imgur.com/Z5k2E.png)
 
 
 ## Contributing
