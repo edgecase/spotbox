@@ -2,21 +2,56 @@
 
 Spotbox is the official jukebox of the [EdgeCase](http://edgecase.com) lab; 100% music democracy.
 
-Gone are the days of fighting over airfoil, adding to a central database, and putting up with the songs no one wants to hear. Others have tried, Spotbox will prevail.
+Gone are the days of fighting over airfoil, adding to a central database, and putting up with the songs no one wants to hear.
+Others have tried, Spotbox will prevail.
+
+
+## What Spotbox Does
+
+Spotbox is a web jukebox that allows users to collectively control the music in your office.
+Under the covers it uses [Spotify](http://spotify.com) to stream audio, so there is no need to manage a shared music collection.
+
+Simply boot the app, select your favorite playlist, and Spotbox will randomly play from that playlist.
+You can also search for songs and add them to the play queue.
+If there are songs in the play queue, Spotbox will pull from the queue instead of the playlist.
+
+If a song is playing that you don't like, you can click next.
+If enough people click next, Spotbox will skip the current song.
+
+Spotbox keeps track of what you have played, showing recently played songs as well as favorite songs and artists.
+
+Spotbox also controls the airfoil connection and volume through the web interface.
+
 
 ## Setup
 
-Lipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+In order to use Spotbox, you'll need a Spotify appkey (requires Spotify premium account).
+Pony up, cheap ass.
 
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+Spotbox has two components, the player and the web server.
 
-## Spotbox Drivers
+### Player
 
-In order to play music, you need to download and run a Spotbox driver.
+* Install zmq (`brew install zmq`)
+* Download the player [here](https://github.com/downloads/edgecase/cocoa_spotify/cocoa_spotbox_driver)
+* `chmod +x cocoa_spotbox_driver`
+* `./cocoa_spotbox_driver ~/path/to/appkey.key USERNAME PASSWORD`
 
-### [cocoa_spotbox_driver](https://github.com/edgecase/cocoa_spotify)
+### Server
 
-At it's core, `cocoa_spotbox_driver` is a run loop that interfaces with `libspotify`. It accepts commands from, and reports back to spotbox via zmq.
+* Clone this repo
+* `cd spotbox`
+* `npm install`
+* `node airfoil`
+* `APP_PORT=9000 APP_ENV=production node server`
+
+The production environment minifies assets and requires a quorem to skip tracks.
+The development environment serves unminified assets and requires only one vote to skip.
+
+
+## Contributing
+Fork the project, make your fix, run the test suite, and make a pull request.
+
 
 ## License
 
