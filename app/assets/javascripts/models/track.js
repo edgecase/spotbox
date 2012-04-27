@@ -15,8 +15,8 @@ Spotbox.Models.Track = Ember.Object.extend({
   displayDuration: function() {
     var duration = this.get("length");
     var minutes  = Math.floor(duration / 60);
-    var seconds  = Math.floor(duration - minutes * 60);
-    if (seconds < 10) { seconds = seconds + "0"; }
+    var seconds  = Math.floor(duration % 60);
+    if (seconds < 10) { seconds = "0" + seconds; }
     return minutes + ":" + seconds;
   }.property("length"),
 
