@@ -17,9 +17,8 @@ Spotbox.Views.SearchResults = Ember.View.extend({
   }.property("Spotbox.Controllers.Search.content",
              "Spotbox.Controllers.Search.searching"),
 
-  setSortKey: function(view, event, ctx) {
+  setSortKey: function(event) {
     event.preventDefault();
-
     var key = $(event.target).data("key");
 
     if (key === Spotbox.Controllers.Search.get("sortKey")) {
