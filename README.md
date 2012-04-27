@@ -25,6 +25,14 @@ Spotbox keeps track of what you have played, showing recently played songs as we
 Spotbox also controls the airfoil connection and volume through the web interface.
 
 
+## Requirements
+
+* Node
+* Zmq
+* Redis
+* Couchdb
+
+
 ## Setup
 
 In order to use Spotbox, you'll need a Spotify appkey (requires Spotify premium account).
@@ -34,7 +42,6 @@ Spotbox has two components, the player and the web server.
 
 ### Player
 
-* Install zmq (`brew install zmq`)
 * Download the player [here](https://github.com/downloads/edgecase/cocoa_spotify/cocoa_spotbox_driver)
 * `chmod +x cocoa_spotbox_driver`
 * `./cocoa_spotbox_driver ~/path/to/appkey.key USERNAME PASSWORD`
