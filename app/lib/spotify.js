@@ -46,7 +46,6 @@ Spotify.retrieve = function(spotify_id, hollaback) {
     } else {
       SpotifyApi.lookup(spotify_id, function(error, metadata) {
         if (error) {
-          console.log("Spotify retrieve error:", error)
           hollaback(error);
         } else {
           try {
@@ -71,7 +70,6 @@ Spotify.search = function(query, hollaback) {
     } else {
       SpotifyApi.search("track", query, function(error, metadata) {
         if (error) {
-          console.log("Spotify search error:", error)
           hollaback(error);
         } else {
           try {

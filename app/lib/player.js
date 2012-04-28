@@ -169,7 +169,11 @@ Player.get_queue = function(hollaback) {
 };
 
 Player.set_track = function(id) {
-  set_property("track", id);
+  Spotify.retrieve(id, function(error, track) {
+    if (!error) {
+      set_property("track", id);
+    }
+  });
 };
 
 Player.get_track = function(hollaback) {
