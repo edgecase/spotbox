@@ -7,7 +7,7 @@ Spotbox.Controllers.Playlists = Ember.ArrayController.create({
     Spotbox.socket.on("playlists", function(playlists) {
       self.set("content", playlists);
     });
-    Spotbox.socket.on("playlists/current", function(id) {
+    Spotbox.socket.on("playlists/current/id", function(id) {
       self.set("currentId", id);
     });
   },

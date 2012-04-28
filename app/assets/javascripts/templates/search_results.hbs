@@ -10,13 +10,15 @@
     </tr>
   </head>
   <tbody>
-    {{#collection collectionView}}
-      <td>{{content.name}}</td>
-      <td>{{content.artistName}}</td>
-      <td>{{content.displayDuration}}</td>
-      <td>{{content.album.name}}</td>
-      <td>{{content.album.released}}</td>
-      <td><a class="btn btn-success" {{action "enqueue"}}>Enqueue</a></td>
-    {{/collection}}
+    {{#each content}}
+      {{#view Spotbox.Views.SearchResultsItem contentBinding="this"}}
+        <td>{{content.name}}</td>
+        <td>{{content.artistName}}</td>
+        <td>{{content.displayDuration}}</td>
+        <td>{{content.album.name}}</td>
+        <td>{{content.album.released}}</td>
+        <td><a class="btn btn-success" {{action "enqueue"}}>Enqueue</a></td>
+      {{/view}}
+    {{/each}}
   </tbody>
 {{/if}}

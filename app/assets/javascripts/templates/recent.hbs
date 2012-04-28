@@ -10,13 +10,15 @@
     </tr>
   </head>
   <tbody>
-    {{#collection collectionView}}
-      <td>{{content.name}}</td>
-      <td>{{content.artistName}}</td>
-      <td>{{content.displayDuration}}</td>
-      <td>{{content.album.name}}</td>
-      <td>{{content.album.released}}</td>
-      <td>{{content.playedAgo}}</td>
-    {{/collection}}
+    {{#each content}}
+      <tr>
+        <td>{{name}}</td>
+        <td>{{artistName}}</td>
+        <td>{{displayDuration}}</td>
+        <td>{{album.name}}</td>
+        <td>{{album.released}}</td>
+        <td>{{playedAgo}}</td>
+      </tr>
+    {{/each}}
   </tbody>
 {{/if}}

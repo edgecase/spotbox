@@ -49,7 +49,10 @@ module.exports = function(io) {
     });
 
     PlaylistManager.get_playlist_id(function(error, id) {
-      socket_emit(socket, "playlists/current", error, id);
+      socket_emit(socket, "playlists/current/id", error, id);
+      PlaylistManager.get_playlist_tracks(id, function(errors, tracks) {
+        socket_emit(socket, "playlists/current/tracks", errors, tracks);
+      });
     });
 
     Stats.top_played(function(error, result) {
@@ -143,7 +146,10 @@ module.exports = function(io) {
   });
 
   PlaylistManager.on("current", function(properties) {
-    socket_emit(io.sockets, "playlists/current", null, properties.current);
+    socket_emit(io.sockets, "playlists/current/id", null, properties.current);
+    PlaylistManager.get_playlist_tracks(properties.current, function(errors, tracks) {
+      socket_emit(io.sockets, "playlists/current/tracks", errors, tracks);
+    });
   });
 
 

@@ -2,25 +2,7 @@ Spotbox.Views.PlaylistTab = Ember.View.extend({
   templateName: "playlist_tab",
   tagName: "li",
   classNames: ["dropdown"],
-
-  collectionView: Ember.CollectionView.extend({
-    contentBinding: "Spotbox.Controllers.Playlists",
-    itemViewClass: Ember.View.extend({
-      tagName: 'li',
-      isVisible: function() {
-        var prefix = Spotbox.Controllers.Playlists.get("prefix");
-        if (prefix.length === 0) {
-          return true;
-        } else {
-          return new RegExp("^" + prefix, "i").test(this.getPath('content.name'));
-        }
-      }.property('Spotbox.Controllers.Playlists.prefix'),
-      click: function(event) {
-        event.preventDefault();
-        Spotbox.Controllers.Playlists.changePlaylist(this.getPath("content.id"));
-      }
-    })
-  }),
+  contentBinding: "Spotbox.Controllers.Playlists",
 
   filterBox: Ember.View.extend({
     tagName: "input",
@@ -35,4 +17,21 @@ Spotbox.Views.PlaylistTab = Ember.View.extend({
       Spotbox.Controllers.Playlists.set('prefix', playlistPrefix);
     }
   })
+});
+
+Spotbox.Views.PlaylistTabItem = Ember.View.extend({
+  tagName: 'li',
+  isVisible: function() {
+    var prefix = Spotbox.Controllers.Playlists.get("prefix");
+    if (prefix.length === 0) {
+      return true;
+    } else {
+      return new RegExp("^" + prefix, "i").test(this.getPath('content.name'));
+    }
+  }.property('Spotbox.Controllers.Playlists.prefix'),
+
+  click: function(event) {
+    event.preventDefault();
+    Spotbox.Controllers.Playlists.changePlaylist(this.getPath("content.id"));
+  }
 });

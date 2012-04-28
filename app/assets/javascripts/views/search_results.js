@@ -4,17 +4,6 @@ Spotbox.Views.SearchResults = Ember.View.extend({
   classNames: ["table", "table-striped", "track-list"],
   contentBinding: "Spotbox.Controllers.Search.content",
 
-  collectionView: Ember.CollectionView.extend({
-    contentBinding: "parentView.content",
-    itemViewClass: Ember.View.extend({
-      tagName: "tr",
-      enqueue: function() {
-        Spotbox.Controllers.QueuedTracks.enqueue(this.get("content"));
-        this.remove();
-      }
-    })
-  }),
-
   spinner: new Spinner(),
 
   clear: function() {
@@ -44,4 +33,12 @@ Spotbox.Views.SearchResults = Ember.View.extend({
       this.spinner.stop();
     }
   }.observes("Spotbox.Controllers.Search.searching")
+});
+
+Spotbox.Views.SearchResultsItem = Ember.View.extend({
+  tagName: "tr",
+  enqueue: function() {
+    Spotbox.Controllers.QueuedTracks.enqueue(this.get("content"));
+    this.remove();
+  }
 });

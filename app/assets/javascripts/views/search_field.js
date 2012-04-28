@@ -21,5 +21,4 @@ Spotbox.Views.SearchField = Ember.TextField.extend({
     event.preventDefault();
     this.submit(function() {});
   }
-
 });

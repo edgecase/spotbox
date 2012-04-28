@@ -1,10 +1,10 @@
-var path          = require("path");
-var fs            = require("fs");
-var underscore    = require("underscore");
-var AsyncRunner   = require("async_collection_runner");
-var config        = require(path.join(__dirname, "..", "..", "config"));
-var Spotbox       = require(path.join(config.root, "app", "lib", "spotbox"));
-var Spotify       = require(path.join(config.root, "app", "lib", "spotify"));
+var path                  = require("path");
+var fs                    = require("fs");
+var underscore            = require("underscore");
+var AsyncRunnerCollection = require("async_collection_runner");
+var config                = require(path.join(__dirname, "..", "..", "config"));
+var Spotbox               = require(path.join(config.root, "app", "lib", "spotbox"));
+var Spotify               = require(path.join(config.root, "app", "lib", "spotify"));
 
 var properties = {
   current: null,
@@ -127,6 +127,20 @@ PlaylistManager.get_playlist = function(id, hollaback) {
   } else {
     hollaback({error: "not found", message: "playlist not found"});
   }
+};
+
+PlaylistManager.get_playlist_tracks = function(id, hollaback) {
+  var playlist_key = Spotbox.namespace(id);
+  config.redis.lrange(playlist_key, 0, -1, function(error, tracks) {
+    if (error) {
+      hollaback(error);
+    } else {
+      var job_runner = function(element, hollaback) {
+        Spotify.retrieve(element, hollaback);
+      };
+      new AsyncRunnerCollection(tracks, job_runner).run(hollaback);
+    }
+  });
 };
 
 PlaylistManager.get_playlists = function(hollaback) {
