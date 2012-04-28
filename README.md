@@ -38,13 +38,17 @@ Spotbox also controls the airfoil connection and volume through the web interfac
 In order to use Spotbox, you'll need a Spotify appkey (requires Spotify premium account).
 Pony up, cheap ass.
 
-Spotbox has two components, the player and the web server.
+Spotbox has two components, the driver and the web server.
 
-### Player
+### Driver
 
-* Download the player [here](https://github.com/downloads/edgecase/cocoa_spotify/cocoa_spotbox_driver)
+* Download the driver [here](https://github.com/downloads/edgecase/cocoa_spotify/cocoa_spotbox_driver)
 * `chmod +x cocoa_spotbox_driver`
 * `./cocoa_spotbox_driver ~/path/to/appkey.key USERNAME PASSWORD`
+
+Note: Currently there is a bug in the driver related to dynamic linking that may prevent the driver from running, depending on your configuration.
+
+If the driver complains about linking errors, clone the [driver repo](https://github.com/edgecase/cocoa_spotify), open in xcode and build / run manually.
 
 ### Server
 
