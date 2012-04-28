@@ -1,20 +1,26 @@
+<div id="control-well" class="well">
+  <div class="controls">
+    <a id="next-votes" class="btn btn-mini">
+      <i>{{nextVotes}}</i>
+    </a>
+
+    {{#view playbackControl id="play-control"}}
+      <i {{bindAttr class="playbackIcon"}}></i>
+    {{/view}}
+
+    {{#view nextTrackControl id="next-control"}}
+      <i class="icon-forward"></i>
+    {{/view}}
+  </div>
+</div>
+
+{{#view playbackProgress id="track-progress"}}
+  <div class="bar" {{bindAttr style="style"}}></div>
+{{/view}}
+
 {{#view trackInfo id="track-info"}}
   <h2>{{model.name}}</h2>
   <h3>{{model.artistName}} -
     <em>{{model.albumName}} ({{model.releaseDate}})</em>
   </h3>
-{{/view}}
-
-{{#view playbackControl id="play-control"}}
-  <i {{bindAttr class="playbackIcon"}}></i>
-{{/view}}
-
-{{#view nextTrackControl id="next-control"}}
-  <i class="icon-forward"></i>
-{{/view}}
-
-{{nextVotes}}
-
-{{#view playbackProgress id="track-progress"}}
-  <div class="bar" {{bindAttr style="style"}}></div>
 {{/view}}
