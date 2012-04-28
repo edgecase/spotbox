@@ -10,8 +10,13 @@
     </tr>
   </head>
   <tbody>
-    {{#each content}}
-      {{view Spotbox.Views.SearchResult modelBinding="this"}}
-    {{/each}}
+    {{#collection collectionView}}
+      <td>{{content.name}}</td>
+      <td>{{content.artistName}}</td>
+      <td>{{content.displayDuration}}</td>
+      <td>{{content.album.name}}</td>
+      <td>{{content.album.released}}</td>
+      <td><a class="btn btn-success" {{action "enqueue"}}>Enqueue</a></td>
+    {{/collection}}
   </tbody>
 {{/if}}

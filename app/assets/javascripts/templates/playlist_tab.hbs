@@ -3,9 +3,7 @@
   <li>{{#view filterBox}}{{/view}}</li>
   <li class="divider"></li>
   <li class="nav-header">Spotify Playlists</li>
-  {{#each Spotbox.Controllers.Playlists}}
-    {{#view Spotbox.Views.PlaylistEntry contentBinding="this"}}
-      <a href="javascript:void(0)">{{content.name}}</a>
-    {{/view}}
-  {{/each}}
+  {{#collection collectionView}}
+    <a href="javascript:void(0)">{{content.name}}</a>
+  {{/collection}}
 </ul>

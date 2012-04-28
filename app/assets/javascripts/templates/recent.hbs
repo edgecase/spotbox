@@ -10,8 +10,13 @@
     </tr>
   </head>
   <tbody>
-    {{#each content}}
-      {{view Spotbox.Views.PlayedTrack modelBinding="this"}}
-    {{/each}}
+    {{#collection collectionView}}
+      <td>{{content.name}}</td>
+      <td>{{content.artistName}}</td>
+      <td>{{content.displayDuration}}</td>
+      <td>{{content.album.name}}</td>
+      <td>{{content.album.released}}</td>
+      <td>{{content.playedAgo}}</td>
+    {{/collection}}
   </tbody>
 {{/if}}

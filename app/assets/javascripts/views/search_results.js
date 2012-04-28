@@ -2,8 +2,18 @@ Spotbox.Views.SearchResults = Ember.View.extend({
   templateName: "search_results",
   tagName: "table",
   classNames: ["table", "table-striped", "track-list"],
-
   contentBinding: "Spotbox.Controllers.Search.content",
+
+  collectionView: Ember.CollectionView.extend({
+    contentBinding: "parentView.content",
+    itemViewClass: Ember.View.extend({
+      tagName: "tr",
+      enqueue: function() {
+        Spotbox.Controllers.QueuedTracks.enqueue(this.get("content"));
+        this.remove();
+      }
+    })
+  }),
 
   spinner: new Spinner(),
 
@@ -14,8 +24,7 @@ Spotbox.Views.SearchResults = Ember.View.extend({
   showContent: function() {
     return Spotbox.Controllers.Search.get("content").length > 0 &&
            !Spotbox.Controllers.Search.get("searching");
-  }.property("Spotbox.Controllers.Search.content",
-             "Spotbox.Controllers.Search.searching"),
+  }.property("Spotbox.Controllers.Search.content", "Spotbox.Controllers.Search.searching"),
 
   setSortKey: function(event) {
     event.preventDefault();
@@ -34,6 +43,5 @@ Spotbox.Views.SearchResults = Ember.View.extend({
     } else {
       this.spinner.stop();
     }
-  }.observes("Spotbox.Controllers.Search.searching"),
-
+  }.observes("Spotbox.Controllers.Search.searching")
 });
