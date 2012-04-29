@@ -10,7 +10,7 @@ Spotbox.Views.SearchField = Ember.TextField.extend({
   }.property("Spotbox.Controllers.Search.searching"),
 
   focusIn: function() {
-    $('#search-tab').tab('show');
+    Spotbox.TabManager.goToState("viewingSearch");
   },
 
   submit: function(event) {

@@ -16,7 +16,7 @@
     <!-- End Player -->
 
     <!-- Lists -->
-    <div class="span9 alerts">
+    <div class="span9">
       <div class="row-fluid">
         <div class="span12 messages">
           <!-- User messages go here -->
@@ -24,32 +24,11 @@
       </div>
 
       <!-- Tab Bar -->
-      <ul id='tab-bar' class='nav nav-tabs'>
-        <li class="active"><a href="#queue" data-toggle="tab">Queue</a></li>
-        <li><a href="#search" id="search-tab" data-toggle="tab">Search</a></li>
-        <li><a href="#recent" data-toggle="tab">Recent</a></li>
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown">Stats <b class="caret"></b></a>
-          <ul class="dropdown-menu">
-            <li><a href="#stats-top-played" data-toggle="tab">Top Tracks</a></li>
-            <li><a href="#stats-top-artists" data-toggle="tab">Top Artists</a></li>
-            <li><a href="#stats-top-skipped" data-toggle="tab">Top Skipped</a></li>
-          </ul>
-        </li>
-        {{view Spotbox.Views.PlaylistTab}}
-      </ul>
+      {{view Spotbox.Views.TabBar}}
       <!-- End Tab Bar -->
 
       <!-- Tab Content -->
-      <div class="tab-content">
-        <div class="tab-pane active" id="queue">{{view Spotbox.Views.Queue}}</div>
-        <div class="tab-pane" id="search">{{view Spotbox.Views.SearchResults}}</div>
-        <div class="tab-pane" id="recent">{{view Spotbox.Views.Recent}}</div>
-        <div class="tab-pane" id="stats-top-played">{{view Spotbox.Views.TopTracks contentBinding="Spotbox.Controllers.Stats.topPlayed"}}</div>
-        <div class="tab-pane" id="stats-top-artists">{{view Spotbox.Views.TopArtists contentBinding="Spotbox.Controllers.Stats.topArtists"}}</div>
-        <div class="tab-pane" id="stats-top-skipped">{{view Spotbox.Views.TopTracks contentBinding="Spotbox.Controllers.Stats.topSkipped"}}</div>
-        <div class="tab-pane" id="playlist">{{view Spotbox.Views.Playlist}}</div>
-      </div>
+      <div id="tab-content"></div>
       <!-- End Tab Content -->
 
     </div>
