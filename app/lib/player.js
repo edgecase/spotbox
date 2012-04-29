@@ -8,7 +8,7 @@ var Spotify               = require(path.join(config.root, "app", "lib", "spotif
 var PlaylistManager       = require(path.join(config.root, "app", "lib", "playlist_manager"));
 
 var HISTORY_LIMIT = 25;
-var QUOREM_SIZE = 3;
+var QUOREM_SIZE = 4;
 var PLAYED_THRESHOLD = 0.5; // minimum fraction of song that has been played in order to mark as played
 
 if (config.env === "development") {
@@ -153,8 +153,8 @@ Player.next_vote = function(id) {
   trigger("next_votes");
 };
 
-Player.get_next_votes = function(hollaback) {
-  hollaback(null, underscore.size(properties.next_votes));
+Player.getDisapprovalPercentage = function(hollaback) {
+  hollaback(null, underscore.size(properties.next_votes) / QUOREM_SIZE);
 };
 
 Player.add_to_queue = function(id) {

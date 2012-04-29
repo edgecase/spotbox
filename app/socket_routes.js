@@ -29,8 +29,8 @@ module.exports = function(io) {
       socket_emit(socket, "player/track", error, { track: track });
     });
 
-    Player.get_next_votes(function(error, votes) {
-      socket_emit(socket, "player/next_votes", error, votes);
+    Player.getDisapprovalPercentage(function(error, percentage) {
+      socket_emit(socket, "player/disapproval_percentage", error, percentage);
     });
 
     Player.get_queue(function(error, queue) {
@@ -142,7 +142,9 @@ module.exports = function(io) {
   });
 
   Player.on("next_votes", function(properties) {
-    socket_emit(io.sockets, "player/next_votes", null, underscore.size(properties.next_votes));
+    Player.getDisapprovalPercentage(function(errors, percent) {
+      socket_emit(io.sockets, "player/disapproval_percentage", null, percent);
+    });
   });
 
   PlaylistManager.on("current", function(properties) {

@@ -1,9 +1,5 @@
-<div id="control-well" class="well">
+<div id="control-well" class="well" {{bindAttr class="someDontLike halfDontLike mostDontLike"}}>
   <div class="controls">
-    <a id="next-votes" class="btn btn-mini">
-      <i>{{nextVotes}}</i>
-    </a>
-
     {{#view playbackControl id="play-control"}}
       <i {{bindAttr class="playbackIcon"}}></i>
     {{/view}}
@@ -18,9 +14,9 @@
   <div class="bar" {{bindAttr style="style"}}></div>
 {{/view}}
 
-{{#view trackInfo id="track-info"}}
+<div id= "track-info" class="well" {{bindAttr class="someDontLike halfDontLike mostDontLike"}}>
   <h2>{{model.name}}</h2>
   <h3>{{model.artistName}} -
     <em>{{model.albumName}} ({{model.releaseDate}})</em>
   </h3>
-{{/view}}
+</div>

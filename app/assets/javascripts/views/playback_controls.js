@@ -1,14 +1,19 @@
 Spotbox.Views.PlaybackControls = Ember.View.extend({
   templateName: "playback_controls",
   classNames: ["well"],
+  modelBinding: "Spotbox.Controllers.Player.content",
 
-  nextVotesBinding: "Spotbox.Controllers.Player.nextVotes",
+  someDontLike: function() {
+    return Spotbox.Controllers.Player.disapprovalPercentage >= 0.25;
+  }.property("Spotbox.Controllers.Player.disapprovalPercentage"),
 
-  trackInfo: Ember.View.extend({
-    classNames: ["well"],
+  halfDontLike: function() {
+    return Spotbox.Controllers.Player.disapprovalPercentage >= 0.50;
+  }.property("Spotbox.Controllers.Player.disapprovalPercentage"),
 
-    modelBinding: "Spotbox.Controllers.Player.content",
-  }),
+  mostDontLike: function() {
+    return Spotbox.Controllers.Player.disapprovalPercentage >= 0.75;
+  }.property("Spotbox.Controllers.Player.disapprovalPercentage"),
 
   playbackControl: Ember.View.extend({
     tagName: "a",
