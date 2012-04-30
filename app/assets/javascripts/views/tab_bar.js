@@ -46,6 +46,11 @@ Spotbox.Views.TabBar = Ember.View.extend({
     classNameBindings: ["isActive:active"],
     contentBinding: "Spotbox.Controllers.Playlists",
 
+    isActive: function() {
+      var state = Spotbox.TabManager.getPath("currentState.name");
+      return state === "viewingCurrentPlaylist";
+    }.property("Spotbox.TabManager.currentState"),
+
     FilterBox: Ember.View.extend({
       tagName: "input",
       classNames: ['search-query'],
@@ -73,6 +78,7 @@ Spotbox.Views.PlaylistsTabItem = Ember.View.extend({
 
   click: function(event) {
     event.preventDefault();
+    Spotbox.TabManager.goToState("viewingCurrentPlaylist");
     Spotbox.Controllers.Playlists.changePlaylist(this.getPath("content.id"));
   }
 })

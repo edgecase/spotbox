@@ -37,7 +37,3 @@ Spotbox.TabManager = Ember.StateManager.create({
     view: Spotbox.Views.Playlist
   }),
 });
-
-// HACK: Couldn't get ember to render initialState
-// Tried with both rootElement and rootView
-$(function() { Spotbox.TabManager.goToState("viewingQueue"); });
