@@ -1,2 +1,20 @@
+# Custom ignores
 public/
 node_modules/
+.DS_Store
+
+# From https://github.com/github/gitignore
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+pids
+logs
+results
+
+npm-debug.log
