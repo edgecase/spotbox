@@ -8,6 +8,7 @@ var Airfoil         = require(path.join(config.root, "app", "lib", "airfoil"));
 var Player          = require(path.join(config.root, "app", "lib", "player"));
 var Stats           = require(path.join(config.root, "app", "lib", "stats"));
 var PlaylistManager = require(path.join(config.root, "app", "lib", "playlist_manager"));
+var AlbumInfo       = require(path.join(config.root, "app", "lib", "album_info"));
 
 module.exports = function(io) {
   function socket_emit(socket, channel, error, result) {
@@ -26,7 +27,9 @@ module.exports = function(io) {
     });
 
     Player.get_track(function(error, track) {
-      socket_emit(socket, "player/track", error, { track: track });
+      AlbumInfo.retrieve(track, function(err, albumInfo) {
+        socket_emit(socket, "player/track", error, { track: track });
+      });
     });
 
     Player.getDisapprovalPercentage(function(error, percentage) {
@@ -124,7 +127,9 @@ module.exports = function(io) {
   Player.on("track", function(properties) {
     if (properties.track) {
       Spotify.retrieve(properties.track, function(error, track) {
-        socket_emit(io.sockets, "player/track", error, {track:track});
+        AlbumInfo.retrieve(track, function(err, albumInfo) {
+          socket_emit(io.sockets, "player/track", error, {track:track});
+        });
       });
     }
   });

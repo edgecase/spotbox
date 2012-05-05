@@ -1,10 +1,10 @@
-var path                  = require("path");
-var http                  = require("http");
-var querystring           = require("querystring");
-var underscore            = require("underscore");
-var config                = require(path.join(__dirname, "..", "..", "config"));
-var Spotbox               = require(path.join(config.root, "app", "lib", "spotbox"));
-var SpotifyApi            = require(path.join(config.root, "app", "lib", "spotify_api"));
+var path        = require("path");
+var http        = require("http");
+var querystring = require("querystring");
+var underscore  = require("underscore");
+var config      = require(path.join(__dirname, "..", "..", "config"));
+var Spotbox     = require(path.join(config.root, "app", "lib", "spotbox"));
+var SpotifyApi  = require(path.join(config.root, "app", "lib", "spotify_api"));
 
 function cache(spotify_id, metadata) {
   config.redis.set(Spotbox.namespace(spotify_id), metadata);

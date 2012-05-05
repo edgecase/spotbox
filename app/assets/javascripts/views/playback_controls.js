@@ -3,6 +3,12 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
   classNames: ["well"],
   modelBinding: "Spotbox.Controllers.Player.content",
 
+  smallAlbumArtUrl: function() {
+    var currentTrack = Spotbox.Controllers.Player.content;
+    var artwork      = currentTrack.getPath("album.artwork")
+    return artwork && artwork[1]["#text"] || "/images/missing_album_art.jpg";
+  }.property("Spotbox.Controllers.Player.content.album.artwork"),
+
   someDontLike: function() {
     return Spotbox.Controllers.Player.disapprovalPercentage >= 0.25;
   }.property("Spotbox.Controllers.Player.disapprovalPercentage"),

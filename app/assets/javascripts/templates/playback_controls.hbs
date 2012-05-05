@@ -15,8 +15,14 @@
 {{/view}}
 
 <div id= "track-info" class="well" {{bindAttr class="someDontLike halfDontLike mostDontLike"}}>
-  <h2>{{model.name}}</h2>
-  <h3>{{model.artistName}} -
-    <em>{{model.albumName}} ({{model.releaseDate}})</em>
-  </h3>
+  <div class="row-fluid">
+    <div class="span4">
+      <img {{bindAttr src="smallAlbumArtUrl"}} />
+    </div>
+    <div class="span8">
+      <h2>{{model.name}}</h2>
+      <h3>{{model.artistName}}</h3>
+      <h3><em>{{model.albumName}} ({{model.releaseDate}})</em></h3>
+    </div>
+  </div>
 </div>

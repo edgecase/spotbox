@@ -10,9 +10,9 @@ var settings = {
 };
 
 function request(opts, params, hollaback) {
-  options = {};
-  options.host = settings.host
-  options.path = "/" + opts.type + "/" +  settings.version + "/"
+  var options = {};
+  options.host = settings.host;
+  options.path = "/" + opts.type + "/" +  settings.version + "/";
 
   if (opts.searchType) {
     options.path += opts.searchType;
