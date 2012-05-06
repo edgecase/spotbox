@@ -49,7 +49,7 @@ assetbuilder.configure({
 importer();
 
 PlaylistManager.load_playlists();
-PlaylistManager.set_playlist_id("spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg");
+PlaylistManager.set_playlist_id(config.settings.spotify.current_playlist);
 
 console.log("app running on " + config.port + " in " + config.env);
 server.listen(config.port);

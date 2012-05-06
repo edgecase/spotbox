@@ -1,9 +1,9 @@
-var path    = require("path");
-var redis   = require("redis");
-var zmq     = require("zmq");
-var cradle  = require("cradle");
-var Spotbox = require(path.join(__dirname, "app", "lib", "spotbox"));
-
+var path     = require("path");
+var redis    = require("redis");
+var zmq      = require("zmq");
+var cradle   = require("cradle");
+var Spotbox  = require(path.join(__dirname, "app", "lib", "spotbox"));
+var settings = require(path.join(__dirname, "settings"));
 
 module.exports = function(config) {
   var env = process.env.APP_ENV || "development";
@@ -36,6 +36,7 @@ module.exports = function(config) {
   airfoil_socket.connect(airfoil_addr);
   airfoil_socket.subscribe(Spotbox.namespace("server::"));
 
+  config.settings              = settings;
   config.env                   = env;
   config.db                    = db;
   config.redis                 = redis.createClient();

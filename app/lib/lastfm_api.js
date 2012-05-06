@@ -1,10 +1,12 @@
+var path        = require("path");
 var http        = require("http");
 var querystring = require("querystring");
+var config      = require(path.join(__dirname, "..", "..", "config"));
 
 var settings = {
   host: "ws.audioscrobbler.com",
   version: "2.0",
-  api_key: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  api_key: config.settings.lastfm.api_key
 };
 
 // Only grabbing artwork at the moment, for more information

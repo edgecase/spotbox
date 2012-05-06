@@ -61,6 +61,12 @@ If the driver complains about linking errors, clone the [driver repo](https://gi
 The production environment minifies assets and requires a quorem to skip tracks.
 The development environment serves unminified assets and requires only one vote to skip.
 
+### Configuration
+
+Rename `settings.js.example` to `settings.js`.
+Edit this file to include third party API credentials.
+Also, you may wish to instruct Spotbox to load your favorite spotify playlists.
+
 
 ## Screenshots
 

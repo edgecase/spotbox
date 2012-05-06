@@ -5,14 +5,14 @@ var AsyncRunnerCollection = require("async_collection_runner");
 var config                = require(path.join(__dirname, "..", "..", "config"));
 var Spotbox               = require(path.join(config.root, "app", "lib", "spotbox"));
 var Spotify               = require(path.join(config.root, "app", "lib", "spotify"));
+var playlists             = config.settings.spotify.playlists;
 
 var properties = {
   current: null,
-  playlists: {
-    "spotify:user:mikedoel:playlist:05m1Zj1ixCNoCb3kJd5of7": null,
-    "spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg": null,
-    "spotify:user:twymer:playlist:5iQM6SRXrs9NkZrbmfEutp": null
-  },
+  playlists: underscore.reduce(config.settings.spotify.playlists, function(memo, playlist) {
+    memo[playlist] = null;
+    return memo;
+  }, {})
 };
 
 var event_hollabacks = {
