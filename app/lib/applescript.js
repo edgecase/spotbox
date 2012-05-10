@@ -35,7 +35,13 @@ shell_out("osascript", [path.join(config.root, "applescripts", "root_path.scpt")
 var Applescript = function() {};
 
 Applescript.run = function(applescriptString, hollaback) {
-  var child = shell_out("osascript", ["-"], hollaback);
+  var child = shell_out("osascript", ["-"], function(error, result) {
+    if (error) {
+      hollaback(error);
+    } else {
+      hollaback(null, result.trim());
+    }
+  });
   child.stdin.write(applescriptString);
   child.stdin.end();
 }
