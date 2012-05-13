@@ -2,9 +2,7 @@ var path          = require("path");
 var fs            = require("fs");
 var underscore    = require("underscore");
 var child_process = require("child_process");
-var config        = require(path.join(__dirname, "..", "..", "config"));
-
-var rootPath = null;
+var appConfig     = require(path.join(__dirname, "..", "..", "config", "app"));
 
 function shell_out(command, args, hollaback) {
   var child = child_process.spawn(command, args);
@@ -26,12 +24,6 @@ function shell_out(command, args, hollaback) {
   return child;
 };
 
-// Determine applescript root path
-shell_out("osascript", [path.join(config.root, "applescripts", "root_path.scpt")], function(error, result) {
-  var scriptPath = result.slice(6).replace("\n", "");
-  rootPath = scriptPath.split(":").slice(0, -2).join(":");
-});
-
 var Applescript = function() {};
 
 Applescript.run = function(applescriptString, hollaback) {
@@ -47,8 +39,8 @@ Applescript.run = function(applescriptString, hollaback) {
 }
 
 // Note: Takes a path relative to the application
-Applescript.transformPath = function(unixPath) {
-  return [rootPath].concat(unixPath.split("/")).join(":");
+Applescript.transformPath = function(unixPath, hollaback) {
+  Applescript.run("POSIX file \"" + unixPath + "\" as text", hollaback);
 };
 
 module.exports = Applescript;
