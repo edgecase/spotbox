@@ -17,7 +17,7 @@
 <div id= "track-info" class="well" {{bindAttr class="someDontLike halfDontLike mostDontLike"}}>
   <div class="row-fluid">
     <div class="span4">
-      <img {{bindAttr src="smallAlbumArtUrl"}} />
+      <a target="_blank" {{bindAttr href="itunesLink"}}><img {{bindAttr src="smallAlbumArtUrl"}} /></a>
     </div>
     <div class="span8">
       <h2>{{model.name}}</h2>

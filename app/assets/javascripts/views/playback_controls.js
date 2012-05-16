@@ -9,6 +9,12 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
     return artwork && artwork[1]["#text"] || "/images/missing_album_art.jpg";
   }.property("Spotbox.Controllers.Player.content.album.artwork"),
 
+  itunesLink: function() {
+    var artist = Spotbox.Controllers.Player.content.get("artistName");
+    var track  = Spotbox.Controllers.Player.content.get("name");
+    return "http://itunes.com/" + Spotbox.itunesParam(artist) + "/" + Spotbox.itunesParam(track);
+  }.property("Spotbox.Controllers.Player.content"),
+
   someDontLike: function() {
     return Spotbox.Controllers.Player.disapprovalPercentage >= 0.25;
   }.property("Spotbox.Controllers.Player.disapprovalPercentage"),

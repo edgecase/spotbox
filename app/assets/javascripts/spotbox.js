@@ -11,7 +11,12 @@ Spotbox.errorMessage = function(tagline, description) {
 
 Spotbox.successMessage = function(tagline, description) {
   Spotbox.Views.Alert.create({tagline: tagline, description: description, alertSuccess: true}).appendTo(".alerts .messages");
-}
+};
+
+Spotbox.itunesParam = function(str) {
+  var lowerCaseWithoutAmpersands = new String(str.toLowerCase().split("&").join("and"));
+  return lowerCaseWithoutAmpersands.replace(/[^a-zA-Z0-9]+/g, '');
+};
 
 // Namespaces
 Spotbox.Views = {};
