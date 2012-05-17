@@ -10,6 +10,7 @@ var httpRoutes        = require(path.join(app.root, "app", "http_routes"));
 var emberPreprocessor = require(path.join(app.root, "app", "lib", "preprocessors", "ember_preprocessor"));
 var Itunes             = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
 var Spotify            = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
+var Airfoil            = require(path.join(app.root, "app", "lib", "application_interfaces", "airfoil"));
 
 function initExpress() {
   var server = express.createServer();
@@ -61,6 +62,9 @@ db.open(function(error) {
     },
     function(element, hollaback) {
       Spotify.launch(hollaback);
+    },
+    function(elemnt, hollaback) {
+      Airfoil.launch(hollaback);
     }
   ]);
 });
