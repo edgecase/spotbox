@@ -7,6 +7,7 @@ var Spotbox         = require(path.join(app.root, "app", "lib", "spotbox"));
 var Spotify         = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
 var Itunes          = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
 var PlaylistManager = require(path.join(app.root, "app", "lib", "playlist_manager"));
+var TrackQueue      = require(path.join(app.root, "app", "lib", "track_queue"));
 
 var QUOREM_SIZE = 4;
 var PLAYED_THRESHOLD = 0.5;
@@ -20,7 +21,6 @@ var currentPlayer = null;
 var properties = {
   state: "stopped",
   track: null,
-  queue: [],
   progress: "0",
   votes: {}
 };
@@ -28,7 +28,6 @@ var properties = {
 var eventHollabacks = {
   state: [],
   track: [],
-  queue: [],
   progress: [],
   votes: []
 };
@@ -84,7 +83,7 @@ function getPlayerForId(id) {
   var player;
   if (id.match(/itunes/)) {
     player = Itunes;
-  } else {
+  } else if (id.match(/spotify/)) {
     player = Spotify;
   }
   return player;
@@ -124,7 +123,7 @@ function pauseCurrent(hollaback) {
   }
 };
 
-function play(id, hollaback) {
+function play(track, hollaback) {
   var previousTrack = properties.track;
   var previousProgress = properties.progress;
   setProperty("nextVotes", {});
@@ -138,28 +137,33 @@ function play(id, hollaback) {
   }
 
   stopCurrent(function(error) {
-    var player = getPlayerForId(id);
+    var player = getPlayerForId(track.id);
     if (error) {
       hollaback(error);
     } else {
       setProperty("state", "playing");
       currentPlayer = player;
-      player.play(id, hollaback);
+      player.play(track, hollaback);
     }
   });
 }
 
 function playNext(hollaback) {
-  if (properties.queue.length > 0) {
-    var id = properties.queue.shift().id;
-    trigger("queue");
-    play(id, hollaback);
+  if (!TrackQueue.empty()) {
+    var track = TrackQueue.next();
+    play(track, hollaback);
   } else {
     PlaylistManager.next(function(error, id) {
       if (error) {
         hollaback(error);
       } else {
-        play(id, hollaback);
+        metadata(id, function(error, track) {
+          if (error) {
+            hollaback(error);
+          } else {
+            play(track, hollaback);
+          }
+        });
       }
     });
   }
@@ -194,24 +198,6 @@ Player.vote = function(id) {
     playNext(function() {});
   }
   trigger("votes");
-};
-
-Player.enqueue = function(id, hollaback) {
-  metadata(id, function(error, track) {
-    if (error) {
-      hollaback(error);
-    } else {
-      var exists = underscore.find(properties.queue, function(t) {
-        return t.id === id
-      });
-      if (!exists) {
-        properties.queue.push(track);
-        hollaback(null, track);
-      } else {
-        hollaback({error: "Player enqueue", message: "duplicate"});
-      }
-    }
-  });
 };
 
 Player.properties = function() {
