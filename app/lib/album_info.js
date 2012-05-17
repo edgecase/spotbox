@@ -1,15 +1,18 @@
 var path      = require("path");
-var config    = require(path.join(__dirname, "..", "..", "config"));
-var Spotbox   = require(path.join(config.root, "app", "lib", "spotbox"));
-var LastFmApi = require(path.join(config.root, "app", "lib", "lastfm_api"));
+var app       = require(path.join(__dirname, "..", "..", "config", "app"));
+var redis     = require(path.join(app.root, "config", "app"));
+var Spotbox   = require(path.join(app.root, "app", "lib", "spotbox"));
+var LastFmApi = require(path.join(app.root, "app", "lib", "apis", "lastfm_api"));
 
 function redisKey(spotify_album_id) {
   return Spotbox.namespace("album_info:" + spotify_album_id);
 };
 
 function cache(key, metadata) {
-  config.redis.set(key, metadata);
-  config.redis.expire(key, 3600 * 24 * 7);
+  redis.set(key, metadata, function(error) {
+    if (error) throw error;
+    redis.expire(key, 3600 * 24 * 7);
+  });
 };
 
 
@@ -29,7 +32,7 @@ AlbumInfo.retrieve = function(track, hollaback) {
   var key      = redisKey(album_id);
   var albumInfo;
 
-  config.redis.get(key, function(error, cached_metadata) {
+  redis.get(key, function(error, cached_metadata) {
     if (error) {
       hollaback(error);
     } else if (cached_metadata) {
@@ -46,6 +49,7 @@ AlbumInfo.retrieve = function(track, hollaback) {
           }
         });
       } catch(e) {
+        // TODO: clean up error handling
         console.log(e);
         hollaback({error: true});
       }

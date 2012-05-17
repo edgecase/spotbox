@@ -1,5 +1,8 @@
 var http       = require("http");
 var underscore = require("underscore");
+var path       = require("path");
+var app        = require(path.join(__dirname, "..", "..", "config", "app"));
+var Spotbox    = require(path.join(app.root, "app", "lib", "spotbox"));
 
 var HttpJson = function () {};
 HttpJson.request = function(options, hollaback) {
