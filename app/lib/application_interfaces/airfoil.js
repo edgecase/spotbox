@@ -16,10 +16,10 @@ var eventHollabacks = {
   connection: []
 };
 
-function setProperty(key, new_value) {
+function setProperty(key, newValue) {
   if (!underscore.isUndefined(properties[key])) {
-    if (properties[key] !== new_value) {
-      properties[key] = new_value;
+    if (properties[key] !== newValue) {
+      properties[key] = newValue;
       trigger(key);
     }
   }
@@ -35,19 +35,25 @@ function trigger(key) {
 
 function exec(applescriptString, hollaback) {
   var str = "tell application \"Airfoil\"\n" + applescriptString + "\nend tell"
-  Applescript.run(str, hollaback || function(error) { if (error) console.log(error); });
+  Applescript.run(str, hollaback);
 };
 
-function pushVolume() {
+function pushVolume(hollaback) {
   command = "set myspeaker to first speaker whose name is \"" + settings.airfoil.speaker_name + "\"\n";
   command += "set (volume of myspeaker) to " + properties.volume / 100.0;
-  exec(command);
+  exec(command, hollaback);
 };
 
 var Airfoil = function() {};
 
 Airfoil.launch = function(hollaback) {
-  exec("launch", hollaback);
+  exec("launch", function(error) {
+    if (error) {
+      hollaback(error);
+    } else {
+      pushVolume(hollaback);
+    }
+  });
 };
 
 Airfoil.connect = function(hollaback) {
@@ -61,7 +67,7 @@ Airfoil.connect = function(hollaback) {
       if (result === "true") {
         setProperty("connection", true);
         hollaback(null, underscore.extend(properties));
-        pushVolume();
+        pushVolume(function() {});
       } else {
         setProperty("connection", false);
         hollaback({error: "airfoil", message: "connect failed"});
@@ -107,7 +113,7 @@ Airfoil.status = function(hollaback) {
           hollaback(error);
         } else {
           setProperty("volume", result * 100);
-          hollaback(null, underscore.extend(properties));
+          hollaback(null, JSON.parse(JSON.stringify(properties)));
         }
       });
     }
@@ -118,7 +124,7 @@ Airfoil.volumeUp = function() {
   var volume = properties.volume + 5;
   if (volume <= 100) {
     setProperty("volume", volume);
-    pushVolume();
+    pushVolume(function() {});
   }
 };
 
@@ -126,7 +132,7 @@ Airfoil.volumeDown = function() {
   var volume = properties.volume - 5;
   if (volume >= 0) {
     setProperty("volume", volume);
-    pushVolume();
+    pushVolume(function() {});
   }
 };
 
