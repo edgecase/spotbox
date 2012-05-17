@@ -1,199 +1,228 @@
-var path                  = require("path");
-var fs                    = require("fs");
-var underscore            = require("underscore");
-var AsyncCollectionRunner = require("async_collection_runner");
-var config                = require(path.join(__dirname, "..", "..", "config"));
-var Spotbox               = require(path.join(config.root, "app", "lib", "spotbox"));
-var Spotify               = require(path.join(config.root, "app", "lib", "spotify"));
-var PlaylistManager       = require(path.join(config.root, "app", "lib", "playlist_manager"));
+var path            = require("path");
+var fs              = require("fs");
+var underscore      = require("underscore");
+var app             = require(path.join(__dirname, "..", "..", "config", "app"));
+var db              = require(path.join(app.root, "config", "database"));
+var Spotbox         = require(path.join(app.root, "app", "lib", "spotbox"));
+var Spotify         = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
+var Itunes          = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
+var PlaylistManager = require(path.join(app.root, "app", "lib", "playlist_manager"));
 
-var HISTORY_LIMIT = 25;
 var QUOREM_SIZE = 4;
-var PLAYED_THRESHOLD = 0.5; // minimum fraction of song that has been played in order to mark as played
+var PLAYED_THRESHOLD = 0.5;
 
-if (config.env === "development") {
-  // Skip tracks without needing a quorem in dev mode
+if (app.env === "development") {
   QUOREM_SIZE = 1;
 }
+
+var currentPlayer = null;
 
 var properties = {
   state: "stopped",
   track: null,
   queue: [],
   progress: "0",
-  next_votes: {}
+  votes: {}
 };
 
-var event_hollabacks = {
+var eventHollabacks = {
   state: [],
   track: [],
   queue: [],
-  played: [],
   progress: [],
-  next_votes: []
+  votes: []
 };
 
-function set_property(key, new_value) {
+function setProperty(key, newValue) {
   if (!underscore.isUndefined(properties[key])) {
-    if (properties[key] !== new_value) {
-      properties[key] = new_value;
+    if (properties[key] !== newValue) {
+      properties[key] = newValue;
       trigger(key);
     }
   }
 };
 
 function trigger(key) {
-  underscore.each(event_hollabacks[key], function(hollaback) {
+  underscore.each(eventHollabacks[key], function(hollaback) {
     underscore.defer(function() {
       hollaback(underscore.clone(properties));
     });
   });
 };
 
-function play(id) {
-  var prev_id = properties.track;
-  var prev_progress = properties.progress;
-  config.pub_socket.send(Spotbox.namespace("players:spotify::play::" + id));
-  set_property("next_votes", {});
-
-  if (prev_id) {
-    Spotify.retrieve(prev_id, function(error, metadata) {
-      if (error) {
-        console.log(error);
-      } else {
-        if (prev_progress > (metadata.length * PLAYED_THRESHOLD)) {
-          save_played(prev_id);
-        } else {
-          save_skipped(prev_id);
-        }
-      }
-    });
-  }
-}
-
-function play_next() {
-  if (properties.queue.length > 0) {
-    id = properties.queue.shift();
-    trigger("queue");
-    play(id);
-  } else {
-    PlaylistManager.random(function(error, id) {
-      if (error) {
-        console.log(error);
-      } else {
-        play(id);
-      }
-    });
-  }
-};
-
-function save_played(id) {
-  Spotify.retrieve(id, function(error, track) {
-    if (error) {
-      console.log("error saving played track", error);
-    } else {
-      underscore.extend(track, {type: "played_track", created_at: new Date()});
-      config.db.save(track, function (error, response) {
-        trigger("played");
+function setPlayerBindings(player) {
+  player.on("state", function(properties) {
+    if (player === currentPlayer) {
+      setProperty("state", properties.state);
+    }
+  });
+  player.on("track", function(properties) {
+    if (player === currentPlayer) {
+      setProperty("track", properties);
+    }
+  });
+  player.on("progress", function(properties) {
+    if (player === currentPlayer) {
+      setProperty("progress", properties.progress);
+    }
+  });
+  player.on("endOfTrack", function(progress) {
+    if (player === currentPlayer) {
+      player.stop(function() {
+        playNext(function() {});
       });
     }
   });
 };
 
-function save_skipped(id) {
-  Spotify.retrieve(id, function(error, track) {
-    if (error) {
-      console.log("error saving skipped track", error);
-    } else {
-      underscore.extend(track, {type: "skipped_track", created_at: new Date()});
-      config.db.save(track, function (error, response) {});
-    }
+function metadata(id, hollaback) {
+  var player = getPlayerForId(id);
+  player.metadata(id, hollaback);
+};
+
+function getPlayerForId(id) {
+  var player;
+  if (id.match(/itunes/)) {
+    player = Itunes;
+  } else {
+    player = Spotify;
+  }
+  return player;
+};
+
+function markPlayed(track) {
+  db.collection("played", function(error, collection) {
+    collection.insert(track, {});
+  });
+  db.collection("pool", function(error, collection) {
+    collection.update({id: track.id}, track, {upsert: true});
   });
 };
+
+function markSkipped(track) {
+  db.collection("skipped", function(error, collection) {
+    collection.insert(track, {});
+  });
+  db.collection("pool", function(error, collection) {
+    collection.findAndModify({id: track.id}, [["_id","asc"]], {remove: true}, function() {});
+  });
+};
+
+function stopCurrent(hollaback) {
+  if (currentPlayer) {
+    currentPlayer.stop(hollaback);
+  } else {
+    hollaback(null);
+  }
+};
+
+function pauseCurrent(hollaback) {
+  if (currentPlayer) {
+    currentPlayer.pause(hollaback);
+  } else {
+    hollaback(null);
+  }
+};
+
+function play(id, hollaback) {
+  var previousTrack = properties.track;
+  var previousProgress = properties.progress;
+  setProperty("nextVotes", {});
+
+  if (previousTrack) {
+    if (previousProgress > (previousTrack.length * PLAYED_THRESHOLD)) {
+      markPlayed(previousTrack);
+    } else {
+      markSkipped(previousTrack);
+    }
+  }
+
+  stopCurrent(function(error) {
+    var player = getPlayerForId(id);
+    if (error) {
+      hollaback(error);
+    } else {
+      setProperty("state", "playing");
+      currentPlayer = player;
+      player.play(id, hollaback);
+    }
+  });
+}
+
+function playNext(hollaback) {
+  if (properties.queue.length > 0) {
+    var id = properties.queue.shift().id;
+    trigger("queue");
+    play(id, hollaback);
+  } else {
+    PlaylistManager.next(function(error, id) {
+      if (error) {
+        hollaback(error);
+      } else {
+        play(id, hollaback);
+      }
+    });
+  }
+};
+
 
 var Player = function() {};
 
-Player.on = function(key, hollaback) {
-  event_hollabacks[key].push(hollaback);
-};
-
-Player.play = function(id) {
+Player.play = function(id, hollaback) {
   if (properties.state === "paused") {
-    config.pub_socket.send(Spotbox.namespace("players:spotify::unpause"));
+    Player.pause(hollaback);
   } else {
     if (id) {
-      play(id);
+      play(id, hollaback);
     } else {
-      play_next();
+      playNext(hollaback);
     }
   }
 };
 
-Player.stop = function() {
-  config.pub_socket.send(Spotbox.namespace("players:spotify::stop"));
+Player.stop = function(hollaback) {
+  stopCurrent(hollaback);
 };
 
 Player.pause = function() {
-  config.pub_socket.send(Spotbox.namespace("players:spotify::pause"));
+  pauseCurrent(hollaback);
 };
 
-Player.set_state = function(state) {
-  set_property("state", state);
-};
-
-Player.get_state = function(hollaback) {
-  hollaback(null, { state: properties.state });
-};
-
-Player.next_vote = function(id) {
-  properties.next_votes[id] = true;
-  if (underscore.size(properties.next_votes) >= QUOREM_SIZE) {
-    play_next();
+Player.vote = function(id) {
+  properties.votes[id] = true;
+  if (underscore.size(properties.votes) >= QUOREM_SIZE) {
+    playNext(function() {});
   }
-  trigger("next_votes");
+  trigger("votes");
 };
 
-Player.getDisapprovalPercentage = function(hollaback) {
-  hollaback(null, underscore.size(properties.next_votes) / QUOREM_SIZE);
-};
-
-Player.add_to_queue = function(id) {
-  if (!underscore.include(properties.queue, id)) {
-    properties.queue.push(id);
-    trigger("queue");
-  }
-};
-
-Player.get_queue = function(hollaback) {
-  new AsyncCollectionRunner(properties.queue, Spotify.retrieve).run(hollaback);
-};
-
-Player.set_track = function(id) {
-  Spotify.retrieve(id, function(error, track) {
-    if (!error) {
-      set_property("track", id);
-    }
-  });
-};
-
-Player.get_track = function(hollaback) {
-  if (properties.track) {
-    Spotify.retrieve(properties.track, hollaback);
-  }
-};
-
-Player.set_progress = function(progress) {
-  set_property("progress", progress);
-};
-
-Player.get_played_tracks = function(hollaback) {
-  config.db.view("played_tracks/recent", {limit: HISTORY_LIMIT, descending: true }, function(error, response) {
+Player.enqueue = function(id, hollaback) {
+  metadata(id, function(error, track) {
     if (error) {
-      hollaback({error: "couchdb error", message: error});
+      hollaback(error);
     } else {
-      hollaback(null, underscore.pluck(response, "value"));
+      var exists = underscore.find(properties.queue, function(t) {
+        return t.id === id
+      });
+      if (!exists) {
+        properties.queue.push(track);
+        hollaback(null, track);
+      } else {
+        hollaback({error: "Player enqueue", message: "duplicate"});
+      }
     }
   });
 };
+
+Player.properties = function() {
+  return JSON.parse(JSON.stringify(properties));
+};
+
+Player.on = function(key, hollaback) {
+  eventHollabacks[key].push(hollaback);
+};
+
+setPlayerBindings(Itunes);
+setPlayerBindings(Spotify);
 
 module.exports = Player;
