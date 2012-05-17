@@ -1,10 +1,10 @@
-var path                  = require("path");
-var fs                    = require("fs");
-var underscore            = require("underscore");
-var AsyncCollectionRunner = require("async_collection_runner");
-var app                   = require(path.join(__dirname, "..", "..", "..", "config", "app"));
-var db                    = require(path.join(app.root, "config", "database"));
-var Applescript           = require(path.join(app.root, "app", "lib", "applescript"));
+var path        = require("path");
+var fs          = require("fs");
+var underscore  = require("underscore");
+var AsyncRunner = require("async_runner");
+var app         = require(path.join(__dirname, "..", "..", "..", "config", "app"));
+var db          = require(path.join(app.root, "config", "database"));
+var Applescript = require(path.join(app.root, "app", "lib", "applescript"));
 
 var pollingId = null;
 var properties = {
@@ -22,10 +22,10 @@ var eventHollabacks = {
   progress: []
 }
 
-function setProperty(key, new_value) {
+function setProperty(key, newValue) {
   if (!underscore.isUndefined(properties[key])) {
-    if (properties[key] !== new_value) {
-      properties[key] = new_value;
+    if (properties[key] !== newValue) {
+      properties[key] = newValue;
       trigger(key);
     }
   }
@@ -41,7 +41,7 @@ function trigger(key) {
 
 function exec(applescriptString, hollaback) {
   var str = "tell application \"iTunes\"\n" + applescriptString + "\nend tell"
-  Applescript.run(str, hollaback || function(error) { if (error); console.log(error) });
+  Applescript.run(str, hollaback);
 };
 
 // Pyramid of doom
@@ -99,30 +99,34 @@ function getProgress(hollaback) {
 
 function updateStatus() {
   getState(function(error, state) {
-    if (properties.state === "playing" && properties.intendedState === "playing" && state === "stopped") {
-      setProperty("intendedState", "stopped");
-      trigger("endOfTrack");
-    }
-    setProperty("state", state);
-    if (state !== "stopped") {
-      getProgress(function(error, progress) {
-        if (!error && progress !== "missing value") {
-          setProperty("progress", progress);
-        }
-      });
-      getTrackId(function(error, trackId) {
-        if (!error) {
-          if (!properties.track || properties.track.id !== trackId) {
-            Itunes.metadata(trackId, function(error, track) {
-              if (error) {
-                hollaback(error);
-              } else {
-                setProperty("track", track);
-              }
-            });
+    if (error) {
+      hollaback(error);
+    } else {
+      if (properties.state === "playing" && properties.intendedState === "playing" && state === "stopped") {
+        setProperty("intendedState", "stopped");
+        trigger("endOfTrack");
+      }
+      setProperty("state", state);
+      if (state !== "stopped") {
+        getProgress(function(error, progress) {
+          if (!error && progress !== "missing value") {
+            setProperty("progress", progress);
           }
-        }
-      });
+        });
+        getTrackId(function(error, trackId) {
+          if (!error) {
+            if (!properties.track || properties.track.id !== trackId) {
+              Itunes.metadata(trackId, function(error, track) {
+                if (error) {
+                  hollaback(error);
+                } else {
+                  setProperty("track", track);
+                }
+              });
+            }
+          }
+        });
+      }
     }
   });
 };
@@ -131,11 +135,25 @@ function updateStatus() {
 var Itunes = function() {};
 
 Itunes.launch = function(hollaback) {
-  exec("launch", hollaback);
+  var runner = new AsyncRunner(hollaback);
+  exec("launch", function(error) {
+    if (error) {
+      hollaback(error);
+    } else {
+      runner.run({}, [
+        function(element, hollaback) {
+          exec("set sound volume to 50", hollaback);
+        },
+        function(element, hollaback) {
+          Itunes.stop(hollaback);
+        }
+      ]);
+    }
+  });
 };
 
 Itunes.metadata = function(id, hollaback) {
-  db.collection("tracks", function(error, collection) {
+  db.collection("pool", function(error, collection) {
     if (error) {
       hollaback(error);
     } else {
@@ -161,19 +179,21 @@ Itunes.play = function(id, hollaback) {
   exec(command, hollaback);
 };
 
-Itunes.pause = function() {
+Itunes.pause = function(hollaback) {
   if (properties.state === "paused") {
     setProperty("intendedState", "playing");
-    exec("play with once");
+    exec("play with once", hollaback);
   } else if (properties.state === "playing") {
     setProperty("intendedState", "paused");
-    exec("pause");
+    exec("pause", hollaback);
+  } else {
+    hollaback();
   }
 };
 
-Itunes.stop = function() {
+Itunes.stop = function(hollaback) {
   setProperty("intendedState", "stopped");
-  exec("stop");
+  exec("stop", hollaback);
 }
 
 Itunes.search = function(searchString, hollaback) {
@@ -190,10 +210,10 @@ Itunes.search = function(searchString, hollaback) {
       var ids = underscore.map(results.split(","), function(id) {
         return "itunes:" + id.trim();
       });
-      var runner = new AsyncCollectionRunner(ids, function(id, hollaback) {
+      var runner = new AsyncRunner(hollaback);
+      runner.run(ids, function(id, hollaback) {
         Itunes.metadata(id, hollaback);
       });
-      runner.run(hollaback);
     }
   });
 };
