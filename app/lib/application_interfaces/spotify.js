@@ -82,33 +82,35 @@ function getProgress(hollaback) {
   exec("player position", hollaback);
 };
 
+// Note: this is complicated because of the odd behavior of spotify.
+// Do not change this method unless you know what you are doing.
 function updateStatus() {
   getState(function(error, state) {
     if (error) {
       hollaback(error);
     } else {
-      if (properties.state === "playing" && properties.intendedState === "playing" && state === "paused") {
+      // Check if player stopped by itself
+      if (properties.state === "playing" && properties.intendedState === "playing" && state === "stopped") {
         setProperty("intendedState", "paused");
         trigger("endOfTrack");
       }
       setProperty("state", state);
-      if (state !== "paused") {
+      if (state !== "paused" && state !== "stopped") {
+        getTrackId(function(error, trackId) {
+          if (!error) {
+            // Check if player automatically went to the next track
+            if (properties.track.id !== trackId) {
+              if (properties.intendedState === "playing") {
+                Spotify.stop(function() {
+                  trigger("endOfTrack");
+                });
+              }
+            }
+          }
+        });
         getProgress(function(error, progress) {
           if (!error && progress !== "missing value") {
             setProperty("progress", progress);
-          }
-        });
-        getTrackId(function(error, trackId) {
-          if (!error) {
-            if (!properties.track || properties.track.id !== trackId) {
-              Spotify.metadata(trackId, function(error, track) {
-                if (error) {
-                  hollaback(error);
-                } else {
-                  setProperty("track", track);
-                }
-              });
-            }
           }
         });
       }
@@ -162,9 +164,10 @@ Spotify.metadata = function(id, hollaback) {
   });
 };
 
-Spotify.play = function(id, hollaback) {
+Spotify.play = function(track, hollaback) {
   setProperty("intendedState", "playing");
-  exec("play track \"" + id + "\"", hollaback);
+  setProperty("track", track);
+  exec("play track \"" + track.id + "\"", hollaback);
 };
 
 Spotify.pause = function() {
