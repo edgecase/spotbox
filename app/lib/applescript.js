@@ -34,9 +34,7 @@ Applescript.run = function(applescriptString, hollaback) {
     } else {
       result = result.trim();
     }
-    if (hollaback) {
-      hollaback(error, result.trim());
-    }
+    hollaback(error, result);
   });
   child.stdin.write(applescriptString);
   child.stdin.end();
