@@ -1,5 +1,5 @@
 # Custom ignores
-public/
+public/assets/
 node_modules/
 .DS_Store
 config/settings.js
