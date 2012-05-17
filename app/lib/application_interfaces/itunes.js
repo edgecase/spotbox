@@ -113,19 +113,6 @@ function updateStatus() {
             setProperty("progress", progress);
           }
         });
-        getTrackId(function(error, trackId) {
-          if (!error) {
-            if (!properties.track || properties.track.id !== trackId) {
-              Itunes.metadata(trackId, function(error, track) {
-                if (error) {
-                  hollaback(error);
-                } else {
-                  setProperty("track", track);
-                }
-              });
-            }
-          }
-        });
       }
     }
   });
@@ -171,11 +158,12 @@ Itunes.metadata = function(id, hollaback) {
   });
 };
 
-Itunes.play = function(id, hollaback) {
-  var itunesId = id.split(":")[1];
+Itunes.play = function(track, hollaback) {
+  var itunesId = track.id.split(":")[1];
   var command = "set mytrack to some track whose database ID is " + itunesId + "\n";
   command += "play mytrack with once";
   setProperty("intendedState", "playing");
+  setProperty("track", track);
   exec(command, hollaback);
 };
 
