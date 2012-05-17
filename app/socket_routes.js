@@ -1,11 +1,15 @@
-var path            = require("path");
-var fs              = require("fs");
-var underscore      = require("underscore");
-var app             = require(path.join(__dirname, "..", "config", "app"));
-var Spotbox         = require(path.join(app.root, "app", "lib", "spotbox"));
-var Player          = require(path.join(app.root, "app", "lib", "player"));
-var AlbumInfo       = require(path.join(app.root, "app", "lib", "album_info"));
-var Airfoil         = require(path.join(app.root, "app", "lib", "application_interfaces", "airfoil"));
+var path        = require("path");
+var fs          = require("fs");
+var underscore  = require("underscore");
+var AsyncRunner = require("async_runner");
+var app         = require(path.join(__dirname, "..", "config", "app"));
+var Spotbox     = require(path.join(app.root, "app", "lib", "spotbox"));
+var Player      = require(path.join(app.root, "app", "lib", "player"));
+var TrackQueue  = require(path.join(app.root, "app", "lib", "track_queue"));
+var AlbumInfo   = require(path.join(app.root, "app", "lib", "album_info"));
+var Airfoil     = require(path.join(app.root, "app", "lib", "application_interfaces", "airfoil"));
+var Itunes      = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
+var Spotify     = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
 
 module.exports = function(io) {
   function socketEmit(socket, channel, error, result) {
@@ -23,35 +27,71 @@ module.exports = function(io) {
       // socketEmit(socket, "player/state", null, properties.state);
       // socketEmit(socket, "player/track", null, properties.track);
       // socketEmit(socket, "player/queue", null, properties.queue);
+      //
+      // Airfoil.status(function(error, properties) {
+      //   socketEmit(socket, "airfoil", null, properties);
+      // });
     })();
 
-    // Airfoil.status(function(error, properties) {
-    //   socketEmit(socket, "airfoil", null, properties);
-    // });
+
+    // Track interface
+    socket.on("tracks/search", function(message) {
+      var runner = new AsyncRunner(function(errors, results) {
+        if (errors) {
+          socketEmit(socket, "tracks/search", errors, null);
+        } else {
+          var searchResults = {
+            itunes: results[0],
+            spotify: results[1]
+          };
+          socketEmit(socket, "tracks/search", null, searchResults);
+        }
+      });
+      var jobs = [
+        function(element, hollaback) {
+          Itunes.search(element, hollaback);
+        },
+        function(element, hollaback) {
+          Spotify.search(element, hollaback);
+        }
+      ];
+      runner.run(message, jobs);
+    });
 
 
-    // Respond to client requests
-    socket.on("tracks/enqueue", function(message) {
-      Player.enqueue(message, function(error, result) {
+    // Player interface
+    socket.on("player/enqueue", function(message) {
+      TrackQueue.enqueue(message, function(error, result) {
         socketEmit(socket, "player/enqueue", error, result);
       });
     });
 
-    socket.on("player", function(message) {
+    socket.on("player/command", function(message) {
       if (message === "play") {
         Player.play(null, function() {});
       } else if (message === "pause") {
-        Player.pause();
+        Player.pause(function() {});
       } else if (message === "stop") {
-        Player.stop();
+        Player.stop(function() {});
       } else if (message === "next") {
         Player.vote(socket.handshake.address.address);
+      } else {
+        console.error("unsupported player command", message);
       }
     });
 
-    // socket.on("airfoil", function(message) {
-    //   // TODO:
-    // });
+    // Airfoil interface
+    socket.on("airfoil", function(message) {
+      if (message === "connect") {
+        Airfoil.connect(function() {});
+      } else if (message === "disconnect") {
+        Airfoil.disconnect(function() {});
+      } else if (message === "volumeUp") {
+        Airfoil.volumeUp();
+      } else if (message === "volumeDown") {
+        Airfoil.volumeDown();
+      }
+    });
   });
 
 
