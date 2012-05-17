@@ -1,6 +1,6 @@
 {
   "name": "spotbox_server",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "author": "Andrew Grieser <agrieser@gmail.com>, Tony Schneider <tonywok@gmail.com>",
   "description": "Jukebox",
   "dependencies": {
