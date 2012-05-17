@@ -3,6 +3,7 @@ public/
 node_modules/
 .DS_Store
 config/settings.js
+vendor/*
 
 # From https://github.com/github/gitignore
 lib-cov
