@@ -1,9 +1,9 @@
 var path               = require("path");
 var fs                 = require("fs");
 var vm                 = require("vm");
-var config             = require(path.join(__dirname, "..", "..", "..", "config"));
-var ember_path         = path.join(config.root, "app", "assets", "javascripts", "lib", "ember.js");
-var ember_context_path = path.join(config.root, "app", "lib", "preprocessors", "ember_context.js");
+var app                = require(path.join(__dirname, "..", "..", "..", "config", "app"));
+var ember_path         = path.join(app.root, "app", "assets", "javascripts", "lib", "ember.js");
+var ember_context_path = path.join(app.root, "app", "lib", "preprocessors", "ember_context.js");
 
 function create_context() {
   var context = vm.createContext({});
