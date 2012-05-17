@@ -9,7 +9,7 @@ HttpJson.request = function(options, hollaback) {
   underscore.defaults(options, {headers: {}});
   underscore.extend(options.headers, {"User-Agent": Spotbox.userAgent});
 
-  http.request(options, function(response) {
+  var request = http.request(options, function(response) {
     var metadata = "";
     response.on("data", function(chunk) {
       metadata += chunk.toString();
@@ -20,7 +20,9 @@ HttpJson.request = function(options, hollaback) {
     response.on("error", function(error) {
       hollaback(error);
     });
-  }).end();
+  });
+
+  return request;
 };
 
 module.exports = HttpJson;
