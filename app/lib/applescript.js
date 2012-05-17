@@ -29,9 +29,13 @@ var Applescript = function() {};
 Applescript.run = function(applescriptString, hollaback) {
   var child = shell_out("osascript", ["-"], function(error, result) {
     if (error) {
-      hollaback(error);
+      console.error("applescript error executing:", applescriptString);
+      console.error(error);
     } else {
-      hollaback(null, result.trim());
+      result = result.trim();
+    }
+    if (hollaback) {
+      hollaback(error, result.trim());
     }
   });
   child.stdin.write(applescriptString);
