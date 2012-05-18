@@ -25,7 +25,7 @@ function request(params, hollaback) {
   options.path += "?" + querystring.stringify(params);
 
   rateLimiter.queue(function() {
-    HttpJson.request(options, hollaback);
+    HttpJson.get(options, hollaback);
   });
 };
 

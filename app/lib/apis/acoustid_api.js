@@ -21,7 +21,7 @@ function request(data, hollaback) {
   options.path = "/" +  apiSettings.version + "/lookup"
 
   rateLimiter.queue(function() {
-    var request = HttpJson.request(options, hollaback);
+    var request = HttpJson.post(options, hollaback);
     request.write(querystring.stringify(data));
     request.end();
   });

@@ -4,8 +4,7 @@ var path       = require("path");
 var app        = require(path.join(__dirname, "..", "..", "config", "app"));
 var Spotbox    = require(path.join(app.root, "app", "lib", "spotbox"));
 
-var HttpJson = function () {};
-HttpJson.request = function(options, hollaback) {
+function request(options, hollaback) {
   underscore.defaults(options, {headers: {}});
   underscore.extend(options.headers, {"User-Agent": Spotbox.userAgent});
 
@@ -23,6 +22,17 @@ HttpJson.request = function(options, hollaback) {
   });
 
   return request;
+};
+
+var HttpJson = function () {};
+HttpJson.get = function(options, hollaback) {
+  options.method = "GET";
+  request(options, hollaback).end();
+};
+
+HttpJson.post = function(options, hollaback) {
+  options.method = "POST";
+  return request(options, hollaback);
 };
 
 module.exports = HttpJson;
