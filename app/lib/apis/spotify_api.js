@@ -50,20 +50,59 @@ function cachedRequest(options, params, cacheKey, hollaback) {
   });
 };
 
+function standardizeTrack(spTrack) {
+  var track            = {album: {}};
+  track.type           = "track";
+  track.provider       = "spotify";
+  track.id             = spTrack.href;
+  track.name           = spTrack.name;
+  track.track_number   = spTrack["track-number"];
+  track.length         = spTrack.length;
+  track.album.name     = spTrack.album.name;
+  track.album.id       = spTrack.album.href;
+  track.album.released = spTrack.album.released;
+
+  track.ids = underscore.reduce(spTrack["external-ids"], function(memo, extId) {
+    memo[extId.type] = extId.id;
+    return memo;
+  }, {spotify: track.id});
+
+  track.artists = underscore.map(spTrack.artists, function(artist) {
+    return {name: artist.name, id: artist.href};
+  });
+
+  return track;
+};
+
 var SpotifyApi = function() {};
 
 SpotifyApi.lookup = function(spotifyUri, hollaback) {
   var key = Spotbox.namespace(spotifyUri);
   var options = { type: "lookup" };
   var params  = { uri: spotifyUri };
-  cachedRequest(options, params, key, hollaback);
+  cachedRequest(options, params, key, function(error, metadata) {
+    if (error) {
+      hollaback(error);
+    } else {
+      hollaback(null, standardizeTrack(metadata.track));
+    }
+  });
 };
 
-SpotifyApi.search = function(type, query, hollaback) {
+SpotifyApi.search = function(query, hollaback) {
   var key = Spotbox.namespace("search:" + querystring.escape(query));
-  var options = {type: "search", searchType: type};
+  var options = {type: "search", searchType: "track"};
   var params = {q: query};
-  cachedRequest(options, params, key, hollaback);
+  cachedRequest(options, params, key, function(error, searchResults) {
+    if (error) {
+      hollaback(error);
+    } else {
+      var tracks = underscore.map(results.tracks, function(track) {
+        return underscore.extend(standardizeTrack(track), {availability: track.album.availability});
+      });
+      hollaback(null, tracks);
+    }
+  });
 };
 
 module.exports = SpotifyApi;

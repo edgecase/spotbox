@@ -46,30 +46,6 @@ function exec(applescriptString, hollaback) {
   Applescript.run(str, hollaback);
 };
 
-function standardizeTrack(spTrack) {
-  var track            = {album: {}};
-  track.type           = "track";
-  track.provider       = "spotify";
-  track.id             = spTrack.href;
-  track.name           = spTrack.name;
-  track.track_number   = spTrack["track-number"];
-  track.length         = spTrack.length;
-  track.album.name     = spTrack.album.name;
-  track.album.id       = spTrack.album.href;
-  track.album.released = spTrack.album.released;
-
-  track.ids = underscore.reduce(spTrack["external-ids"], function(memo, extId) {
-    memo[extId.type] = extId.id;
-    return memo;
-  }, {spotify: track.id});
-
-  track.artists = underscore.map(spTrack.artists, function(artist) {
-    return {name: artist.name, id: artist.href};
-  });
-
-  return track;
-};
-
 function getTrackId(hollaback) {
   exec("id of current track", hollaback);
 };
@@ -151,13 +127,7 @@ Spotify.metadata = function(id, hollaback) {
         } else if (tracks.length === 1) {
           hollaback(null, tracks[0])
         } else {
-          SpotifyApi.lookup(id, function(error, meta) {
-            if (error) {
-              hollaback(error);
-            } else {
-              hollaback(null, standardizeTrack(meta.track));
-            }
-          });
+          SpotifyApi.lookup(id, hollaback);
         }
       });
     }
@@ -188,17 +158,7 @@ Spotify.stop = function(hollaback) {
 };
 
 Spotify.search = function(query, hollaback) {
-  SpotifyApi.search("track", query, function(error, results) {
-    if (error) {
-      hollaback(error);
-    } else {
-      var tracks = underscore.map(results.tracks, function(track) {
-        // Availability check is relatively expensive, decentralize the work by pushing that to the client.
-        return underscore.extend(standardizeTrack(track), {availability: track.album.availability});
-      });
-      hollaback(null, tracks);
-    }
-  });
+  SpotifyApi.search(query, hollaback);
 };
 
 Spotify.on = function(key, hollaback) {
