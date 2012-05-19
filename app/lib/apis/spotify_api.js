@@ -97,7 +97,7 @@ SpotifyApi.search = function(query, hollaback) {
     if (error) {
       hollaback(error);
     } else {
-      var tracks = underscore.map(results.tracks, function(track) {
+      var tracks = underscore.map(searchResults.tracks, function(track) {
         return underscore.extend(standardizeTrack(track), {availability: track.album.availability});
       });
       hollaback(null, tracks);
