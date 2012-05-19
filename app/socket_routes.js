@@ -1,15 +1,15 @@
-var path        = require("path");
-var fs          = require("fs");
-var underscore  = require("underscore");
-var AsyncRunner = require("async_runner");
-var app         = require(path.join(__dirname, "..", "config", "app"));
-var Spotbox     = require(path.join(app.root, "app", "lib", "spotbox"));
-var Player      = require(path.join(app.root, "app", "lib", "player"));
-var TrackQueue  = require(path.join(app.root, "app", "lib", "track_queue"));
-var AlbumInfo   = require(path.join(app.root, "app", "lib", "album_info"));
-var Airfoil     = require(path.join(app.root, "app", "lib", "application_interfaces", "airfoil"));
-var Itunes      = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
-var Spotify     = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
+var path         = require("path");
+var fs           = require("fs");
+var underscore   = require("underscore");
+var AsyncRunner  = require("async_runner");
+var app          = require(path.join(__dirname, "..", "config", "app"));
+var Spotbox      = require(path.join(app.root, "app", "lib", "spotbox"));
+var Player       = require(path.join(app.root, "app", "lib", "player"));
+var TrackManager = require(path.join(app.root, "app", "lib", "track_manager"));
+var AlbumInfo    = require(path.join(app.root, "app", "lib", "album_info"));
+var Airfoil      = require(path.join(app.root, "app", "lib", "application_interfaces", "airfoil"));
+var Itunes       = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
+var Spotify      = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
 
 module.exports = function(io) {
   function socketEmit(socket, channel, error, result) {
@@ -23,14 +23,14 @@ module.exports = function(io) {
   io.sockets.on("connection", function(socket) {
     // Populate initial state
     (function() {
-      var properties = Player.properties;
-      // socketEmit(socket, "player/state", null, properties.state);
-      // socketEmit(socket, "player/track", null, properties.track);
-      // socketEmit(socket, "player/queue", null, properties.queue);
-      //
-      // Airfoil.status(function(error, properties) {
-      //   socketEmit(socket, "airfoil", null, properties);
-      // });
+      var properties = Player.properties();
+      socketEmit(socket, "spotbox/version", null, Spotbox.version);
+      socketEmit(socket, "tracks/queue", null, TrackManager.queue());
+      socketEmit(socket, "player/state", null, properties.state);
+      socketEmit(socket, "player/track", null, properties.track);
+      Airfoil.status(function(error, properties) {
+        socketEmit(socket, "airfoil", null, properties);
+      });
     })();
 
 
@@ -58,17 +58,17 @@ module.exports = function(io) {
       runner.run(message, jobs);
     });
 
-
-    // Player interface
-    socket.on("player/enqueue", function(message) {
-      TrackQueue.enqueue(message, function(error, result) {
+    socket.on("tracks/enqueue", function(message) {
+      TrackManager.enqueue(message, function(error, result) {
         socketEmit(socket, "player/enqueue", error, result);
       });
     });
 
+
+    // Player interface
     socket.on("player/command", function(message) {
       if (message === "play") {
-        Player.play(null, function() {});
+        Player.play(function(error) {});
       } else if (message === "pause") {
         Player.pause(function() {});
       } else if (message === "stop") {
@@ -95,34 +95,37 @@ module.exports = function(io) {
   });
 
 
+
+  // Inform browser of changes in the queue
+  TrackManager.on("queue", function(properties) {
+    socketEmit(io.sockets, "tracks/queue", null, properties.queue);
+  });
+
+
   // Inform browser of player state changes
-  // Player.on("state", function(properties) {
-  //   socketEmit(io.sockets, "player/state", null, {state:properties.state});
-  // });
-//
-//   Player.on("progress", function(properties) {
-//     socketEmit(io.sockets, "player/progress", null, {progress:properties.progress});
-//   });
-//
-//   Player.on("track", function(properties) {
-//     // TODO: multi endpoint support
-//   });
-//
-//   Player.on("queue", function(properties) {
-//     socketEmit(io.sockets, "tracks/queue", null, Player.queue);
-//   });
-//
-//   Player.on("votes", function(properties) {
-//     // TODO:
-//   });
+  Player.on("state", function(properties) {
+    socketEmit(io.sockets, "player/state", null, {state:properties.state});
+  });
+
+  Player.on("progress", function(properties) {
+    socketEmit(io.sockets, "player/progress", null, {progress:properties.progress});
+  });
+
+  Player.on("track", function(properties) {
+    socketEmit(io.sockets, "player/track", null, {progress:properties.track});
+  });
+
+  Player.on("votes", function(properties) {
+    socketEmit(io.sockets, "player/votes", null, {progress:properties.votes.length});
+  });
 
 
   // Inform browser of airfoil status changes
-  // Airfoil.on("volume", function(properties) {
-  //   socketEmit(io.sockets, "airfoil", null, properties);
-  // });
+  Airfoil.on("volume", function(properties) {
+    socketEmit(io.sockets, "airfoil", null, properties);
+  });
 
-  // Airfoil.on("connection", function(properties) {
-  //   socketEmit(io.sockets, "airfoil", null, properties);
-  // });
+  Airfoil.on("connection", function(properties) {
+    socketEmit(io.sockets, "airfoil", null, properties);
+  });
 };
