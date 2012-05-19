@@ -11,38 +11,33 @@ Spotbox.Controllers.Player = Ember.Object.create({
   init: function() {
     var self = this;
 
-    Spotbox.socket.on("player/state", function(data) {
-      self.set("playbackState", data.state);
+    Spotbox.socket.on("player/state", function(state) {
+      self.set("playbackState", state);
     });
 
-    Spotbox.socket.on("player/track", function(data) {
-      self.set("content", Spotbox.Models.Track.create(data.track));
-      $("title").text(self.get("content").get("artistAndTrack"));
+    Spotbox.socket.on("player/track", function(track) {
+      if (track) {
+        self.set("content", Spotbox.Models.Track.create(track));
+      }
     });
 
-    Spotbox.socket.on("player/disapproval_percentage", function(data) {
-      self.set("disapprovalPercentage", data);
-    });
-
-    Spotbox.socket.on("player/progress", function(data) {
+    Spotbox.socket.on("player/progress", function(progress) {
       var track = self.get("content");
       if (track) {
-        track.set("progress", data.progress);
-      } else {
-        console.log("no track");
+        track.set("progress", progress);
       }
     });
   },
 
   play: function() {
-    Spotbox.socket.emit("player", "play");
+    Spotbox.socket.emit("player/command", "play");
   },
 
   pause: function() {
-    Spotbox.socket.emit("player", "pause");
+    Spotbox.socket.emit("player/command", "pause");
   },
 
   next: function() {
-    Spotbox.socket.emit("player", "next");
+    Spotbox.socket.emit("player/command", "next");
   }
 });

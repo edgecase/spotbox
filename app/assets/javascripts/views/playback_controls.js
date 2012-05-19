@@ -34,7 +34,7 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
 
     click: function(event) {
       event.preventDefault();
-      var playbackState = Spotbox.Controllers.Player.playbackState;
+      var playbackState = Spotbox.Controllers.Player.get("playbackState");
 
       if (playbackState === "stopped") {
         Spotbox.Controllers.Player.play();
