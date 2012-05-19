@@ -6,8 +6,8 @@ var db              = require(path.join(app.root, "config", "database"));
 var Spotbox         = require(path.join(app.root, "app", "lib", "spotbox"));
 var Spotify         = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
 var Itunes          = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
-var PlaylistManager = require(path.join(app.root, "app", "lib", "playlist_manager"));
-var TrackQueue      = require(path.join(app.root, "app", "lib", "track_queue"));
+var Airfoil         = require(path.join(app.root, "app", "lib", "application_interfaces", "airfoil"));
+var TrackManager    = require(path.join(app.root, "app", "lib", "track_manager"));
 
 var QUOREM_SIZE = 4;
 var PLAYED_THRESHOLD = 0.5;
@@ -57,7 +57,7 @@ function setPlayerBindings(player) {
   });
   player.on("track", function(properties) {
     if (player === currentPlayer) {
-      setProperty("track", properties);
+      setProperty("track", properties.track);
     }
   });
   player.on("progress", function(properties) {
@@ -89,23 +89,6 @@ function getPlayerForId(id) {
   return player;
 };
 
-function markPlayed(track) {
-  db.collection("played", function(error, collection) {
-    collection.insert(track, {});
-  });
-  db.collection("pool", function(error, collection) {
-    collection.update({id: track.id}, track, {upsert: true});
-  });
-};
-
-function markSkipped(track) {
-  db.collection("skipped", function(error, collection) {
-    collection.insert(track, {});
-  });
-  db.collection("pool", function(error, collection) {
-    collection.findAndModify({id: track.id}, [["_id","asc"]], {remove: true}, function() {});
-  });
-};
 
 function stopCurrent(hollaback) {
   if (currentPlayer) {
@@ -130,57 +113,44 @@ function play(track, hollaback) {
 
   if (previousTrack) {
     if (previousProgress > (previousTrack.length * PLAYED_THRESHOLD)) {
-      markPlayed(previousTrack);
+      TrackManager.markPlayed(previousTrack, {}, function() {});
     } else {
-      markSkipped(previousTrack);
+      TrackManager.markSkipped(previousTrack, {progress: previousProgress}, function() {});
     }
   }
 
   stopCurrent(function(error) {
-    var player = getPlayerForId(track.id);
     if (error) {
       hollaback(error);
     } else {
-      setProperty("state", "playing");
-      currentPlayer = player;
-      player.play(track, hollaback);
+      var player = getPlayerForId(track.id);
+      Airfoil.setSource(player, function(error) {
+        setProperty("state", "playing");
+        currentPlayer = player;
+        player.play(track, hollaback);
+      });
     }
   });
-}
+};
 
 function playNext(hollaback) {
-  if (!TrackQueue.empty()) {
-    var track = TrackQueue.next();
-    play(track, hollaback);
-  } else {
-    PlaylistManager.next(function(error, id) {
-      if (error) {
-        hollaback(error);
-      } else {
-        metadata(id, function(error, track) {
-          if (error) {
-            hollaback(error);
-          } else {
-            play(track, hollaback);
-          }
-        });
-      }
-    });
-  }
+  TrackManager.next(function(error, track) {
+    if (error) {
+      hollaback(error);
+    } else {
+      play(track, hollaback);
+    }
+  });
 };
 
 
 var Player = function() {};
 
-Player.play = function(id, hollaback) {
+Player.play = function(hollaback) {
   if (properties.state === "paused") {
     Player.pause(hollaback);
   } else {
-    if (id) {
-      play(id, hollaback);
-    } else {
-      playNext(hollaback);
-    }
+    playNext(hollaback);
   }
 };
 
