@@ -97,6 +97,8 @@ function updateStatus() {
 
 var Spotify = function() {};
 
+Spotify.playerName = "spotify";
+
 Spotify.launch = function(hollaback) {
   var runner = new AsyncRunner(hollaback);
   exec("launch", function(error) {

@@ -1,5 +1,4 @@
 var path        = require("path");
-var fs          = require("fs");
 var underscore  = require("underscore");
 var AsyncRunner = require("async_runner");
 var app         = require(path.join(__dirname, "..", "..", "..", "config", "app"));
@@ -121,6 +120,8 @@ function updateStatus() {
 
 var Itunes = function() {};
 
+Itunes.playerName = "itunes";
+
 Itunes.launch = function(hollaback) {
   var runner = new AsyncRunner(hollaback);
   exec("launch", function(error) {
@@ -211,7 +212,6 @@ Itunes.add = function(unixPath, hollaback) {
     var command = "set mytrack to add \"" + asPath + "\"\n";
     command += "return database ID of mytrack";
     exec(command, function(error, idString) {
-      fs.unlink(unixPath);
       if (error) {
         hollaback(error);
       } else {

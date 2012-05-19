@@ -25,6 +25,7 @@ function request(options, hollaback) {
 };
 
 var HttpJson = function () {};
+
 HttpJson.get = function(options, hollaback) {
   options.method = "GET";
   request(options, hollaback).end();
