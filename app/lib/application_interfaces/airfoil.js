@@ -1,14 +1,15 @@
 var path        = require("path");
 var fs          = require("fs");
 var underscore  = require("underscore");
+var AsyncRunner = require("async_runner");
 var app         = require(path.join(__dirname, "..", "..", "..", "config", "app"));
 var settings    = require(path.join(app.root, "config", "settings"));
 var Spotbox     = require(path.join(app.root, "app", "lib", "spotbox"));
 var Applescript = require(path.join(app.root, "app", "lib", "applescript"));
 
 var properties = {
-  volume: 20,
-  connected: false
+  volume: 50,
+  connection: false
 };
 
 var eventHollabacks = {
@@ -51,7 +52,15 @@ Airfoil.launch = function(hollaback) {
     if (error) {
       hollaback(error);
     } else {
-      pushVolume(hollaback);
+      runner = new AsyncRunner(hollaback);
+      runner.run({}, [
+        function(element, hollaback) {
+          pushVolume(hollaback);
+        },
+        function(element, hollaback) {
+          Airfoil.connect(hollaback);
+        }
+      ]);
     }
   });
 };
@@ -134,6 +143,14 @@ Airfoil.volumeDown = function() {
     setProperty("volume", volume);
     pushVolume(function() {});
   }
+};
+
+Airfoil.setSource = function(player, hollaback) {
+  var sourceName = player.playerName.charAt(0).toUpperCase() + player.playerName.slice(1);
+  var command = "set aSource to make new application source\n";
+  command += "set application file of aSource to \"/Applications/" + sourceName + ".app\"\n";
+  command += "set current audio source to aSource";
+  exec(command, hollaback);
 };
 
 Airfoil.on = function(key, hollaback) {
