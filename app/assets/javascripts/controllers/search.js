@@ -24,7 +24,12 @@ Spotbox.Controllers.Search = Ember.ArrayController.create({
           return Spotbox.Models.Track.create(result);
         });
         self.set("searchResults", searchResults);
-        self.set("displayCategory", "spotify");
+        var category = self.get("displayCategory");
+        if (category) {
+          self.set("content", searchResults[category]);
+        } else {
+          self.set("displayCategory", "spotify");
+        }
         self.set("searching", false);
       }
     });
