@@ -118,22 +118,7 @@ Spotify.launch = function(hollaback) {
 };
 
 Spotify.metadata = function(id, hollaback) {
-  db.collection("pool", function(error, collection) {
-    if (error) {
-      hollaback(error);
-    } else {
-      var cursor = collection.find({id: id}, {limit: 1});
-      cursor.toArray(function(error, tracks) {
-        if (error) {
-          hollaback(error);
-        } else if (tracks.length === 1) {
-          hollaback(null, tracks[0])
-        } else {
-          SpotifyApi.lookup(id, hollaback);
-        }
-      });
-    }
-  });
+  SpotifyApi.lookup(id, hollaback);
 };
 
 Spotify.play = function(track, hollaback) {
