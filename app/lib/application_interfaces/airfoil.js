@@ -87,7 +87,7 @@ Airfoil.connect = function(hollaback) {
 
 Airfoil.disconnect = function(hollaback) {
   var command = "set myspeaker to first speaker whose name is \"" + settings.airfoil.speaker_name + "\"\n";
-  command = "disconnect from myspeaker\n";
+  command += "disconnect from myspeaker\n";
   command += "connected of myspeaker";
   exec(command, function(error, result) {
     if (error) {
