@@ -149,6 +149,8 @@ Itunes.search = function(searchString, hollaback) {
   exec(command, function(error, results) {
     if (error) {
       hollaback({error: "itunes", message: "error while searching"});
+    } else if (results === "") {
+      hollaback(null, []);
     } else {
       var ids = underscore.map(results.split(","), function(id) {
         return "itunes:" + id.trim();
