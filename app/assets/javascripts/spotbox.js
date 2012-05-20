@@ -14,8 +14,8 @@ Spotbox.successMessage = function(tagline, description) {
 };
 
 Spotbox.itunesParam = function(str) {
-  // var lowerCaseWithoutAmpersands = new String(str.toLowerCase().split("&").join("and"));
-  // return lowerCaseWithoutAmpersands.replace(/[^a-zA-Z0-9]+/g, '');
+  var lowerCaseWithoutAmpersands = new String(str.toLowerCase().split("&").join("and"));
+  return lowerCaseWithoutAmpersands.replace(/[^a-zA-Z0-9]+/g, '');
 };
 
 // Namespaces
