@@ -104,19 +104,19 @@ module.exports = function(io) {
 
   // Inform browser of player state changes
   Player.on("state", function(properties) {
-    socketEmit(io.sockets, "player/state", null, {state:properties.state});
+    socketEmit(io.sockets, "player/state", null, properties.state);
   });
 
   Player.on("progress", function(properties) {
-    socketEmit(io.sockets, "player/progress", null, {progress:properties.progress});
+    socketEmit(io.sockets, "player/progress", null, properties.progress);
   });
 
   Player.on("track", function(properties) {
-    socketEmit(io.sockets, "player/track", null, {progress:properties.track});
+    socketEmit(io.sockets, "player/track", null, properties.track);
   });
 
   Player.on("votes", function(properties) {
-    socketEmit(io.sockets, "player/votes", null, {progress:properties.votes.length});
+    socketEmit(io.sockets, "player/votes", null, properties.votes.length);
   });
 
 
