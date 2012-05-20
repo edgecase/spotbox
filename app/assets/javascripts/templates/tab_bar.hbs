@@ -1,34 +1,7 @@
 {{#view QueueTab}}
-  <a {{action "showQueue" target="Spotbox.TabManager"}} href="#queue">Queue</a>
+  <a {{action "showQueue" target="Spotbox.TabManager"}} href="javascript:void(0)">Queue</a>
 {{/view}}
 
 {{#view SearchTab}}
-  <a {{action "showSearch" target="Spotbox.TabManager"}} href="#search">Search</a>
-{{/view}}
-
-{{#view RecentTab}}
-  <a {{action "showRecent" target="Spotbox.TabManager"}} href="#recent">Recent</a>
-{{/view}}
-
-{{#view StatsTab}}
-  <a class="dropdown-toggle" data-toggle="dropdown">Stats <b class="caret"></b></a>
-  <ul class="dropdown-menu">
-    <li><a {{action "showTopTracks" target="Spotbox.TabManager"}} href="#stats-top-played">Top Tracks</a></li>
-    <li><a {{action "showTopArtists" target="Spotbox.TabManager"}} href="#stats-top-artists">Top Artists</a></li>
-    <li><a {{action "showTopSkipped" target="Spotbox.TabManager"}} href="#stats-top-skipped">Top Skipped</a></li>
-  </ul>
-{{/view}}
-
-{{#view PlaylistsTab}}
-  <a class="dropdown-toggle" data-toggle="dropdown">Playlists <b class="caret"></b></a>
-  <ul class="dropdown-menu">
-    <li>{{#view FilterBox}}{{/view}}</li>
-    <li class="divider"></li>
-    <li class="nav-header">Spotify Playlists</li>
-    {{#each content}}
-      {{#view Spotbox.Views.PlaylistsTabItem contentBinding="this"}}
-        <a {{action "showCurrentPlaylist" target="Spotbox.TabManager"}} href="#playlist">{{content.name}}</a>
-      {{/view}}
-    {{/each}}
-  </ul>
+  <a {{action "showSearch" target="Spotbox.TabManager"}} href="javascript:void(0)">Search</a>
 {{/view}}
