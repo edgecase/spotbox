@@ -10,7 +10,6 @@ var Airfoil         = require(path.join(app.root, "app", "lib", "application_int
 var TrackManager    = require(path.join(app.root, "app", "lib", "track_manager"));
 
 var QUOREM_SIZE = 4;
-var PLAYED_THRESHOLD = 0.5;
 
 if (app.env === "development") {
   QUOREM_SIZE = 1;
@@ -108,11 +107,11 @@ function pauseCurrent(hollaback) {
 
 function play(track, hollaback) {
   var previousTrack = properties.track;
-  var previousProgress = properties.progress;
+  var previousProgress = parseInt(properties.progress, 10);
   setProperty("nextVotes", {});
 
   if (previousTrack) {
-    if (previousProgress > (previousTrack.length * PLAYED_THRESHOLD)) {
+    if (previousProgress === 0 ||previousProgress >= (previousTrack.length - 5)) {
       TrackManager.markPlayed(previousTrack, {}, function() {});
     } else {
       TrackManager.markSkipped(previousTrack, {progress: previousProgress}, function() {});
