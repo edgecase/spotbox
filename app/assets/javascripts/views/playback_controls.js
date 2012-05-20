@@ -30,6 +30,7 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
   playbackControl: Ember.View.extend({
     tagName: "a",
     classNames: ["btn", "btn-large"],
+    classNameBindings: ["someDontLike", "halfDontLike", "mostDontLike"],
     playbackIcon: "icon-play",
 
     click: function(event) {
