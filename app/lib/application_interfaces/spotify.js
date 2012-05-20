@@ -77,7 +77,7 @@ function updateStatus() {
             // Check if player automatically went to the next track
             if (properties.track.id !== trackId) {
               if (properties.intendedState === "playing") {
-                Spotify.stop(function() {
+                Spotify.pause(function() {
                   trigger("endOfTrack");
                 });
               }
@@ -110,7 +110,7 @@ Spotify.launch = function(hollaback) {
           exec("set sound volume to 50", hollaback);
         },
         function(element, hollaback) {
-          Spotify.stop(hollaback);
+          Spotify.pause(hollaback);
         }
       ]);
     }
@@ -127,21 +127,14 @@ Spotify.play = function(track, hollaback) {
   exec("play track \"" + track.id + "\"", hollaback);
 };
 
-Spotify.pause = function() {
-  if (properties.state === "paused") {
-    setProperty("intendedState", "playing");
-    exec("play", hollaback);
-  } else if (properties.state === "playing") {
-    setProperty("intendedState", "paused");
-    exec("pause", hollaback);
-  } else {
-    hollaback();
-  }
-};
-
-Spotify.stop = function(hollaback) {
+Spotify.pause = function(hollaback) {
   setProperty("intendedState", "paused");
   exec("pause", hollaback);
+};
+
+Spotify.unpause = function(hollaback) {
+  setProperty("intendedState", "playing");
+  exec("play", hollaback);
 };
 
 Spotify.search = function(query, hollaback) {

@@ -133,7 +133,7 @@ Itunes.launch = function(hollaback) {
           exec("set sound volume to 50", hollaback);
         },
         function(element, hollaback) {
-          Itunes.stop(hollaback);
+          Itunes.pause(hollaback);
         }
       ]);
     }
@@ -169,21 +169,14 @@ Itunes.play = function(track, hollaback) {
 };
 
 Itunes.pause = function(hollaback) {
-  if (properties.state === "paused") {
-    setProperty("intendedState", "playing");
-    exec("play with once", hollaback);
-  } else if (properties.state === "playing") {
-    setProperty("intendedState", "paused");
-    exec("pause", hollaback);
-  } else {
-    hollaback();
-  }
+  setProperty("intendedState", "paused");
+  exec("pause", hollaback);
 };
 
-Itunes.stop = function(hollaback) {
-  setProperty("intendedState", "stopped");
-  exec("stop", hollaback);
-}
+Itunes.unpause = function(hollaback) {
+  setProperty("intendedState", "playing");
+  exec("play with once", hollaback);
+};
 
 Itunes.search = function(searchString, hollaback) {
   var command = "set searchResults to {}\n";

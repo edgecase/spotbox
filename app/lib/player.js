@@ -66,7 +66,7 @@ function setPlayerBindings(player) {
   });
   player.on("endOfTrack", function(progress) {
     if (player === currentPlayer) {
-      player.stop(function() {
+      player.pause(function() {
         playNext(function() {});
       });
     }
@@ -88,10 +88,9 @@ function getPlayerForId(id) {
   return player;
 };
 
-
-function stopCurrent(hollaback) {
+function unpauseCurrent(hollaback) {
   if (currentPlayer) {
-    currentPlayer.stop(hollaback);
+    currentPlayer.unpause(hollaback);
   } else {
     hollaback(null);
   }
@@ -118,7 +117,7 @@ function play(track, hollaback) {
     }
   }
 
-  stopCurrent(function(error) {
+  pauseCurrent(function(error) {
     if (error) {
       hollaback(error);
     } else {
@@ -146,19 +145,15 @@ function playNext(hollaback) {
 var Player = function() {};
 
 Player.play = function(hollaback) {
-  if (properties.state === "paused") {
-    Player.pause(hollaback);
-  } else {
-    playNext(hollaback);
-  }
-};
-
-Player.stop = function(hollaback) {
-  stopCurrent(hollaback);
+  playNext(hollaback);
 };
 
 Player.pause = function(hollaback) {
   pauseCurrent(hollaback);
+};
+
+Player.unpause = function(hollaback) {
+  unpauseCurrent(hollaback);
 };
 
 Player.vote = function(id) {
