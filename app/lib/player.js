@@ -122,7 +122,11 @@ function playNext(hollaback) {
 var Player = function() {};
 
 Player.play = function(hollaback) {
-  playNext(hollaback);
+  if (state.properties.track) {
+    Player.unpause(hollaback);
+  } else {
+    playNext(hollaback);
+  }
 };
 
 Player.pause = function(hollaback) {

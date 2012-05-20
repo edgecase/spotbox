@@ -8,7 +8,7 @@ Spotbox.Models.QueuedTrack = Spotbox.Models.Track.extend({
       var seconds = currentTrack.get("length") - currentTrack.get("progress");
       var i;
       for (i = 0; i < index; i++) {
-        seconds += queuedTracks[i].get("length");
+        seconds += parseInt(queuedTracks[i].get("length"), 10);
       }
       if (seconds < 60) {
         return "less than a minute";

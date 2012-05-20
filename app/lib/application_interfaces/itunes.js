@@ -41,8 +41,7 @@ function lookup(id, hollaback) {
                   name: name,
                   track_number: trackNumber,
                   artists: [{name: artist}],
-                  album: {name: albumName},
-                  year: year,
+                  album: {name: albumName, released: year},
                   length: duration
                 }
                 hollaback(null, data);
@@ -118,22 +117,7 @@ Itunes.launch = function(hollaback) {
 };
 
 Itunes.metadata = function(id, hollaback) {
-  db.collection("pool", function(error, collection) {
-    if (error) {
-      hollaback(error);
-    } else {
-      var cursor = collection.find({id: id}, {limit: 1});
-      cursor.toArray(function(error, tracks) {
-        if (error) {
-          hollaback(error);
-        } else if (tracks.length === 1) {
-          hollaback(null, tracks[0])
-        } else {
-          lookup(id, hollaback);
-        }
-      });
-    }
-  });
+  lookup(id, hollaback);
 };
 
 Itunes.play = function(track, hollaback) {
