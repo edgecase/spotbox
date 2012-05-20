@@ -1,67 +1,44 @@
-var path            = require("path");
-var fs              = require("fs");
-var underscore      = require("underscore");
-var app             = require(path.join(__dirname, "..", "..", "config", "app"));
-var db              = require(path.join(app.root, "config", "database"));
-var Spotbox         = require(path.join(app.root, "app", "lib", "spotbox"));
-var Spotify         = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
-var Itunes          = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
-var Airfoil         = require(path.join(app.root, "app", "lib", "application_interfaces", "airfoil"));
-var TrackManager    = require(path.join(app.root, "app", "lib", "track_manager"));
+var path         = require("path");
+var fs           = require("fs");
+var underscore   = require("underscore");
+var app          = require(path.join(__dirname, "..", "..", "config", "app"));
+var db           = require(path.join(app.root, "config", "database"));
+var EventedState = require(path.join(app.root, "app", "lib", "evented_state"));
+var Spotbox      = require(path.join(app.root, "app", "lib", "spotbox"));
+var Spotify      = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
+var Itunes       = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
+var Airfoil      = require(path.join(app.root, "app", "lib", "application_interfaces", "airfoil"));
+var TrackManager = require(path.join(app.root, "app", "lib", "track_manager"));
 
-var QUOREM_SIZE = 4;
 
 if (app.env === "development") {
-  QUOREM_SIZE = 1;
+  var QUOREM_SIZE = 1;
+} else {
+  var QUOREM_SIZE = 4;
 }
 
 var currentPlayer = null;
-
-var properties = {
+var state = new EventedState({
   state: "stopped",
   track: null,
   progress: "0",
   votes: {}
-};
-
-var eventHollabacks = {
-  state: [],
-  track: [],
-  progress: [],
-  votes: []
-};
-
-function setProperty(key, newValue) {
-  if (!underscore.isUndefined(properties[key])) {
-    if (properties[key] !== newValue) {
-      properties[key] = newValue;
-      trigger(key);
-    }
-  }
-};
-
-function trigger(key) {
-  underscore.each(eventHollabacks[key], function(hollaback) {
-    underscore.defer(function() {
-      hollaback(underscore.clone(properties));
-    });
-  });
-};
+});
 
 function setPlayerBindings(player) {
   player.on("state", function(properties) {
     if (player === currentPlayer) {
-      setProperty("state", properties.state);
+      state.set("state", properties.state);
     }
   });
   player.on("track", function(properties) {
     if (player === currentPlayer) {
-      setProperty("track", properties.track);
+      state.set("track", properties.track);
     }
   });
   player.on("progress", function(properties) {
     if (player === currentPlayer) {
-      setProperty("progress", properties.progress);
+      state.set("progress", properties.progress);
     }
   });
   player.on("endOfTrack", function(progress) {
@@ -105,15 +82,15 @@ function pauseCurrent(hollaback) {
 };
 
 function play(track, hollaback) {
-  var previousTrack = properties.track;
-  var previousProgress = parseInt(properties.progress, 10);
-  setProperty("nextVotes", {});
+  var previousTrack = state.properties.track;
+  var previousProgress = parseInt(state.properties.progress, 10);
+  state.set("votes", {});
 
   if (previousTrack) {
-    if (previousProgress === 0 ||previousProgress >= (previousTrack.length - 5)) {
+    if (previousProgress === 0 || previousProgress >= (previousTrack.length - 5)) {
       TrackManager.markPlayed(previousTrack, {}, function() {});
     } else {
-      TrackManager.markSkipped(previousTrack, {progress: previousProgress}, function() {});
+      // TrackManager.markSkipped(previousTrack, {progress: previousProgress}, function() {});
     }
   }
 
@@ -123,7 +100,7 @@ function play(track, hollaback) {
     } else {
       var player = getPlayerForId(track.id);
       Airfoil.setSource(player, function(error) {
-        setProperty("state", "playing");
+        state.set("state", "playing");
         currentPlayer = player;
         player.play(track, hollaback);
       });
@@ -157,19 +134,19 @@ Player.unpause = function(hollaback) {
 };
 
 Player.vote = function(id) {
-  properties.votes[id] = true;
-  if (underscore.size(properties.votes) >= QUOREM_SIZE) {
+  state.properties.votes[id] = true;
+  if (underscore.size(state.properties.votes) >= QUOREM_SIZE) {
     playNext(function() {});
   }
-  trigger("votes");
+  state.trigger("votes");
 };
 
 Player.properties = function() {
-  return JSON.parse(JSON.stringify(properties));
+  return JSON.parse(JSON.stringify(state.properties));
 };
 
 Player.on = function(key, hollaback) {
-  eventHollabacks[key].push(hollaback);
+  state.on(key, hollaback);
 };
 
 setPlayerBindings(Itunes);

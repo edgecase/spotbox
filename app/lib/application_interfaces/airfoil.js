@@ -1,38 +1,19 @@
-var path        = require("path");
-var fs          = require("fs");
-var underscore  = require("underscore");
-var AsyncRunner = require("async_runner");
-var app         = require(path.join(__dirname, "..", "..", "..", "config", "app"));
-var settings    = require(path.join(app.root, "config", "settings"));
-var Spotbox     = require(path.join(app.root, "app", "lib", "spotbox"));
-var Applescript = require(path.join(app.root, "app", "lib", "applescript"));
+var path             = require("path");
+var fs               = require("fs");
+var underscore       = require("underscore");
+var underscoreString = require("underscore.string");
+var AsyncRunner      = require("async_runner");
+var app              = require(path.join(__dirname, "..", "..", "..", "config", "app"));
+var EventedState     = require(path.join(app.root, "app", "lib", "evented_state"));
+var settings         = require(path.join(app.root, "config", "settings"));
+var Spotbox          = require(path.join(app.root, "app", "lib", "spotbox"));
+var Applescript      = require(path.join(app.root, "app", "lib", "applescript"));
 
-var properties = {
+var state = new EventedState({
   volume: 50,
-  connection: false
-};
-
-var eventHollabacks = {
-  volume: [],
-  connection: []
-};
-
-function setProperty(key, newValue) {
-  if (!underscore.isUndefined(properties[key])) {
-    if (properties[key] !== newValue) {
-      properties[key] = newValue;
-      trigger(key);
-    }
-  }
-};
-
-function trigger(key) {
-  underscore.each(eventHollabacks[key], function(hollaback) {
-    underscore.defer(function() {
-      hollaback(underscore.clone(properties));
-    });
-  });
-};
+  connection: false,
+  source: null
+});
 
 function exec(applescriptString, hollaback) {
   var str = "tell application \"Airfoil\"\n" + applescriptString + "\nend tell"
@@ -41,7 +22,7 @@ function exec(applescriptString, hollaback) {
 
 function pushVolume(hollaback) {
   command = "set myspeaker to first speaker whose name is \"" + settings.airfoil.speaker_name + "\"\n";
-  command += "set (volume of myspeaker) to " + properties.volume / 100.0;
+  command += "set (volume of myspeaker) to " + state.properties.volume / 100.0;
   exec(command, hollaback);
 };
 
@@ -74,11 +55,11 @@ Airfoil.connect = function(hollaback) {
       hollaback(error);
     } else {
       if (result === "true") {
-        setProperty("connection", true);
-        hollaback(null, underscore.extend(properties));
+        state.set("connection", true);
+        hollaback();
         pushVolume(function() {});
       } else {
-        setProperty("connection", false);
+        state.set("connection", false);
         hollaback({error: "airfoil", message: "connect failed"});
       }
     }
@@ -94,11 +75,11 @@ Airfoil.disconnect = function(hollaback) {
       hollaback(error);
     } else {
       if (result === "true") {
-        setProperty("connection", true);
+        state.set("connection", true);
         hollaback({error: "airfoil", message: "disconnect failed"});
       } else {
-        setProperty("connection", false);
-        hollaback(null, underscore.extend(properties));
+        state.set("connection", false);
+        hollaback();
       }
     }
   });
@@ -112,17 +93,17 @@ Airfoil.status = function(hollaback) {
       hollaback(error);
     } else {
       if (result === "true") {
-        setProperty("connection", true);
+        state.set("connection", true);
       } else {
-        setProperty("connection", false);
+        state.set("connection", false);
       }
       command = "volume of first speaker whose name is \"" + settings.airfoil.speaker_name + "\"";
       exec(command, function(error, result) {
         if (error) {
           hollaback(error);
         } else {
-          setProperty("volume", result * 100);
-          hollaback(null, JSON.parse(JSON.stringify(properties)));
+          state.set("volume", result * 100);
+          hollaback(null, JSON.parse(JSON.stringify(state.properties)));
         }
       });
     }
@@ -130,31 +111,32 @@ Airfoil.status = function(hollaback) {
 };
 
 Airfoil.volumeUp = function() {
-  var volume = properties.volume + 5;
+  var volume = state.properties.volume + 5;
   if (volume <= 100) {
-    setProperty("volume", volume);
+    state.set("volume", volume);
     pushVolume(function() {});
   }
 };
 
 Airfoil.volumeDown = function() {
-  var volume = properties.volume - 5;
+  var volume = state.properties.volume - 5;
   if (volume >= 0) {
-    setProperty("volume", volume);
+    state.set("volume", volume);
     pushVolume(function() {});
   }
 };
 
 Airfoil.setSource = function(player, hollaback) {
-  var sourceName = player.playerName.charAt(0).toUpperCase() + player.playerName.slice(1);
+  var sourceName = underscoreString.capitalize(player.playerName);
   var command = "set aSource to make new application source\n";
   command += "set application file of aSource to \"/Applications/" + sourceName + ".app\"\n";
   command += "set current audio source to aSource";
   exec(command, hollaback);
+  state.set("source", sourceName);
 };
 
 Airfoil.on = function(key, hollaback) {
-  eventHollabacks[key].push(hollaback);
+  state.on(key, hollaback);
 };
 
 module.exports = Airfoil

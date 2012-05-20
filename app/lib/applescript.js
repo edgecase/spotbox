@@ -20,7 +20,6 @@ Applescript.run = function(applescriptString, hollaback) {
   child.stdin.end();
 }
 
-// Note: Takes a path relative to the application
 Applescript.transformPath = function(unixPath, hollaback) {
   Applescript.run("POSIX file \"" + unixPath + "\" as text", hollaback);
 };

@@ -1,42 +1,19 @@
-var path        = require("path");
-var underscore  = require("underscore");
-var AsyncRunner = require("async_runner");
-var app         = require(path.join(__dirname, "..", "..", "..", "config", "app"));
-var db          = require(path.join(app.root, "config", "database"));
-var Applescript = require(path.join(app.root, "app", "lib", "applescript"));
+var path         = require("path");
+var underscore   = require("underscore");
+var AsyncRunner  = require("async_runner");
+var app          = require(path.join(__dirname, "..", "..", "..", "config", "app"));
+var EventedState = require(path.join(app.root, "app", "lib", "evented_state"));
+var db           = require(path.join(app.root, "config", "database"));
+var Applescript  = require(path.join(app.root, "app", "lib", "applescript"));
 
 var pollingId = null;
-var properties = {
+
+var state = new EventedState({
   track: null,
   state: "stopped",
   intendedState: "stopped",
   progress: 0
-}
-
-var eventHollabacks = {
-  track: [],
-  state: [],
-  intendedState: [],
-  endOfTrack: [],
-  progress: []
-}
-
-function setProperty(key, newValue) {
-  if (!underscore.isUndefined(properties[key])) {
-    if (properties[key] !== newValue) {
-      properties[key] = newValue;
-      trigger(key);
-    }
-  }
-};
-
-function trigger(key) {
-  underscore.each(eventHollabacks[key], function(hollaback) {
-    underscore.defer(function() {
-      hollaback(underscore.clone(properties));
-    });
-  });
-};
+}, ["endOfTrack"]);
 
 function exec(applescriptString, hollaback) {
   var str = "tell application \"iTunes\"\n" + applescriptString + "\nend tell"
@@ -97,19 +74,19 @@ function getProgress(hollaback) {
 };
 
 function updateStatus() {
-  getState(function(error, state) {
+  getState(function(error, playerState) {
     if (error) {
       hollaback(error);
     } else {
-      if (properties.state === "playing" && properties.intendedState === "playing" && state === "stopped") {
-        setProperty("intendedState", "stopped");
-        trigger("endOfTrack");
+      if (state.properties.state === "playing" && state.properties.intendedState === "playing" && playerState === "stopped") {
+        state.set("intendedState", "stopped");
+        state.trigger("endOfTrack");
       }
-      setProperty("state", state);
-      if (state !== "stopped") {
+      state.set("state", playerState);
+      if (playerState !== "stopped") {
         getProgress(function(error, progress) {
           if (!error && progress !== "missing value") {
-            setProperty("progress", progress);
+            state.set("progress", progress);
           }
         });
       }
@@ -163,18 +140,18 @@ Itunes.play = function(track, hollaback) {
   var itunesId = track.id.split(":")[1];
   var command = "set mytrack to some track whose database ID is " + itunesId + "\n";
   command += "play mytrack with once";
-  setProperty("intendedState", "playing");
-  setProperty("track", track);
+  state.set("intendedState", "playing");
+  state.set("track", track);
   exec(command, hollaback);
 };
 
 Itunes.pause = function(hollaback) {
-  setProperty("intendedState", "paused");
+  state.set("intendedState", "paused");
   exec("pause", hollaback);
 };
 
 Itunes.unpause = function(hollaback) {
-  setProperty("intendedState", "playing");
+  state.set("intendedState", "playing");
   exec("play with once", hollaback);
 };
 
@@ -215,11 +192,11 @@ Itunes.add = function(unixPath, hollaback) {
 };
 
 Itunes.on = function(key, hollaback) {
-  eventHollabacks[key].push(hollaback);
+  state.on(key, hollaback);
 };
 
 // Poll to trigger events
-Itunes.on("state", function(properties) {
+state.on("state", function(properties) {
   if (properties.state === "playing" && !pollingId) {
     // start polling
     pollingId = setInterval(updateStatus, 250);
@@ -234,7 +211,7 @@ Itunes.on("state", function(properties) {
   }
 });
 
-Itunes.on("intendedState", function(properties) {
+state.on("intendedState", function(properties) {
   if (properties.intendedState === "playing") {
     if (!pollingId) {
       pollingId = setInterval(updateStatus, 250);

@@ -1,40 +1,20 @@
-var path        = require("path");
-var fs          = require("fs");
-var underscore  = require("underscore");
-var AsyncRunner = require("async_runner");
-var app         = require(path.join(__dirname, "..", "..", "config", "app"));
-var redis       = require(path.join(app.root, "config", "redis"));
-var db          = require(path.join(app.root, "config", "database"));
-var Spotbox     = require(path.join(app.root, "app", "lib", "spotbox"));
-var Spotify     = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
-var Itunes      = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
-var Chromaprint = require(path.join(app.root, "app", "lib", "application_interfaces", "chromaprint"));
-var Eyed3       = require(path.join(app.root, "app", "lib", "application_interfaces", "eyed3"));
+var path         = require("path");
+var fs           = require("fs");
+var underscore   = require("underscore");
+var AsyncRunner  = require("async_runner");
+var app          = require(path.join(__dirname, "..", "..", "config", "app"));
+var redis        = require(path.join(app.root, "config", "redis"));
+var db           = require(path.join(app.root, "config", "database"));
+var EventedState = require(path.join(app.root, "app", "lib", "evented_state"));
+var Spotbox      = require(path.join(app.root, "app", "lib", "spotbox"));
+var Spotify      = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
+var Itunes       = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
+var Chromaprint  = require(path.join(app.root, "app", "lib", "application_interfaces", "chromaprint"));
+var Eyed3        = require(path.join(app.root, "app", "lib", "application_interfaces", "eyed3"));
 
-var properties = {
+var state = new EventedState({
   queue: []
-};
-
-var eventHollabacks = {
-  queue: []
-};
-
-function setProperty(key, newValue) {
-  if (!underscore.isUndefined(properties[key])) {
-    if (properties[key] !== newValue) {
-      properties[key] = newValue;
-      trigger(key);
-    }
-  }
-};
-
-function trigger(key) {
-  underscore.each(eventHollabacks[key], function(hollaback) {
-    underscore.defer(function() {
-      hollaback(underscore.clone(properties));
-    });
-  });
-};
+});
 
 function reloadPlayPool(hollaback) {
   var key = Spotbox.namespace("pool");
@@ -91,10 +71,10 @@ function getPlayerForId(id) {
 var TrackManager = function() {};
 
 TrackManager.next = function(hollaback) {
-  if (properties.queue.length > 0) {
-    var track = properties.queue.shift();
-    trigger("queue");
+  var track = state.properties.queue.shift();
+  if (track) {
     hollaback(null, track);
+    state.trigger("queue");
   } else {
     loadNextFromPool(hollaback);
   }
@@ -107,12 +87,12 @@ TrackManager.enqueue = function(id, hollaback) {
       if (error) {
         hollaback(error);
       } else {
-        var exists = underscore.find(properties.queue, function(t) {
+        var exists = underscore.find(state.properties.queue, function(t) {
           return t.id === id
         });
         if (!exists) {
-          properties.queue.push(track);
-          trigger("queue");
+          state.properties.queue.push(track);
+          state.trigger("queue");
           hollaback(null, track);
         } else {
           hollaback({error: "Player enqueue", message: "duplicate"});
@@ -125,7 +105,7 @@ TrackManager.enqueue = function(id, hollaback) {
 };
 
 TrackManager.queue = function() {
-  return JSON.parse(JSON.stringify(properties.queue));
+  return JSON.parse(JSON.stringify(state.properties.queue));
 };
 
 TrackManager.import = function(filepath, hollaback) {
@@ -213,7 +193,7 @@ TrackManager.markSkipped = function(track, data, hollaback) {
 };
 
 TrackManager.on = function(key, hollaback) {
-  eventHollabacks[key].push(hollaback);
+  state.on(key, hollaback);
 };
 
 module.exports = TrackManager;

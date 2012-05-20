@@ -1,45 +1,22 @@
-var path        = require("path");
-var http        = require("http");
-var querystring = require("querystring");
-var underscore  = require("underscore");
-var AsyncRunner = require("async_runner");
-var app         = require(path.join(__dirname, "..", "..", "..", "config", "app"));
-var db          = require(path.join(app.root, "config", "database"));
-var SpotifyApi  = require(path.join(app.root, "app", "lib", "apis", "spotify_api"));
-var Applescript = require(path.join(app.root, "app", "lib", "applescript"));
+var path         = require("path");
+var http         = require("http");
+var querystring  = require("querystring");
+var underscore   = require("underscore");
+var AsyncRunner  = require("async_runner");
+var app          = require(path.join(__dirname, "..", "..", "..", "config", "app"));
+var EventedState = require(path.join(app.root, "app", "lib", "evented_state"));
+var db           = require(path.join(app.root, "config", "database"));
+var SpotifyApi   = require(path.join(app.root, "app", "lib", "apis", "spotify_api"));
+var Applescript  = require(path.join(app.root, "app", "lib", "applescript"));
 
 var pollingId = null;
-var properties = {
+
+var state = new EventedState({
   track: null,
-  state: "paused",
-  intendedState: "paused",
+  state: "stopped",
+  intendedState: "stopped",
   progress: 0
-}
-
-var eventHollabacks = {
-  track: [],
-  state: [],
-  intendedState: [],
-  endOfTrack: [],
-  progress: []
-}
-
-function setProperty(key, newValue) {
-  if (!underscore.isUndefined(properties[key])) {
-    if (properties[key] !== newValue) {
-      properties[key] = newValue;
-      trigger(key);
-    }
-  }
-};
-
-function trigger(key) {
-  underscore.each(eventHollabacks[key], function(hollaback) {
-    underscore.defer(function() {
-      hollaback(underscore.clone(properties));
-    });
-  });
-};
+}, ["endOfTrack"]);
 
 function exec(applescriptString, hollaback) {
   var str = "tell application \"Spotify\"\n" + applescriptString + "\nend tell"
@@ -61,24 +38,24 @@ function getProgress(hollaback) {
 // Note: this is complicated because of the odd behavior of spotify.
 // Do not change this method unless you know what you are doing.
 function updateStatus() {
-  getState(function(error, state) {
+  getState(function(error, playerState) {
     if (error) {
       hollaback(error);
     } else {
       // Check if player stopped by itself
-      if (properties.state === "playing" && properties.intendedState === "playing" && state === "stopped") {
-        setProperty("intendedState", "paused");
-        trigger("endOfTrack");
+      if (state.properties.state === "playing" && state.properties.intendedState === "playing" && playerState === "stopped") {
+        state.set("intendedState", "paused");
+        state.trigger("endOfTrack");
       }
-      setProperty("state", state);
-      if (state !== "paused" && state !== "stopped") {
+      state.set("state", playerState);
+      if (playerState !== "paused" && playerState !== "stopped") {
         getTrackId(function(error, trackId) {
           if (!error) {
             // Check if player automatically went to the next track
-            if (properties.track.id !== trackId) {
-              if (properties.intendedState === "playing") {
+            if (state.properties.track.id !== trackId) {
+              if (state.properties.intendedState === "playing") {
                 Spotify.pause(function() {
-                  trigger("endOfTrack");
+                  state.trigger("endOfTrack");
                 });
               }
             }
@@ -86,7 +63,7 @@ function updateStatus() {
         });
         getProgress(function(error, progress) {
           if (!error && progress !== "missing value") {
-            setProperty("progress", progress);
+            state.set("progress", progress);
           }
         });
       }
@@ -122,18 +99,18 @@ Spotify.metadata = function(id, hollaback) {
 };
 
 Spotify.play = function(track, hollaback) {
-  setProperty("intendedState", "playing");
-  setProperty("track", track);
+  state.set("intendedState", "playing");
+  state.set("track", track);
   exec("play track \"" + track.id + "\"", hollaback);
 };
 
 Spotify.pause = function(hollaback) {
-  setProperty("intendedState", "paused");
+  state.set("intendedState", "paused");
   exec("pause", hollaback);
 };
 
 Spotify.unpause = function(hollaback) {
-  setProperty("intendedState", "playing");
+  state.set("intendedState", "playing");
   exec("play", hollaback);
 };
 
@@ -142,11 +119,11 @@ Spotify.search = function(query, hollaback) {
 };
 
 Spotify.on = function(key, hollaback) {
-  eventHollabacks[key].push(hollaback);
+  state.on(key, hollaback);
 };
 
 // Poll to trigger events
-Spotify.on("state", function(properties) {
+state.on("state", function(properties) {
   if (properties.state === "playing" && !pollingId) {
     // start polling
     pollingId = setInterval(updateStatus, 250);
@@ -161,7 +138,7 @@ Spotify.on("state", function(properties) {
   }
 });
 
-Spotify.on("intendedState", function(properties) {
+state.on("intendedState", function(properties) {
   if (properties.intendedState === "playing") {
     if (!pollingId) {
       pollingId = setInterval(updateStatus, 250);
