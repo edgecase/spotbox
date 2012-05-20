@@ -1,7 +1,7 @@
 window.Spotbox = Ember.Application.create({
   ready: function() {
     Spotbox.Views.Layout.create().append();
-    Spotbox.TabManager.goToState("viewingQueue");
+    page(window.location.pathname);
   }
 });
 

@@ -11,7 +11,7 @@ Spotbox.Views.SearchField = Ember.TextField.extend({
 
   submit: function(event) {
     Spotbox.Controllers.Search.search(this.get("query"));
-    Spotbox.TabManager.goToState("viewingSearch");
+    page("/search");
   },
 
   insertNewline: function(event) {

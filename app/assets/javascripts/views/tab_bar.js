@@ -7,16 +7,24 @@ Spotbox.Views.TabBar = Ember.View.extend({
   QueueTab: Ember.View.extend({
     tagName: "li",
     classNameBindings: ["isActive:active"],
+    click: function(event) {
+      event.preventDefault();
+      page("/");
+    },
     isActive: function() {
-      return Spotbox.TabManager.getPath("currentState.name") === "viewingQueue"
+      return Spotbox.TabManager.getPath("currentState.name") === "queue"
     }.property("Spotbox.TabManager.currentState")
   }),
 
   SearchTab: Ember.View.extend({
     tagName: "li",
     classNameBindings: ["isActive:active"],
+    click: function(event) {
+      event.preventDefault();
+      page("/search");
+    },
     isActive: function() {
-      return Spotbox.TabManager.getPath("currentState.name") === "viewingSearch"
+      return Spotbox.TabManager.getPath("currentState.name") === "search"
     }.property("Spotbox.TabManager.currentState")
   })
 });
