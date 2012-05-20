@@ -64,7 +64,7 @@ function loadNextFromPool(hollaback) {
     if (error) {
       hollaback(error);
     } else if (trackId) {
-      getPlayerForId(trackId).metadata(hollaback);
+      getPlayerForId(trackId).metadata(trackId, hollaback);
     } else {
       reloadPlayPool(function(error) {
         if (error) {

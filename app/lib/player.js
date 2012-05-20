@@ -157,7 +157,7 @@ Player.stop = function(hollaback) {
   stopCurrent(hollaback);
 };
 
-Player.pause = function() {
+Player.pause = function(hollaback) {
   pauseCurrent(hollaback);
 };
 
