@@ -1,33 +1,38 @@
 Spotbox.Controllers.Search = Ember.ArrayController.create({
   content: [],
-  searchModel: {},
+  searchResults: {itunes: [], spotify: []},
   searching: false,
+  displayCategory: null,
   sortKey: null,
 
   init: function() {
     var self = this;
-    Spotbox.socket.on("tracks/search/result", function(results) {
+    Spotbox.socket.on("tracks/search", function(results) {
       if (results.error) {
         Spotbox.errorMessage("Search Error", "encountered while searching for tracks");
         self.set("content", []);
         self.set("searching", false);
       } else {
-        var valid_results = _.filter(results, function(result) {
+        var searchResults = {};
+        var spotifyResults = _.filter(results.spotify, function(result) {
           return _.include(result.availability.territories.split(" "), "US");
         });
-        results = _.map(valid_results, function(result) {
+        searchResults.spotify = _.map(spotifyResults, function(result) {
           return Spotbox.Models.Track.create(result);
         });
-        self.set("content", results);
+        searchResults.itunes = _.map(results.itunes, function(result) {
+          return Spotbox.Models.Track.create(result);
+        });
+        self.set("searchResults", searchResults);
+        self.set("displayCategory", "spotify");
         self.set("searching", false);
       }
     });
   },
 
-  search: function() {
+  search: function(query) {
     this.set("searching", true);
-    var model = this.get("searchModel");
-    Spotbox.socket.emit("tracks/search", model);
+    Spotbox.socket.emit("tracks/search", query);
   },
 
   sortContent: function() {
@@ -44,6 +49,11 @@ Spotbox.Controllers.Search = Ember.ArrayController.create({
         return result.get(key);
       }));
     }
-  }.observes("sortKey")
+  }.observes("sortKey"),
 
+  switchCategory: function() {
+    var category = this.get("displayCategory");
+    var results = this.get("searchResults")[category];
+    this.set("content", results);
+  }.observes("displayCategory")
 });

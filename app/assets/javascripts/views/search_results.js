@@ -1,9 +1,6 @@
 Spotbox.Views.SearchResults = Ember.View.extend({
   templateName: "search_results",
-  tagName: "table",
-  classNames: ["table", "table-striped", "track-list"],
   contentBinding: "Spotbox.Controllers.Search.content",
-
   spinner: new Spinner(),
 
   clear: function() {
@@ -32,7 +29,20 @@ Spotbox.Views.SearchResults = Ember.View.extend({
     } else {
       this.spinner.stop();
     }
-  }.observes("Spotbox.Controllers.Search.searching")
+  }.observes("Spotbox.Controllers.Search.searching"),
+
+  categoryButton: Ember.View.extend({
+    tagname: "a",
+    classNames: ["btn"],
+    classNameBindings: ["active"],
+    click: function(event) {
+      Spotbox.Controllers.Search.set("displayCategory", this.get("name"));
+    },
+    active: function() {
+      var category = Spotbox.Controllers.Search.get("displayCategory");
+      return category === this.get("name");
+    }.property("Spotbox.Controllers.Search.displayCategory")
+  })
 });
 
 Spotbox.Views.SearchResultsItem = Ember.View.extend({

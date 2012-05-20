@@ -1,20 +1,17 @@
 Spotbox.Views.SearchField = Ember.TextField.extend({
   classNames: ["search-query"],
   placeholder: "Search",
-  modelBinding: "Spotbox.Controllers.Search.searchModel",
-  valueBinding: "model.query",
+  query: "",
+  valueBinding: "query",
   attributeBindings: ["disabled"],
 
   disabled: function() {
-    return Spotbox.Controllers.Search.searching;
+    return Spotbox.Controllers.Search.get("searching");
   }.property("Spotbox.Controllers.Search.searching"),
 
-  focusIn: function() {
-    Spotbox.TabManager.goToState("viewingSearch");
-  },
-
   submit: function(event) {
-    Spotbox.Controllers.Search.search();
+    Spotbox.Controllers.Search.search(this.get("query"));
+    Spotbox.TabManager.goToState("viewingSearch");
   },
 
   insertNewline: function(event) {
