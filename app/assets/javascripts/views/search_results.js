@@ -1,15 +1,9 @@
 Spotbox.Views.SearchResults = Ember.View.extend({
   templateName: "search_results",
   contentBinding: "Spotbox.Controllers.Search.content",
-  spinner: new Spinner(),
-
-  clear: function() {
-    Spotbox.Controllers.Search.set("content", []);
-  },
 
   showContent: function() {
-    return Spotbox.Controllers.Search.get("content").length > 0 &&
-           !Spotbox.Controllers.Search.get("searching");
+    return (Spotbox.Controllers.Search.get("content").length > 0) && !Spotbox.Controllers.Search.get("searching");
   }.property("Spotbox.Controllers.Search.content", "Spotbox.Controllers.Search.searching"),
 
   setSortKey: function(event) {
@@ -23,18 +17,7 @@ Spotbox.Views.SearchResults = Ember.View.extend({
     }
   },
 
-  displaySpinner: function() {
-    if (Spotbox.Controllers.Search.get("searching")) {
-      $("#search").prepend(this.spinner.spin().el);
-    } else {
-      this.spinner.stop();
-    }
-  }.observes("Spotbox.Controllers.Search.searching"),
-
-  categoryButton: Ember.View.extend({
-    tagname: "a",
-    classNames: ["btn"],
-    classNameBindings: ["active"],
+  categoryButton: Spotbox.Views.Button.extend({
     click: function(event) {
       Spotbox.Controllers.Search.set("displayCategory", this.get("name"));
     },
@@ -45,6 +28,7 @@ Spotbox.Views.SearchResults = Ember.View.extend({
   })
 });
 
+// This view (unfortunately) needs to be global because it is used in an #each block.
 Spotbox.Views.SearchResultsItem = Ember.View.extend({
   tagName: "tr",
   enqueue: function() {
