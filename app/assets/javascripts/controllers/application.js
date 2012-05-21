@@ -10,5 +10,8 @@ Spotbox.Controllers.Application = Ember.Object.create({
         self.set("version", version);
       }
     });
+    Spotbox.socket.on("error", function(msg) {
+      Spotbox.errorMessage(msg.error, msg.message);
+    });
   }
 });

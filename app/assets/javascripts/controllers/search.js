@@ -8,30 +8,24 @@ Spotbox.Controllers.Search = Ember.ArrayController.create({
   init: function() {
     var self = this;
     Spotbox.socket.on("tracks/search", function(results) {
-      if (results.error) {
-        Spotbox.errorMessage("Search Error", "encountered while searching for tracks");
-        self.set("content", []);
-        self.set("searching", false);
+      var searchResults = {};
+      var spotifyResults = _.filter(results.spotify, function(result) {
+        return _.include(result.availability.territories.split(" "), "US");
+      });
+      searchResults.spotify = _.map(spotifyResults, function(result) {
+        return Spotbox.Models.Track.create(result);
+      });
+      searchResults.itunes = _.map(results.itunes, function(result) {
+        return Spotbox.Models.Track.create(result);
+      });
+      self.set("searchResults", searchResults);
+      var category = self.get("displayCategory");
+      if (category) {
+        self.set("content", searchResults[category]);
       } else {
-        var searchResults = {};
-        var spotifyResults = _.filter(results.spotify, function(result) {
-          return _.include(result.availability.territories.split(" "), "US");
-        });
-        searchResults.spotify = _.map(spotifyResults, function(result) {
-          return Spotbox.Models.Track.create(result);
-        });
-        searchResults.itunes = _.map(results.itunes, function(result) {
-          return Spotbox.Models.Track.create(result);
-        });
-        self.set("searchResults", searchResults);
-        var category = self.get("displayCategory");
-        if (category) {
-          self.set("content", searchResults[category]);
-        } else {
-          self.set("displayCategory", "spotify");
-        }
-        self.set("searching", false);
+        self.set("displayCategory", "spotify");
       }
+      self.set("searching", false);
     });
   },
 
