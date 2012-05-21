@@ -5,13 +5,15 @@
   "description": "Jukebox",
   "dependencies": {
     "express":           "*",
+    "connect":           "*",
+    "everyauth":         "*",
+    "jade":              "*",
+    "socket.io":         "*",
     "asset_builder":     "0.2.2",
     "redis":             "*",
     "mongodb":           "*",
     "underscore":        "*",
     "underscore.string": "*",
-    "jade":              "*",
-    "socket.io":         "*",
     "async_runner":      "git://github.com/agrieser/async_runner.git"
   },
   "license": "MIT",
