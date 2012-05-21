@@ -12,6 +12,15 @@ var Itunes       = require(path.join(app.root, "app", "lib", "application_interf
 var Spotify      = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
 
 module.exports = function(io) {
+  function authenticate(socket, hollaback) {
+    var session = socket.handshake.session;
+    if (session && session.email) {
+      hollaback(null, {email: session.email});
+    } else {
+      hollaback();
+    }
+  };
+
   io.sockets.on("connection", function(socket) {
     // Populate initial state
     (function() {
@@ -51,12 +60,19 @@ module.exports = function(io) {
     });
 
     socket.on("tracks/enqueue", function(message) {
-      // Protected action
-      TrackManager.enqueue(message, function(error, result) {
+      authenticate(socket, function(error, user) {
         if (error) {
-          socket.emit("error", error);
+          socket.emit("error", message);
+        } else if (user) {
+          TrackManager.enqueue(message, user, function(error, result) {
+            if (error) {
+              socket.emit("error", error);
+            } else {
+              socket.emit("player/enqueue", result);
+            }
+          });
         } else {
-          socket.emit("player/enqueue", result);
+          socket.emit("authenticate");
         }
       });
     });
@@ -64,34 +80,48 @@ module.exports = function(io) {
 
     // Player interface
     socket.on("player/command", function(message) {
-      // Protected action
-      if (message === "play") {
-        Player.play(function(error) {});
-      } else if (message === "pause") {
-        Player.pause(function() {});
-      } else if (message === "stop") {
-        Player.stop(function() {});
-      } else if (message === "next") {
-        Player.vote(socket.handshake.address.address);
-      } else {
-        socket.emit("error", message);
-      }
+      authenticate(socket, function(error, user) {
+        if (error) {
+          socket.emit("error", message);
+        } else if (user) {
+          if (message === "play") {
+            Player.play(function(error) {});
+          } else if (message === "pause") {
+            Player.pause(function() {});
+          } else if (message === "stop") {
+            Player.stop(function() {});
+          } else if (message === "next") {
+            Player.vote(user);
+          } else {
+            socket.emit("error", message);
+          }
+        } else {
+          socket.emit("authenticate");
+        }
+      });
     });
 
     // Airfoil interface
     socket.on("airfoil", function(message) {
-      // Protected action
-      if (message === "connect") {
-        Airfoil.connect(function() {});
-      } else if (message === "disconnect") {
-        Airfoil.disconnect(function() {});
-      } else if (message === "volumeUp") {
-        Airfoil.volumeUp();
-      } else if (message === "volumeDown") {
-        Airfoil.volumeDown();
-      } else {
-        socket.emit("error", message);
-      }
+      authenticate(socket, function(error, user) {
+        if (error) {
+          socket.emit("error", message);
+        } else if (user) {
+          if (message === "connect") {
+            Airfoil.connect(function() {});
+          } else if (message === "disconnect") {
+            Airfoil.disconnect(function() {});
+          } else if (message === "volumeUp") {
+            Airfoil.volumeUp();
+          } else if (message === "volumeDown") {
+            Airfoil.volumeDown();
+          } else {
+            socket.emit("error", message);
+          }
+        } else {
+          socket.emit("authenticate");
+        }
+      });
     });
   });
 

@@ -80,7 +80,7 @@ TrackManager.next = function(hollaback) {
   }
 };
 
-TrackManager.enqueue = function(id, hollaback) {
+TrackManager.enqueue = function(id, user, hollaback) {
   var player = getPlayerForId(id);
   if (player) {
     player.metadata(id, function(error, track) {
@@ -91,6 +91,7 @@ TrackManager.enqueue = function(id, hollaback) {
           return t.id === id
         });
         if (!exists) {
+          track.user = user;
           state.properties.queue.push(track);
           state.trigger("queue");
           hollaback(null, track);

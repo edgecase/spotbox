@@ -8,6 +8,7 @@ var everyauth         = require("everyauth");
 var AsyncRunner       = require("async_runner");
 var app               = require(path.join(__dirname, "config", "app"));
 var db                = require(path.join(app.root, "config", "database"));
+var authentication    = require(path.join(app.root, "config", "authentication"));
 var settings          = require(path.join(app.root, "config", "settings"));
 var socketRoutes      = require(path.join(app.root, "app", "socket_routes"));
 var httpRoutes        = require(path.join(app.root, "app", "http_routes"));
@@ -42,17 +43,6 @@ function initExpress() {
   assetbuilder.registerPreprocessor(emberPreprocessor);
   assetbuilder.configure({
     env: app.env
-  });
-
-  var google = everyauth.google
-  google.appId(settings.google_auth.app_id)
-  google.appSecret(settings.google_auth.app_secret)
-  google.scope("https://www.googleapis.com/auth/userinfo.email");
-  google.handleAuthCallbackError( function (request, response) { response.send(403); })
-  google.findOrCreateUser(function(session, accessToken, accessTokenExtra, googleUserMetadata) {
-    var promise = this.Promise();
-    session.email = googleUserMetadata.email;
-    promise.fulfill();
   });
 
   console.log("app running on " + app.port + " in " + app.env);

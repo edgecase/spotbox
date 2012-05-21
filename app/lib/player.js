@@ -137,8 +137,8 @@ Player.unpause = function(hollaback) {
   unpauseCurrent(hollaback);
 };
 
-Player.vote = function(id) {
-  state.properties.votes[id] = true;
+Player.vote = function(user) {
+  state.properties.votes[user.email] = true;
   if (underscore.size(state.properties.votes) >= QUOREM_SIZE) {
     playNext(function() {});
   }
