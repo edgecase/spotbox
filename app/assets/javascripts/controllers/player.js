@@ -18,6 +18,7 @@ Spotbox.Controllers.Player = Ember.Object.create({
     Spotbox.socket.on("player/track", function(track) {
       if (track) {
         self.set("content", Spotbox.Models.Track.create(track));
+        document.title = track.name + " - " + _.pluck(track.artists, "name").join(",");
       }
     });
 
