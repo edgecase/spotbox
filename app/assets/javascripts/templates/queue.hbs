@@ -6,6 +6,7 @@
       <th>Time</th>
       <th>Album</th>
       <th>Year</th>
+      <th>Queued By</th>
       <th class="span2">ETA</th>
     </tr>
   </head>
@@ -17,6 +18,7 @@
         <td>{{displayDuration}}</td>
         <td>{{album.name}}</td>
         <td>{{album.released}}</td>
+        <td>{{user.email}}</td>
         <td>{{eta}}</td>
       </tr>
     {{/each}}
