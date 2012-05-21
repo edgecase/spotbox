@@ -14,7 +14,11 @@ function request(options, hollaback) {
       metadata += chunk.toString();
     });
     response.on("end", function() {
-      hollaback(null, JSON.parse(metadata));
+      try {
+        hollaback(null, JSON.parse(metadata));
+      } catch (e) {
+        hollaback({error: "HttpJson", message: metadata});
+      }
     });
     response.on("error", function(error) {
       hollaback(error);
