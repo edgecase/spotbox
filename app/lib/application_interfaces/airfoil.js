@@ -10,7 +10,7 @@ var Spotbox          = require(path.join(app.root, "app", "lib", "spotbox"));
 var Applescript      = require(path.join(app.root, "app", "lib", "applescript"));
 
 var state = new EventedState({
-  volume: 50,
+  volume: settings.airfoil.volume || 50,
   connection: false,
   source: null
 });
