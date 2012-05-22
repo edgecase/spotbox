@@ -143,15 +143,24 @@ Acoustid.groupLookup = function(acoustid, hollaback) {
 Acoustid.lookup = function(acoustid, trackId, albumId, hollaback) {
   var key = Spotbox.namespace("acoustid:track:" + acoustid + trackId + albumId);
 
-  Acoustid.groupLookup(acoustid, function(error, tracks) {
+  redis.get(key, function(error, cachedMetadata) {
     if (error) {
       hollaback(error);
+    } else if (cachedMetadata) {
+      hollback(null, JSON.parse(cachedMetadata));
     } else {
-      var track = underscore.find(tracks, function(track) {
-        return track.ids.music_brainz === trackId && track.album.id === albumId;
+      Acoustid.groupLookup(acoustid, function(error, tracks) {
+        if (error) {
+          hollaback(error);
+        } else {
+          var track = underscore.find(tracks, function(track) {
+            return track.ids.music_brainz === trackId && track.album.id === albumId;
+          });
+          redis.set(key, JSON.stringify(track), function(error) {
+            hollaback(error, track);
+          });
+        }
       });
-
-      hollaback(null, track);
     }
   });
 };
