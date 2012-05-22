@@ -106,7 +106,7 @@ Itunes.launch = function(hollaback) {
     } else {
       runner.run({}, [
         function(element, hollaback) {
-          exec("set sound volume to 50", hollaback);
+          exec("set sound volume to 30", hollaback);
         },
         function(element, hollaback) {
           Itunes.pause(hollaback);

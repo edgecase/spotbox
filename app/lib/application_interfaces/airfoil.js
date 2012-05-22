@@ -111,7 +111,7 @@ Airfoil.status = function(hollaback) {
 };
 
 Airfoil.volumeUp = function() {
-  var volume = state.properties.volume + 5;
+  var volume = state.properties.volume + 2;
   if (volume <= 100) {
     state.set("volume", volume);
     pushVolume(function() {});
@@ -119,7 +119,7 @@ Airfoil.volumeUp = function() {
 };
 
 Airfoil.volumeDown = function() {
-  var volume = state.properties.volume - 5;
+  var volume = state.properties.volume - 2;
   if (volume >= 0) {
     state.set("volume", volume);
     pushVolume(function() {});
