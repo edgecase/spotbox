@@ -52,7 +52,6 @@ function cachedRequest(options, params, cacheKey, hollaback) {
 
 function standardizeTrack(spTrack) {
   var track            = {album: {}};
-  track.type           = "track";
   track.provider       = "spotify";
   track.id             = spTrack.href;
   track.name           = spTrack.name;
