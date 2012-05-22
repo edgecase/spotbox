@@ -3,6 +3,23 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
   classNames: ["well"],
   modelBinding: "Spotbox.Controllers.Player.content",
 
+  didInsertElement: function() {
+    var self = this;
+    this.$().on("dragenter", function() {
+      self.set("draghover", true);
+    });
+    this.$().on("dragexit", function() {
+      self.set("draghover", false);
+    });
+  },
+
+  drop: function(event) {
+    event.preventDefault();
+    _.each(event.originalEvent.dataTransfer.files, function(file) {
+      Spotbox.Controllers.Uploads.upload(file);
+    });
+  },
+
   smallAlbumArtUrl: function() {
     var currentTrack = Spotbox.Controllers.Player.content;
     var artwork      = currentTrack.getPath("album.artwork")
@@ -14,18 +31,6 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
     var track  = Spotbox.Controllers.Player.content.get("name");
     return "http://itunes.com/" + Spotbox.itunesParam(artist) + "/" + Spotbox.itunesParam(track);
   }.property("Spotbox.Controllers.Player.content"),
-
-  someDontLike: function() {
-    return Spotbox.Controllers.Player.disapprovalPercentage >= 0.25;
-  }.property("Spotbox.Controllers.Player.disapprovalPercentage"),
-
-  halfDontLike: function() {
-    return Spotbox.Controllers.Player.disapprovalPercentage >= 0.50;
-  }.property("Spotbox.Controllers.Player.disapprovalPercentage"),
-
-  mostDontLike: function() {
-    return Spotbox.Controllers.Player.disapprovalPercentage >= 0.75;
-  }.property("Spotbox.Controllers.Player.disapprovalPercentage"),
 
   playbackControl: Ember.View.extend({
     tagName: "a",
