@@ -23,9 +23,8 @@ function request(method, data, hollaback) {
 
   rateLimiter.queue(function() {
     if (method === "POST") {
-      var request = HttpJson.post(options, hollaback);
-      request.write(querystring.stringify(data));
-      request.end();
+      options.headers = {"Content-Type": "application/x-www-form-urlencoded"};
+      HttpJson.post(options, querystring.stringify(data), hollaback);
     } else {
       HttpJson.get(options, hollaback);
     }

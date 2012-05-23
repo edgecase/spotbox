@@ -35,9 +35,13 @@ HttpJson.get = function(options, hollaback) {
   request(options, hollaback).end();
 };
 
-HttpJson.post = function(options, hollaback) {
+HttpJson.post = function(options, body, hollaback) {
   options.method = "POST";
-  return request(options, hollaback);
+  underscore.defaults(options, {headers: {}});
+  options.headers["Content-Length"] = body.length;
+  var req = request(options, hollaback)
+  req.write(body);
+  req.end();
 };
 
 module.exports = HttpJson;
