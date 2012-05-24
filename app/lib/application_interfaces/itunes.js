@@ -8,7 +8,7 @@ var RateLimiter  = require(path.join(app.root, "app", "lib", "rate_limiter"));
 var Applescript  = require(path.join(app.root, "app", "lib", "applescript"));
 var AcoustidApi  = require(path.join(app.root, "app", "lib", "apis", "acoustid_api"));
 
-var rateLimiter = new RateLimiter(1000.0 / 3); // 3 calls per second
+var rateLimiter = new RateLimiter(1000.0 / 3);
 
 var pollingId = null;
 
@@ -205,7 +205,10 @@ Itunes.search = function(searchString, hollaback) {
 };
 
 Itunes.retag = function(track, hollaback) {
-  rateLimiter.queue(function() { retag(track, hollaback)});
+  // itunes gots 99 problems, and this is one of 'em.
+  setTimeout(function() {
+    rateLimiter.queue(function() { retag(track, hollaback); });
+  }, 100);
 };
 
 Itunes.import = function(unixPath, hollaback) {
