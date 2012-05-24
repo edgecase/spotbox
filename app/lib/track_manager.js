@@ -10,7 +10,7 @@ var Spotbox      = require(path.join(app.root, "app", "lib", "spotbox"));
 var Spotify      = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
 var Itunes       = require(path.join(app.root, "app", "lib", "application_interfaces", "itunes"));
 var Chromaprint  = require(path.join(app.root, "app", "lib", "application_interfaces", "chromaprint"));
-var Eyed3        = require(path.join(app.root, "app", "lib", "application_interfaces", "eyed3"));
+var AcoustidApi  = require(path.join(app.root, "app", "lib", "apis", "acoustid_api"));
 
 var state = new EventedState({
   queue: []
@@ -109,51 +109,111 @@ TrackManager.queue = function() {
   return JSON.parse(JSON.stringify(state.properties.queue));
 };
 
-TrackManager.import = function(filepath, hollaback) {
-  Chromaprint.identify(filepath, function(error, fingerprintData) {
+TrackManager.retag = function(id, acoustidId, acoustidTrackId, acoustidAlbumId, hollaback) {
+  AcoustidApi.lookup(acoustidId, acoustidTrackId, acoustidAlbumId, function(error, track) {
     if (error) {
       hollaback(error);
     } else {
-      AcoustidApi.lookup(fingerprintData, function(error, musicBrainzId) {
-        if (error) {
-          hollaback(error)
-        } else if (!musicBrainzId) {
-          // skip remaining steps and add directly to itunes
-          Itunes.add(filepath, function(error, itunesData) {
-            TrackManager.add(itunesData, hollaback);
-          });
-        } else {
-          MusicBrainz.lookup(musicBrainzId, function(error, metadata) {
-            if (error) {
-              hollaback(error);
-            } else {
-              Eyed3.clearTags(filepath, function(error) {
-                if (error) {
-                  hollaback(error);
-                } else {
-                  Eyed3.writeTags(filepath, metadata, function(error) {
-                    Itunes.add(filepath, function(error, itunesData) {
-                      if (error) {
-                        hollaback(error);
-                      } else {
-                        metadata.id = itunesData.id;
-                        TrackManager.add(metadata, hollaback);
-                      }
-                    });
-                  });
-                }
-              });
-            }
+      var runner = new AsyncRunner(hollaback);
+      runner.run({}, [
+        function(element, hollaback) {
+          Itunes.retag(id, track, hollaback);
+        },
+        function(element, hollaback) {
+          db.collection("tracks", function(error, collection) {
+            var acoustid = {
+              id: acoustidId,
+              trackId: acoustidTrackId,
+              albumId: acoustidAlbumId
+            };
+            collection.update({id: track.id}, {$set: {acoustid: acoustid}}, {upsert: true, safe: true}, hollaback);
           });
         }
-      });
+      ]);
     }
   });
 };
 
-TrackManager.addToPool = function(track, hollaback) {
+TrackManager.import = function(filepath, user, hollaback) {
+  function addTrack(track, extras, hollaback) {
+    underscore.extend(extras, {user: user, created_at: new Date()});
+    db.collection("tracks", function(error, collection) {
+      collection.update({id: track.id}, {$set: extras}, {upsert: true, safe: true}, function() {
+        hollaback();
+      });
+    });
+  };
+
+  var mp3filepath = filepath + ".mp3";
+  fs.rename(filepath, mp3filepath, function(error) {
+    if (error) {
+      hollaback(error);
+    } else {
+      var runner = new AsyncRunner(function(errors, results) {
+        if (errors) {
+          hollaback(errors);
+        } else {
+          var itunesMeta = results[0];
+          var fingerprint = results[1].fingerprint;
+          var acoustidId = results[1].acoustidId;
+          if (!acoustidId) {
+            addTrack(itunesMeta, {fingerprint: fingerprint}, hollaback);
+          } else {
+            AcoustidApi.bestMatchLookup(acoustidId, itunesMeta, function(error, track) {
+              if (error) {
+                hollaback(error);
+              } else if (!track) {
+                var attrs = {
+                  acoustid: {id: acoustidId},
+                  fingerprint: fingerprint
+                };
+                addTrack(itunesMeta, attrs, hollaback);
+              } else {
+                track.id = itunesMeta.id;
+                var runner = new AsyncRunner(hollaback);
+                runner.run({}, [
+                  function(element, hollaback) {
+                    Itunes.retag(track, hollaback);
+                  },
+                  function(element, hollaback) {
+                    var attrs = {
+                      fingerprint: fingerprint,
+                      acoustid: {id: acoustidId, trackId: track.ids.music_brainz, albumId: track.album.id}
+                    };
+                    addTrack(track, attrs, hollaback);
+                  }
+                ]);
+              }
+            });
+          }
+        }
+      });
+      runner.run({}, [
+        function(element, hollaback) {
+          Itunes.import(mp3filepath, hollaback);
+        },
+        function(element, hollaback) {
+          Chromaprint.identify(mp3filepath, function(error, data) {
+            if (error) {
+              hollaback(error);
+            } else if (!data) {
+              hollaback(null, {fingerprint: data.fingerprint});
+            } else {
+              AcoustidApi.fingerprintLookup(data, function(error, acoustidId) {
+                hollaback(error, {acoustidId: acoustidId, fingerprint: data.fingerprint});
+              });
+            }
+          });
+        },
+      ]);
+    }
+  });
+};
+
+TrackManager.addToPool = function(track, options, hollaback) {
+  underscore.extend(options, {id: track.id, pool: true});
   db.collection("tracks", function(error, collection) {
-    collection.update({id: track.id}, {$set: {id: track.id, pool: true}}, {upsert: true});
+    collection.update({id: track.id}, {$set: options}, {upsert: true});
   });
 };
 
@@ -164,6 +224,7 @@ TrackManager.removeFromPool = function(track, hollaback) {
 };
 
 TrackManager.markPlayed = function(track, data, hollaback) {
+  // TODO: Set created_at date
   var runner = new AsyncRunner(hollaback);
   runner.run(track, [
     function(track, hollaback) {
@@ -173,12 +234,13 @@ TrackManager.markPlayed = function(track, data, hollaback) {
       });
     },
     function(track, hollaback) {
-      TrackManager.addToPool(track, hollaback)
+      TrackManager.addToPool(track, {}, hollaback)
     }
   ]);
 };
 
 TrackManager.markSkipped = function(track, data, hollaback) {
+  // TODO: Set created_at date
   var runner = new AsyncRunner(hollaback);
   runner.run(track, [
     function(track, hollaback) {
