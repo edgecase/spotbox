@@ -80,6 +80,16 @@ function findBestResult(results) {
   })[0];
 };
 
+function scoreMatch(string, part) {
+  var points = 0;
+  if (part.length >= 3) {
+    if (string.match(part)) {
+      points += Math.pow(part.length, 2);
+    };
+  }
+  return points;
+};
+
 
 var Acoustid = function() {};
 
@@ -145,22 +155,24 @@ Acoustid.bestMatchLookup = function(acoustidId, sourceTrack, hollaback) {
     var filteredTracks = underscore.filter(tracks, function(track) {
       return track.artists && track.artists.length && track.length && track.name;
     });
-    if (sourceTrack.name) {
-      var orderedTracks = underscore.sortBy(filteredTracks, function(track) {
-        var parts = sourceTrack.name.split(/\s/);
-        return -underscore.reduce(parts, function(memo, part) {
-          if (part.length >= 3) {
-            if (track.name.match(part)) {
-              memo += part.length;
-            };
-          }
-          return memo;
+    var orderedTracks = underscore.sortBy(filteredTracks, function(track) {
+      var points = 0;
+      var nameParts = sourceTrack.name.split(/\s/);
+      var artistParts = underscore.map(sourceTrack.artists, function(artist) {
+        artist.name.split(/\s/)
+      }).join(" ");
+      points += underscore.reduce(nameParts, function(memo, part) {
+        return memo + scoreMatch(track.name, part);;
+      }, 0);
+      points += underscore.reduce(artistParts, function(artistsPoints, part) {
+        return artistsPoints + underscore.reduce(track.artists, function(artistPoints, artist) {
+          return artistPoints + scoreMatch(artist.name, part);
         }, 0);
-      });
-      hollaback(null, orderedTracks[0]);
-    } else {
-      hollaback(null, filteredTracks[0]);
-    }
+      }, 0);
+      points -= Math.abs(sourceTrack.length - track.length);
+      return -points;
+    });
+    hollaback(null, orderedTracks[0]);
   });
 };
 
