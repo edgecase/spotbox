@@ -136,7 +136,7 @@ TrackManager.retag = function(id, acoustidId, acoustidTrackId, acoustidAlbumId, 
 
 TrackManager.import = function(filepath, user, hollaback) {
   function addTrack(track, extras, hollaback) {
-    underscore.extend(extras, {user: user, created_at: new Date()});
+    underscore.extend(extras, {user: user, createdAt: new Date()});
     db.collection("tracks", function(error, collection) {
       collection.update({id: track.id}, {$set: extras}, {upsert: true, safe: true}, function() {
         hollaback();
@@ -177,6 +177,7 @@ TrackManager.import = function(filepath, user, hollaback) {
                   },
                   function(element, hollaback) {
                     var attrs = {
+                      provider: "local",
                       fingerprint: fingerprint,
                       acoustid: {id: acoustidId, trackId: track.ids.music_brainz, albumId: track.album.id}
                     };
@@ -240,7 +241,6 @@ TrackManager.markPlayed = function(track, data, hollaback) {
 };
 
 TrackManager.markSkipped = function(track, data, hollaback) {
-  // TODO: Set created_at date
   var runner = new AsyncRunner(hollaback);
   runner.run(track, [
     function(track, hollaback) {
@@ -253,6 +253,22 @@ TrackManager.markSkipped = function(track, data, hollaback) {
       TrackManager.removeFromPool(track, hollaback);
     }
   ]);
+};
+
+TrackManager.userUploads = function(data, hollaback) {
+  db.collection("tracks", function(error, collection) {
+    var cursor = collection.find({"$and": [{"user.email": data.email},{provider: "local"}]});
+    cursor.toArray(function(error, tracks) {
+      if (error) {
+        hollaback(error);
+      } else {
+        var possibleTracks = underscore.chain(tracks).reduce(function(memo, track) {
+          memo.push(AcoustidApi.groupLookup(track));
+        }, []).compact().value();
+        hollaback(null, possibleTracks);
+      }
+    });
+  });
 };
 
 TrackManager.on = function(key, hollaback) {
