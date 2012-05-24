@@ -56,7 +56,7 @@ function cachedRequest(method, params, cacheKey, hollaback) {
 function buildRecordingTracks(recording) {
   var artists = recording.artists;
   return underscore.map(recording.releasegroups, function(group) {
-    var track = {
+    return {
       provider: "acoustid",
       ids: {
         music_brainz: recording.id
@@ -64,6 +64,7 @@ function buildRecordingTracks(recording) {
       name: recording.title,
       track_number: group.releases[0].track_count,
       length: recording.duration,
+      artists: artists,
       album: {
         name: group.title,
         id: group.id,
