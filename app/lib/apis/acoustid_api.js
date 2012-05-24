@@ -180,9 +180,13 @@ Acoustid.lookup = function(acoustidId, trackId, albumId, hollaback) {
           var track = underscore.find(tracks, function(track) {
             return track.ids.music_brainz === trackId && track.album.id === albumId;
           });
-          redis.set(key, JSON.stringify(track), function(error) {
-            hollaback(error, track);
-          });
+          if (track) {
+            redis.set(key, JSON.stringify(track), function(error) {
+              hollaback(error, track);
+            });
+          } else {
+            hollaback({error: "Acoustid", message: "Track not found"});
+          }
         }
       });
     }
