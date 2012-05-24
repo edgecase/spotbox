@@ -2,9 +2,13 @@ var path         = require("path");
 var underscore   = require("underscore");
 var AsyncRunner  = require("async_runner");
 var app          = require(path.join(__dirname, "..", "..", "..", "config", "app"));
-var EventedState = require(path.join(app.root, "app", "lib", "evented_state"));
 var db           = require(path.join(app.root, "config", "database"));
+var EventedState = require(path.join(app.root, "app", "lib", "evented_state"));
+var RateLimiter  = require(path.join(app.root, "app", "lib", "rate_limiter"));
 var Applescript  = require(path.join(app.root, "app", "lib", "applescript"));
+var AcoustidApi  = require(path.join(app.root, "app", "lib", "apis", "acoustid_api"));
+
+var rateLimiter = new RateLimiter(1000.0 / 3); // 3 calls per second
 
 var pollingId = null;
 
@@ -18,6 +22,18 @@ var state = new EventedState({
 function exec(applescriptString, hollaback) {
   var str = "tell application \"iTunes\"\n" + applescriptString + "\nend tell"
   Applescript.run(str, hollaback);
+};
+
+function retag(track, hollaback) {
+  var itunesId = track.id.split(":")[1];
+  var artists = underscore.pluck(track.artists, "name").join(", ");
+  var command = "set mytrack to some track whose database ID is " + itunesId + "\n";
+  command += "set name of mytrack to \"" + track.name + "\"\n";
+  command += "set track number of mytrack to \"" + track.track_number + "\"\n";
+  command += "set artist of mytrack to \"" + artists + "\"\n";
+  command += "set album of mytrack to \"" + track.album.name + "\"\n";
+  command += "set year of mytrack to \"" + track.album.released + "\"\n";
+  exec(command, hollaback);
 };
 
 // Pyramid of doom
@@ -117,7 +133,32 @@ Itunes.launch = function(hollaback) {
 };
 
 Itunes.metadata = function(id, hollaback) {
-  lookup(id, hollaback);
+  lookup(id, function(error, itunesMeta) {
+    db.collection("tracks", function(error, collection) {
+      collection.find({id: id}, {limit: 1}).toArray(function(error, docs) {
+        if (error) {
+          hollaback(error);
+        } else if (docs.length === 0) {
+          hollaback(null, itunesMeta);
+        } else {
+          var acoustid = docs[0].acoustid;
+          if (acoustid && acoustid.id && acoustid.trackId && acoustid.albumId) {
+            AcoustidApi.lookup(acoustid.id, acoustid.trackId, acoustid.albumId, function(error, track) {
+              if (error) {
+                hollaback(error);
+              } else {
+                track.id = itunesMeta.id;
+                track.length = itunesMeta.length;
+                hollaback(null, track);
+              }
+            });
+          } else {
+            hollaback(null, itunesMeta);
+          }
+        }
+      });
+    });
+  });
 };
 
 Itunes.play = function(track, hollaback) {
@@ -163,7 +204,11 @@ Itunes.search = function(searchString, hollaback) {
   });
 };
 
-Itunes.add = function(unixPath, hollaback) {
+Itunes.retag = function(track, hollaback) {
+  rateLimiter.queue(function() { retag(track, hollaback)});
+};
+
+Itunes.import = function(unixPath, hollaback) {
   Applescript.transformPath(unixPath, function(error, asPath) {
     var command = "set mytrack to add \"" + asPath + "\"\n";
     command += "return database ID of mytrack";
