@@ -11,14 +11,14 @@ Chromaprint.identify = function(filepath, hollaback) {
     if (error) {
       hollaback(error);
     } else {
-      var response = output.toString().split("\n");
-      var result = {
-        file: output[0].replace(/FILE=/, ''),
-        duration: output[1].replace(/DURATION=/, ''),
-        fingerprint: output[2].replace(/FINGERPRINT=/, '')
+      var splitOutput = output.split("\n");
+      var data = {
+        file: splitOutput[0].replace(/^FILE=/, ""),
+        duration: splitOutput[1].replace(/^DURATION=/, ""),
+        fingerprint: splitOutput[2].replace(/^FINGERPRINT=/, "")
       };
 
-      hollaback(null, result);
+      hollaback(null, data);
     }
   });
 };
