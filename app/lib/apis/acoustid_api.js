@@ -74,13 +74,12 @@ function buildRecordingTracks(recording) {
   });
 };
 
-function bestResult(data) {
-  var result = underscore.sortBy(data.results, function(result) {
-    return -result.score;
+function findBestResult(results) {
+  return underscore.sortBy(results, function(recording) {
+    return -recording.score;
   })[0];
-
-  return result;
 };
+
 
 var Acoustid = function() {};
 
@@ -89,11 +88,10 @@ Acoustid.fingerprintLookup = function(data, hollaback) {
   sha.update(data.fingerprint);
   sha.update(data.duration);
 
-  var key = Spotbox.namespace("acoustid:fingerprint" + sha.digest("hex"));
+  var key = Spotbox.namespace("acoustid:fingerprint:" + sha.digest("hex"));
 
   var params = {
     client: settings.acoustid.api_key,
-    meta: "recordings+releasegroups+releases",
     duration: data.duration,
     format: "json",
     fingerprint: data.fingerprint
@@ -101,19 +99,13 @@ Acoustid.fingerprintLookup = function(data, hollaback) {
 
   cachedRequest("POST", params, key, function(error, data) {
     if (error) {
-      hollback(error);
+      hollaback(error);
     } else {
-      if (data.results.length === 0) {
-        hollaback();
+      var result = findBestResult(data.results);
+      if (result) {
+        hollaback(null, result.id);
       } else {
-        var result = bestResult(data);
-        var acoustidData = {
-          acoustid: result.id,
-          trackId: result.recordings[0].id,
-          albumId: result.recordings[0].releasegroups[0].id
-        };
-
-        hollaback(null, acoustidData);
+        hollaback();
       }
     }
   });
@@ -122,7 +114,6 @@ Acoustid.fingerprintLookup = function(data, hollaback) {
 Acoustid.groupLookup = function(acoustid, hollaback) {
   var params = {
     client: settings.acoustid.api_key,
-    meta: "recordings+releasegroups+releases",
     format: "json",
     trackid: acoustid
   };
@@ -133,26 +124,56 @@ Acoustid.groupLookup = function(acoustid, hollaback) {
     if (error) {
       hollaback(error);
     } else {
-      var result = bestResult(data);
-      var recordingTracks = underscore.chain(result.recordings).map(result.recordings, function(recording) {
-        return buildRecordingTracks(recording);
-      }).flatten().value();
+      var result = findBestResult(data.results);
+
+      var recordingTracks = underscore.reduce(result.recordings, function(memo, recording) {
+        try {
+          memo = memo.concat(buildRecordingTracks(recording));
+        } catch(e) {
+          console.log("error building recording track: ", e);
+        }
+        return memo;
+      }, []);
 
       hollaback(null, recordingTracks);
     }
   });
 };
 
-Acoustid.lookup = function(acoustid, trackId, albumId, hollaback) {
-  var key = Spotbox.namespace("acoustid:track:" + acoustid + trackId + albumId);
+Acoustid.bestMatchLookup = function(acoustidId, sourceTrack, hollaback) {
+  Acoustid.groupLookup(acoustidId, function(error, tracks) {
+    var filteredTracks = underscore.filter(tracks, function(track) {
+      return track.artists && track.artists.length && track.length && track.name;
+    });
+    if (sourceTrack.name) {
+      var orderedTracks = underscore.sortBy(filteredTracks, function(track) {
+        var parts = sourceTrack.name.split(/\s/);
+        return -underscore.reduce(parts, function(memo, part) {
+          if (part.length >= 3) {
+            if (track.name.match(part)) {
+              memo += part.length;
+            };
+          }
+          return memo;
+        }, 0);
+      });
+      hollaback(null, orderedTracks[0]);
+    } else {
+      hollaback(null, filteredTracks[0]);
+    }
+  });
+};
+
+Acoustid.lookup = function(acoustidId, trackId, albumId, hollaback) {
+  var key = Spotbox.namespace("acoustid:track:" + acoustidId + trackId + albumId);
 
   redis.get(key, function(error, cachedMetadata) {
     if (error) {
       hollaback(error);
     } else if (cachedMetadata) {
-      hollback(null, JSON.parse(cachedMetadata));
+      hollaback(null, JSON.parse(cachedMetadata));
     } else {
-      Acoustid.groupLookup(acoustid, function(error, tracks) {
+      Acoustid.groupLookup(acoustidId, function(error, tracks) {
         if (error) {
           hollaback(error);
         } else {
