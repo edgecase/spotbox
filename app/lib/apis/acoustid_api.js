@@ -68,7 +68,7 @@ function buildRecordingTracks(recording) {
       album: {
         name: group.title,
         id: group.id,
-        released: group.releases[0].date.year
+        released: (group.releases[0].date || {}).year
       }
     };
   });
@@ -81,8 +81,12 @@ function findBestResult(results) {
 };
 
 function scoreMatch(string, part) {
+  // TODO: This should match only whole words, not parts of words
+  // ie: 'if' should match 'if', but not 'infamous'
+  // TODO: If this changes, the split needs to change
   var points = 0;
   if (part.length >= 3) {
+    // TODO: should be something like ^||\s part $||\s
     if (string.match(part)) {
       points += Math.pow(part.length, 2);
     };
@@ -170,6 +174,9 @@ Acoustid.bestMatchLookup = function(acoustidId, sourceTrack, hollaback) {
         }, 0);
       }, 0);
       points -= Math.abs(sourceTrack.length - track.length);
+      if (track.year) {
+        points += 5;
+      }
       return -points;
     });
     hollaback(null, orderedTracks[0]);
