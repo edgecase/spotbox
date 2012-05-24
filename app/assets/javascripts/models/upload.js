@@ -5,7 +5,7 @@ Spotbox.Models.Upload = Ember.Object.extend({
   upload: function(hollaback) {
     var self = this;
     var file = this.get("file");
-    var url = "/upload/";
+    var url = "/tracks/";
     var xhr = new XMLHttpRequest();
     var data = new FormData;
     data.append("track", file);

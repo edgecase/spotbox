@@ -7,11 +7,17 @@ module.exports = function(server) {
     response.render("main");
   });
 
-  server.post("/upload", function(request, response) {
+  server.post("/tracks/", function(request, response) {
     var file = request.files.track;
     if (file) {
-      response.json({});
-      TrackManager.import(file.path, function() {});
+      TrackManager.import(file.path, {email: request.session.email || "unknown"}, function(error) {
+        if (error) {
+          console.log("Track upload error:", error);
+          response.send(500);
+        } else {
+          response.json({});
+        }
+      });
     } else {
       response.send(422);
     }
