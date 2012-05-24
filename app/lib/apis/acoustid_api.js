@@ -1,6 +1,7 @@
 var path        = require("path");
 var querystring = require("querystring");
 var crypto      = require("crypto");
+var underscore  = require("underscore");
 var app         = require(path.join(__dirname, "..", "..", "..", "config", "app"));
 var settings    = require(path.join(app.root, "config", "settings"));
 var redis       = require(path.join(app.root, "config", "redis"));
@@ -21,11 +22,13 @@ function request(method, data, hollaback) {
     path: "/" + apiSettings.version + "/lookup"
   };
 
+  var query = querystring.stringify(data) + "&meta=recordings+releasegroups+releases";
   rateLimiter.queue(function() {
     if (method === "POST") {
       options.headers = {"Content-Type": "application/x-www-form-urlencoded"};
-      HttpJson.post(options, querystring.stringify(data), hollaback);
+      HttpJson.post(options, query, hollaback);
     } else {
+      options.path += "?" + query;
       HttpJson.get(options, hollaback);
     }
   });

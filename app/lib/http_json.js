@@ -9,16 +9,17 @@ function request(options, hollaback) {
   underscore.extend(options.headers, {"User-Agent": Spotbox.userAgent});
 
   var request = http.request(options, function(response) {
-    var metadata = "";
+    var data = "";
     response.on("data", function(chunk) {
-      metadata += chunk.toString();
+      data += chunk.toString();
     });
     response.on("end", function() {
       try {
-        hollaback(null, JSON.parse(metadata));
+        var json = JSON.parse(data);
       } catch (e) {
-        hollaback({error: "HttpJson", message: metadata});
+        hollaback({error: "HttpJson", message: data});
       }
+      hollaback(null, json);
     });
     response.on("error", function(error) {
       hollaback(error);
