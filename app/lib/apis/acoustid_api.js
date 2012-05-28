@@ -8,6 +8,7 @@ var redis       = require(path.join(app.root, "config", "redis"));
 var RateLimiter = require(path.join(app.root, "app", "lib", "rate_limiter"));
 var HttpJson    = require(path.join(app.root, "app", "lib", "http_json"));
 var Spotbox     = require(path.join(app.root, "app", "lib", "spotbox"));
+var Levenshtein = require(path.join(app.root, "app", "lib", "levenshtein"));
 
 var rateLimiter = new RateLimiter(1000.0 / 3); // 3 requests per second
 
@@ -80,20 +81,6 @@ function findBestResult(results) {
   })[0];
 };
 
-function scoreMatch(string, part) {
-  // TODO: This should match only whole words, not parts of words
-  // ie: 'if' should match 'if', but not 'infamous'
-  // TODO: If this changes, the split needs to change
-  var points = 0;
-  if (part.length >= 3) {
-    // TODO: should be something like ^||\s part $||\s
-    if (string.match(part)) {
-      points += Math.pow(part.length, 2);
-    };
-  }
-  return points;
-};
-
 
 var Acoustid = function() {};
 
@@ -157,27 +144,17 @@ Acoustid.groupLookup = function(acoustid, hollaback) {
 Acoustid.bestMatchLookup = function(acoustidId, sourceTrack, hollaback) {
   Acoustid.groupLookup(acoustidId, function(error, tracks) {
     var filteredTracks = underscore.filter(tracks, function(track) {
-      return track.artists && track.artists.length && track.length && track.name;
+      return track.artists && track.artists.length && track.album && track.album.name && track.length && track.name;
     });
     var orderedTracks = underscore.sortBy(filteredTracks, function(track) {
       var points = 0;
-      var nameParts = sourceTrack.name.split(/\s/);
-      var artistParts = underscore.map(sourceTrack.artists, function(artist) {
-        artist.name.split(/\s/)
-      }).join(" ");
-      points += underscore.reduce(nameParts, function(memo, part) {
-        return memo + scoreMatch(track.name, part);;
-      }, 0);
-      points += underscore.reduce(artistParts, function(artistsPoints, part) {
-        return artistsPoints + underscore.reduce(track.artists, function(artistPoints, artist) {
-          return artistPoints + scoreMatch(artist.name, part);
-        }, 0);
-      }, 0);
-      points -= Math.abs(sourceTrack.length - track.length);
-      if (track.year) {
-        points += 5;
-      }
-      return -points;
+      var sourceArtistChunks = underscore.pluck(sourceTrack.artists, "name").sort().join(" ");
+      var trackArtistsChunks =  underscore.pluck(track.artists, "name").sort().join(" ");
+      points += Levenshtein.distance(sourceTrack.name, track.name);
+      points += Levenshtein.distance(sourceTrack.album.name, track.album.name);
+      points += Levenshtein.distance(sourceArtistChunks, trackArtistsChunks);
+      points += Math.abs(sourceTrack.length - track.length);
+      return points;
     });
     hollaback(null, orderedTracks[0]);
   });

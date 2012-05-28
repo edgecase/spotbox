@@ -67,6 +67,87 @@ function getPlayerForId(id) {
   return player;
 };
 
+function findByFingerprint(fingerprint, hollaback) {
+  db.collection("tracks", function(error, collection) {
+    if (error) return hollaback(error);
+    collection.find({fingerprint: fingerprint}, {limit: 1}).toArray(function(error, tracks) {
+      if (error) return hollaback(error);
+      hollaback(null, tracks[0]);
+    });
+  });
+};
+
+function findByAcoustidId(acoustidId, hollaback) {
+  db.collection("tracks", function(error, collection) {
+    if (error) return hollaback(error);
+    collection.find({acoustid: {id: acoustidId}}, {limit: 1}).toArray(function(error, tracks) {
+      if (error) return hollaback(error);
+      hollaback(null, tracks[0]);
+    });
+  });
+};
+
+function findByFingerprintOrAcoustidId(fingerprint, acoustidId, hollaback) {
+  var runner = new AsyncRunner(function(errors, results) {
+    if (errors) return hollaback(errors);
+    hollaback(null, underscore.compact(results)[0]);
+  });
+  runner.run({}, [
+    function(element, hollaback) {
+      findByFingerprint(fingerprint, hollaback);
+    },
+    function(element, hollaback) {
+      findByAcoustidId(acoustidId, hollaback);
+    }
+  ]);
+};
+
+function addTrack(track, attrs, hollaback) {
+  underscore.extend(attrs, {created_at: new Date(), id: track.id});
+  db.collection("tracks", function(error, collection) {
+    collection.insert(attrs, {safe: true}, hollaback);
+  });
+};
+
+function importWithoutAcoustid(filepath, fingerprint, user, hollaback) {
+  findByFingerprint(findByFingerprint, function(error, result) {
+    if (error) return hollaback(error);
+    if (result) return hollaback({error: "track manager import", message: "duplicate track"});
+    Itunes.import(filepath, function(error, itunesMeta) {
+      if (error) return hollaback(error);
+      addTrack(itunesMeta, {fingerprint: fingerprint, user: user}, hollaback);
+    });
+  });
+};
+
+function importWithAcoustid(filepath, fingerprint, acoustidId, user, hollaback) {
+  findByFingerprintOrAcoustidId(fingerprint, acoustidId, function(error, result) {
+    if (error) return hollaback(error);
+    if (result) return hollaback({error: "track manager import", message: "duplicate track"});
+    Itunes.import(filepath, function(error, itunesMeta) {
+      if (error) return hollaback(error);
+      AcoustidApi.bestMatchLookup(acoustidId, itunesMeta, function(error, track) {
+        if (error) return hollaback(error);
+        if (!track) {
+          var attrs = { acoustid: {id: acoustidId}, fingerprint: fingerprint, user: user };
+          addTrack(itunesMeta, attrs, hollaback);
+        } else {
+          track.id = itunesMeta.id;
+          var attrs = {
+            fingerprint: fingerprint,
+            acoustid: {id: acoustidId, trackId: track.ids.music_brainz, albumId: track.album.id},
+            user: user
+          };
+          new AsyncRunner(hollaback).run({}, [
+            function(element, hollaback) { Itunes.retag(track, hollaback) },
+            function(element, hollaback) { addTrack(track, attrs, hollaback) }
+          ]);
+        }
+      });
+    });
+  });
+};
+
 
 var TrackManager = function() {};
 
@@ -111,103 +192,36 @@ TrackManager.queue = function() {
 
 TrackManager.retag = function(id, acoustidId, acoustidTrackId, acoustidAlbumId, hollaback) {
   AcoustidApi.lookup(acoustidId, acoustidTrackId, acoustidAlbumId, function(error, track) {
-    if (error) {
-      hollaback(error);
-    } else {
-      var runner = new AsyncRunner(hollaback);
-      runner.run({}, [
-        function(element, hollaback) {
-          Itunes.retag(id, track, hollaback);
-        },
-        function(element, hollaback) {
-          db.collection("tracks", function(error, collection) {
-            var acoustid = {
-              id: acoustidId,
-              trackId: acoustidTrackId,
-              albumId: acoustidAlbumId
-            };
-            collection.update({id: track.id}, {$set: {acoustid: acoustid}}, {upsert: true, safe: true}, hollaback);
-          });
-        }
-      ]);
-    }
+    if (error) return hollaback(error);
+    if (!track) return hollaback({error: "retag", message: "combination does not exist"});
+    db.collection("tracks", function(error, collection) {
+      var acoustid = {
+        id: acoustidId,
+        trackId: acoustidTrackId,
+        albumId: acoustidAlbumId
+      };
+      collection.update({id: track.id}, {$set: {acoustid: acoustid}}, {safe: true}, hollaback);
+    });
   });
 };
 
 TrackManager.import = function(filepath, user, hollaback) {
-  function addTrack(track, extras, hollaback) {
-    underscore.extend(extras, {user: user, created_at: new Date()});
-    db.collection("tracks", function(error, collection) {
-      collection.update({id: track.id}, {$set: extras}, {upsert: true, safe: true}, function() {
-        hollaback();
-      });
-    });
-  };
-
   var mp3filepath = filepath + ".mp3";
   fs.rename(filepath, mp3filepath, function(error) {
-    if (error) {
-      hollaback(error);
-    } else {
-      var runner = new AsyncRunner(function(errors, results) {
-        if (errors) {
-          hollaback(errors);
+    if (error) return hollaback(error);
+    Chromaprint.identify(mp3filepath, function(error, data) {
+      if (error) return hollaback(error);
+      var fingerprint = data.fingerprint;
+      AcoustidApi.fingerprintLookup(data, function(error, acoustidId) {
+        if (error) return hollaback(error);
+        if (!acoustidId) {
+          importWithoutAcoustid(mp3filepath, fingerprint, user, hollaback);
         } else {
-          var itunesMeta = results[0];
-          var fingerprint = results[1].fingerprint;
-          var acoustidId = results[1].acoustidId;
-          if (!acoustidId) {
-            addTrack(itunesMeta, {fingerprint: fingerprint}, hollaback);
-          } else {
-            AcoustidApi.bestMatchLookup(acoustidId, itunesMeta, function(error, track) {
-              if (error) {
-                hollaback(error);
-              } else if (!track) {
-                var attrs = {
-                  acoustid: {id: acoustidId},
-                  fingerprint: fingerprint
-                };
-                addTrack(itunesMeta, attrs, hollaback);
-              } else {
-                track.id = itunesMeta.id;
-                var runner = new AsyncRunner(hollaback);
-                runner.run({}, [
-                  function(element, hollaback) {
-                    Itunes.retag(track, hollaback);
-                  },
-                  function(element, hollaback) {
-                    var attrs = {
-                      fingerprint: fingerprint,
-                      acoustid: {id: acoustidId, trackId: track.ids.music_brainz, albumId: track.album.id}
-                    };
-                    addTrack(track, attrs, hollaback);
-                  }
-                ]);
-              }
-            });
-          }
+          importWithAcoustid(mp3filepath, fingerprint, acoustidId, user, hollaback);
         }
       });
-      runner.run({}, [
-        function(element, hollaback) {
-          Itunes.import(mp3filepath, hollaback);
-        },
-        function(element, hollaback) {
-          Chromaprint.identify(mp3filepath, function(error, data) {
-            if (error) {
-              hollaback(error);
-            } else if (!data) {
-              hollaback(null, {fingerprint: data.fingerprint});
-            } else {
-              AcoustidApi.fingerprintLookup(data, function(error, acoustidId) {
-                hollaback(error, {acoustidId: acoustidId, fingerprint: data.fingerprint});
-              });
-            }
-          });
-        },
-      ]);
-    }
-  });
+    });
+  })
 };
 
 TrackManager.addToPool = function(track, options, hollaback) {
