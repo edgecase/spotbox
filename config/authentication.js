@@ -11,7 +11,6 @@ google.handleAuthCallbackError( function (request, response) { response.send(403
 google.redirectPath('/');
 google.findOrCreateUser(function(session, accessToken, accessTokenExtra, googleUserMetadata) {
   var promise = this.Promise();
-  console.log(googleUserMetadata);
   session.email = googleUserMetadata.email;
   promise.fulfill({});
   return promise;
