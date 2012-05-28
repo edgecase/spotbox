@@ -77,6 +77,24 @@ module.exports = function(io) {
       });
     });
 
+    socket.on("tracks/uploads", function(message) {
+      authenticate(socket, function(error, user) {
+        if (error) {
+          socket.emit("error", message);
+        } else if (user) {
+          TrackManager.userUploads(user, function(error, tracks) {
+            if (error) {
+              socket.emit("error", message);
+            } else {
+              socket.emit("uploads/list", tracks);
+            }
+          });
+        } else {
+          socket.emit("authenticate");
+        }
+      });
+    });
+
 
     // Player interface
     socket.on("player/command", function(message) {

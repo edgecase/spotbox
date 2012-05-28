@@ -103,7 +103,7 @@ function findByFingerprintOrAcoustidId(fingerprint, acoustidId, hollaback) {
 };
 
 function addTrack(track, attrs, hollaback) {
-  underscore.extend(attrs, {created_at: new Date(), id: track.id});
+  underscore.extend(attrs, {createdAt: new Date(), id: track.id});
   db.collection("tracks", function(error, collection) {
     collection.insert(attrs, {safe: true}, hollaback);
   });
@@ -115,7 +115,7 @@ function importWithoutAcoustid(filepath, fingerprint, user, hollaback) {
     if (result) return hollaback({error: "track manager import", message: "duplicate track"});
     Itunes.import(filepath, function(error, itunesMeta) {
       if (error) return hollaback(error);
-      addTrack(itunesMeta, {fingerprint: fingerprint, user: user}, hollaback);
+      addTrack(itunesMeta, {fingerprint: fingerprint, user: user, provider: "local"}, hollaback);
     });
   });
 };
@@ -129,7 +129,7 @@ function importWithAcoustid(filepath, fingerprint, acoustidId, user, hollaback) 
       AcoustidApi.bestMatchLookup(acoustidId, itunesMeta, function(error, track) {
         if (error) return hollaback(error);
         if (!track) {
-          var attrs = { acoustid: {id: acoustidId}, fingerprint: fingerprint, user: user };
+          var attrs = { acoustid: {id: acoustidId}, fingerprint: fingerprint, user: user, provider: "local" };
           addTrack(itunesMeta, attrs, hollaback);
         } else {
           track.id = itunesMeta.id;
@@ -267,6 +267,21 @@ TrackManager.markSkipped = function(track, data, hollaback) {
       TrackManager.removeFromPool(track, hollaback);
     }
   ]);
+};
+
+TrackManager.userUploads = function(data, hollaback) {
+  db.collection("tracks", function(error, collection) {
+    collection.find({"user.email": data.email, provider: "acoustid"}).toArray(function(error, tracks) {
+      if (error) {
+        hollaback(error);
+      } else {
+        var possibleTracks = underscore.chain(tracks).reduce(function(memo, track) {
+          memo.push(AcoustidApi.groupLookup(track));
+        }, []).compact().value();
+        hollaback(null, possibleTracks);
+      }
+    });
+  });
 };
 
 TrackManager.on = function(key, hollaback) {
