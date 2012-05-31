@@ -149,11 +149,11 @@ Itunes.metadata = function(id, hollaback) {
               } else {
                 track.id = itunesMeta.id;
                 track.length = itunesMeta.length;
-                hollaback(null, track);
+                hollaback(null, underscore.extend(track, {meta: docs[0]}));
               }
             });
           } else {
-            hollaback(null, itunesMeta);
+            hollaback(null, underscore.extend(itunesMeta, {meta: docs[0]}));
           }
         }
       });

@@ -81,9 +81,9 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
   }),
 
   requestedBy: function() {
-    var user = this.getPath("model.user");
+    var user = this.getPath("model.meta.user");
     if (user) {
-      return "requested by " + user.email;
+      return "requested by: " + user.email.split("@")[0];
     } else {
       return "from playlist";
     }

@@ -11,7 +11,13 @@ google.handleAuthCallbackError( function (request, response) { response.send(403
 google.redirectPath('/');
 google.findOrCreateUser(function(session, accessToken, accessTokenExtra, googleUserMetadata) {
   var promise = this.Promise();
-  session.email = googleUserMetadata.email;
+  if (settings.google_auth.domain) {
+    if (googleUserMetadata.email.match("@" + settings.google_auth.domain)) {
+      session.email = googleUserMetadata.email;
+    }
+  } else {
+    session.email = googleUserMetadata.email;
+  }
   promise.fulfill({});
   return promise;
 });

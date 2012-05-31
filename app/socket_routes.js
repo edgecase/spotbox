@@ -32,6 +32,9 @@ module.exports = function(io) {
       Airfoil.status(function(error, properties) {
         socket.emit("airfoil", properties);
       });
+      authenticate(socket, function(error, user) {
+        socket.emit("authentication", user);
+      });
     })();
 
 

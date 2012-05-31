@@ -115,7 +115,7 @@ function importWithoutAcoustid(filepath, fingerprint, user, hollaback) {
     if (result) return hollaback({error: "track manager import", message: "duplicate track"});
     Itunes.import(filepath, function(error, itunesMeta) {
       if (error) return hollaback(error);
-      addTrack(itunesMeta, {fingerprint: fingerprint, user: user, provider: "local"}, hollaback);
+      addTrack(itunesMeta, {fingerprint: fingerprint, user: user, upload: true}, hollaback);
     });
   });
 };
@@ -129,14 +129,15 @@ function importWithAcoustid(filepath, fingerprint, acoustidId, user, hollaback) 
       AcoustidApi.bestMatchLookup(acoustidId, itunesMeta, function(error, track) {
         if (error) return hollaback(error);
         if (!track) {
-          var attrs = { acoustid: {id: acoustidId}, fingerprint: fingerprint, user: user, provider: "local" };
+          var attrs = { acoustid: {id: acoustidId}, fingerprint: fingerprint, user: user, upload: true };
           addTrack(itunesMeta, attrs, hollaback);
         } else {
           track.id = itunesMeta.id;
           var attrs = {
             fingerprint: fingerprint,
             acoustid: {id: acoustidId, trackId: track.ids.music_brainz, albumId: track.album.id},
-            user: user
+            user: user,
+            upload: true
           };
           new AsyncRunner(hollaback).run({}, [
             function(element, hollaback) { Itunes.retag(track, hollaback) },
@@ -172,7 +173,7 @@ TrackManager.enqueue = function(id, user, hollaback) {
           return t.id === id
         });
         if (!exists) {
-          track.user = user;
+          track.meta = {user: user};
           state.properties.queue.push(track);
           state.trigger("queue");
           hollaback(null, track);
@@ -271,17 +272,17 @@ TrackManager.markSkipped = function(track, data, hollaback) {
 
 TrackManager.userUploads = function(data, hollaback) {
   db.collection("tracks", function(error, collection) {
-    collection.find({"user.email": data.email, provider: "acoustid"}).toArray(function(error, tracks) {
-      if (error) {
-        hollaback(error);
-      } else {
-        var possibleTracks = underscore.chain(tracks).reduce(function(memo, track) {
-          memo.push(AcoustidApi.groupLookup(track));
-        }, []).compact().value();
-        hollaback(null, possibleTracks);
-      }
+    collection.find({"user.email": data.email, upload: true}).toArray(function(error, tracks) {
+      if (error) return hollaback(error);
+      new AsyncRunner(hollaback).run(tracks, function(track, hollaback) {
+        TrackManager.lookup(track.id, hollaback);
+      });
     });
   });
+};
+
+TrackManager.lookup = function(id, hollaback) {
+  getPlayerForId(id).lookup(id, hollaback);
 };
 
 TrackManager.on = function(key, hollaback) {

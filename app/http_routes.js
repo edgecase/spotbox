@@ -15,7 +15,7 @@ module.exports = function(server) {
     response.render("main");
   });
 
-  server.post("/tracks/", function(request, response) {
+  server.post("/tracks/", authenticate, function(request, response) {
     var file = request.files.track;
     if (file) {
       TrackManager.import(file.path, {email: request.session.email || "unknown"}, function(error) {

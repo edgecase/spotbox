@@ -16,5 +16,8 @@ Spotbox.Controllers.Application = Ember.Object.create({
     Spotbox.socket.on("authenticate", function() {
       page("/auth/google");
     });
+    Spotbox.socket.on("authentication", function(user) {
+      self.set("user", user);
+    });
   }
 });
