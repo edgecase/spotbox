@@ -2,24 +2,31 @@ window.Spotbox = Ember.Application.create({
   ready: function() {
     Spotbox.Views.Layout.create().append();
     var tabContainer = Ember.ContainerView.create();
+    var messageContainer = Ember.ContainerView.create();
     tabContainer.appendTo(".tab-content");
+    messageContainer.appendTo(".message-container");
     Spotbox.TabManager = Spotbox.StateManagers.TabManager.create({rootView: tabContainer});
+    Spotbox.MessageContainer = messageContainer;
     page(window.location.pathname);
   },
 
   errorMessage: function(tagline, description) {
-    Spotbox.Views.Alert.create({tagline: tagline, description: description, alertError: true}).appendTo(".messages");
+    Spotbox.MessageContainer.get("childViews").pushObject(
+      Spotbox.Views.Alert.create({tagline: tagline, description: description, alertError: true})
+    );
   },
 
   successMessage: function(tagline, description) {
-    Spotbox.Views.Alert.create({tagline: tagline, description: description, alertSuccess: true}).appendTo(".messages");
+    Spotbox.MessageContainer.get("childViews").pushObject(
+      Spotbox.Views.Alert.create({tagline: tagline, description: description, alertSuccess: true})
+    );
   },
 
-  displayUser: function(user) {
+  userName: function(user) {
     if (user) {
       return _.map(user.email.split("@")[0].split("."), _.capitalize).join(" ");
     } else {
-      return "";
+      return "Anonymous Coward";
     }
   },
 

@@ -3,9 +3,11 @@ Spotbox.Controllers.Uploads = Ember.ArrayController.create({
 
   init: function() {
     var self = this;
-
     Spotbox.socket.on("uploads/list", function(results) {
-      console.log("Uploads:", results);
+      var tracks = _.map(results, function(track) {
+        return Spotbox.Models.Track.create(track);
+      });
+      self.set("content", tracks);
     });
   },
 
