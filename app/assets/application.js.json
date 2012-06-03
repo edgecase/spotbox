@@ -1,5 +1,6 @@
 {
   "files": [
+    "javascripts/init.js",
     "javascripts/lib/jquery.js",
     "javascripts/lib/underscore.js",
     "javascripts/lib/",
@@ -9,6 +10,7 @@
     "javascripts/controllers/",
     "javascripts/views/extensions.js",
     "javascripts/views/",
+    "javascripts/tab_manager.js",
     "javascripts/"
   ]
 }

@@ -1,12 +1,7 @@
 <div class="navbar-inner">
   <div class="container">
-    <a class="brand" href="#"><strong>Spotbox</strong>: <em>{{version}}</em></a>
-    {{#if user}}
-      <span class="label label-info">{{user.email}}</span>
-    {{else}}
-      <a href="#" {{action authenticate}}>Authenticate</a>
-    {{/if}}
-    <div id="search-bar">
+    <a class="brand" href="#"><strong>Spotbox</strong>: <em>{{view.version}}</em></a>
+    <div class="navbar-search pull-right">
       <i class="icon-search icon-white"></i>
       {{view Spotbox.Views.SearchField}}
     </div>

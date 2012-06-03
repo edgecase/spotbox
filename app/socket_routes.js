@@ -64,37 +64,25 @@ module.exports = function(io) {
 
     socket.on("tracks/enqueue", function(message) {
       authenticate(socket, function(error, user) {
-        if (error) {
-          socket.emit("error", message);
-        } else if (user) {
-          TrackManager.enqueue(message, user, function(error, result) {
-            if (error) {
-              socket.emit("error", error);
-            } else {
-              socket.emit("player/enqueue", result);
-            }
-          });
-        } else {
-          socket.emit("authenticate");
-        }
+        TrackManager.enqueue(message, user, function(error, result) {
+          if (error) {
+            socket.emit("error", error);
+          } else {
+            socket.emit("player/enqueue", result);
+          }
+        });
       });
     });
 
     socket.on("tracks/uploads", function(message) {
       authenticate(socket, function(error, user) {
-        if (error) {
-          socket.emit("error", message);
-        } else if (user) {
-          TrackManager.userUploads(user, function(error, tracks) {
-            if (error) {
-              socket.emit("error", message);
-            } else {
-              socket.emit("uploads/list", tracks);
-            }
-          });
-        } else {
-          socket.emit("authenticate");
-        }
+        TrackManager.userUploads(user, function(error, tracks) {
+          if (error) {
+            socket.emit("error", message);
+          } else {
+            socket.emit("uploads/list", tracks);
+          }
+        });
       });
     });
 

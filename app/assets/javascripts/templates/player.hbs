@@ -1,0 +1,27 @@
+<div class="well">
+  <div class="controls">
+    {{#view view.playbackControl}}
+      <i {{bindAttr class="view.playbackIcon"}}></i>
+    {{/view}}
+    <a {{action "thumbsUp"}} class="btn btn-large"><i class="icon-thumbs-up"></i></a>
+    <a {{action "thumbsDown"}} class="btn btn-large"><i class="icon-thumbs-down"></i></a>
+  </div>
+</div>
+
+{{#view view.playbackProgress}}
+  <div class="bar" {{bindAttr style="view.style"}}></div>
+{{/view}}
+
+<div class="well track-info">
+  <div class="row-fluid">
+    <div class="span4">
+      <a target="_blank" {{bindAttr href="view.itunesLink"}}><img {{bindAttr src="view.smallAlbumArtUrl"}} /></a>
+    </div>
+    <div class="span8">
+      <h2>{{view.model.name}}</h2>
+      <h3>{{view.model.artistName}}</h3>
+      <h3><em>{{view.model.albumName}} ({{view.model.releaseDate}})</em></h3>
+      <h3>{{view.requestedBy}}</h3>
+    </div>
+  </div>
+</div>

@@ -1,6 +1,9 @@
 window.Spotbox = Ember.Application.create({
   ready: function() {
     Spotbox.Views.Layout.create().append();
+    var tabContainer = Ember.ContainerView.create();
+    tabContainer.appendTo(".tab-content");
+    Spotbox.TabManager = Spotbox.StateManagers.TabManager.create({rootView: tabContainer});
     page(window.location.pathname);
   },
 
@@ -23,4 +26,5 @@ window.Spotbox = Ember.Application.create({
 Spotbox.Views = {};
 Spotbox.Models = {};
 Spotbox.Controllers = {};
+Spotbox.StateManagers = {};
 Spotbox.socket = io.connect();

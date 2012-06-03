@@ -1,13 +1,13 @@
-<table class="table table-striped track-list">
-  <div class"btn-group">
-    {{#view categoryButton name="itunes"}}
-      {{name}}
-    {{/view}}
-    {{#view categoryButton name="spotify"}}
-      {{name}}
-    {{/view}}
-  </div>
-  {{#if showContent}}
+{{#if view.showContent}}
+  <table class="table table-striped track-list">
+    <div class"btn-group">
+      {{#view view.categoryButton name="itunes"}}
+        {{view.name}}
+      {{/view}}
+      {{#view view.categoryButton name="spotify"}}
+        {{view.name}}
+      {{/view}}
+    </div>
     <thead>
       <tr>
         <th><a href="#" {{action "setSortKey"}} data-key="name">Track</a></th>
@@ -15,20 +15,20 @@
         <th><a href="#" {{action "setSortKey"}} data-key="displayDuration">Time</a></th>
         <th><a href="#" {{action "setSortKey"}} data-key="albumName">Album</a></th>
         <th><a href="#" {{action "setSortKey"}} data-key="releaseDate">Year</a></th>
-        <th></th>
+        <th>Actions</th>
       </tr>
     </head>
     <tbody>
-      {{#each content}}
-        {{#view Spotbox.Views.SearchResultsItem contentBinding="this"}}
-          <td>{{content.name}}</td>
-          <td>{{content.artistName}}</td>
-          <td>{{content.displayDuration}}</td>
-          <td>{{content.album.name}}</td>
-          <td>{{content.album.released}}</td>
+      {{#each view.content}}
+        {{#view view.searchResultsItem contentBinding="this"}}
+          <td>{{view.content.name}}</td>
+          <td>{{view.content.artistName}}</td>
+          <td>{{view.content.displayDuration}}</td>
+          <td>{{view.content.album.name}}</td>
+          <td>{{view.content.album.released}}</td>
           <td><a class="btn btn-success" {{action "enqueue"}}>Enqueue</a></td>
         {{/view}}
       {{/each}}
     </tbody>
-  {{/if}}
-</table>
+  </table>
+{{/if}}

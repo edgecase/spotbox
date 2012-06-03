@@ -1,6 +1,4 @@
-Spotbox.TabManager = Ember.StateManager.create({
-  rootElement: "#tab-content",
-
+Spotbox.StateManagers.TabManager = Ember.StateManager.extend({
   queue: Ember.ViewState.create({
     view: Spotbox.Views.Queue
   }),
@@ -12,20 +10,4 @@ Spotbox.TabManager = Ember.StateManager.create({
   uploads: Ember.ViewState.create({
     view: Spotbox.Views.UserUploads
   })
-});
-
-page("/", function(ctx) {
-  ctx.save();
-  Spotbox.TabManager.goToState("queue")
-});
-
-page("/search", function(ctx) {
-  ctx.save();
-  Spotbox.TabManager.goToState("search")
-});
-
-page("/uploads", function(ctx) {
-  ctx.save();
-  Spotbox.TabManager.goToState("uploads")
-  Spotbox.Controllers.Uploads.retrieve();
 });

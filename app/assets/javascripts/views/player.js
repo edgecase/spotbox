@@ -1,14 +1,15 @@
-Spotbox.Views.PlaybackControls = Ember.View.extend({
-  templateName: "playback_controls",
-  classNames: ["well"],
+Spotbox.Views.Player = Ember.View.extend({
+  templateName: "player",
+  classNames: ["player", "well"],
+  classNameBindings: ["draghover"],
   modelBinding: "Spotbox.Controllers.Player.content",
 
   didInsertElement: function() {
     var self = this;
-    this.$().on("dragenter", function() {
+    this.$().on("dragover", function() {
       self.set("draghover", true);
     });
-    this.$().on("dragexit", function() {
+    this.$().on("dragleave", function() {
       self.set("draghover", false);
     });
   },
@@ -18,6 +19,14 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
     _.each(event.originalEvent.dataTransfer.files, function(file) {
       Spotbox.Controllers.Uploads.upload(file);
     });
+  },
+
+  thumbsUp: function() {
+    console.log("thumbsup");
+  },
+
+  thumbsDown: function() {
+    console.log("thumbsdown");
   },
 
   smallAlbumArtUrl: function() {
@@ -35,7 +44,6 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
   playbackControl: Ember.View.extend({
     tagName: "a",
     classNames: ["btn", "btn-large"],
-    classNameBindings: ["someDontLike", "halfDontLike", "mostDontLike"],
     playbackIcon: "icon-play",
 
     click: function(event) {
@@ -43,9 +51,9 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
       var playbackState = Spotbox.Controllers.Player.get("playbackState");
 
       if (playbackState === "stopped") {
-        Spotbox.Controllers.Player.play();
+        Spotbox.Controllers.Player.unpause();
       } else if (playbackState === "paused") {
-        Spotbox.Controllers.Player.play();
+        Spotbox.Controllers.Player.unpause();
       } else if (playbackState === "playing") {
         Spotbox.Controllers.Player.pause();
       }
@@ -71,21 +79,11 @@ Spotbox.Views.PlaybackControls = Ember.View.extend({
     }.property("model.percent")
   }),
 
-  nextTrackControl: Ember.View.extend({
-    tagName: "a",
-    classNames: ["btn", "btn-mini"],
-
-    click: function(event) {
-      Spotbox.Controllers.Player.next();
-    }
-  }),
-
+  // TODO: Make this queue aware
+  // if in queue, display queued by
+  // otherwise ?
   requestedBy: function() {
     var user = this.getPath("model.meta.user");
-    if (user) {
-      return "requested by: " + user.email.split("@")[0];
-    } else {
-      return "from playlist";
-    }
+    return Spotbox.displayUser(user);
   }.property("model.user")
 });
