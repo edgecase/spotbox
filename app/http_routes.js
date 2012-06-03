@@ -11,7 +11,7 @@ function authenticate(request, response, next) {
 };
 
 module.exports = function(server) {
-  server.get("*", function(request, response) {
+  server.get("*", authenticate, function(request, response) {
     response.render("main");
   });
 

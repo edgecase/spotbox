@@ -13,10 +13,7 @@ Spotbox.Controllers.Application = Ember.Object.create({
     Spotbox.socket.on("error", function(msg) {
       Spotbox.errorMessage(msg.error, msg.message);
     });
-    Spotbox.socket.on("authenticate", function() {
-      page("/auth/google");
-    });
-    Spotbox.socket.on("authentication", function(user) {
+    Spotbox.socket.on("user", function(user) {
       self.set("user", user);
     });
   }

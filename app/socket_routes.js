@@ -33,7 +33,7 @@ module.exports = function(io) {
         socket.emit("airfoil", properties);
       });
       authenticate(socket, function(error, user) {
-        socket.emit("authentication", user);
+        socket.emit("user", user);
       });
     })();
 
@@ -90,22 +90,12 @@ module.exports = function(io) {
     // Player interface
     socket.on("player/command", function(message) {
       authenticate(socket, function(error, user) {
-        if (error) {
-          socket.emit("error", message);
-        } else if (user) {
-          if (message === "play") {
-            Player.play(function(error) {});
-          } else if (message === "pause") {
-            Player.pause(function() {});
-          } else if (message === "stop") {
-            Player.stop(function() {});
-          } else if (message === "next") {
-            Player.vote(user);
-          } else {
-            socket.emit("error", message);
-          }
+        if (message === "unpause") {
+          Player.play(function(error) {});
+        } else if (message === "pause") {
+          Player.pause(function() {});
         } else {
-          socket.emit("authenticate");
+          socket.emit("error", message);
         }
       });
     });
@@ -113,22 +103,16 @@ module.exports = function(io) {
     // Airfoil interface
     socket.on("airfoil", function(message) {
       authenticate(socket, function(error, user) {
-        if (error) {
-          socket.emit("error", message);
-        } else if (user) {
-          if (message === "connect") {
-            Airfoil.connect(function() {});
-          } else if (message === "disconnect") {
-            Airfoil.disconnect(function() {});
-          } else if (message === "volumeUp") {
-            Airfoil.volumeUp();
-          } else if (message === "volumeDown") {
-            Airfoil.volumeDown();
-          } else {
-            socket.emit("error", message);
-          }
+        if (message === "connect") {
+          Airfoil.connect(function() {});
+        } else if (message === "disconnect") {
+          Airfoil.disconnect(function() {});
+        } else if (message === "volumeUp") {
+          Airfoil.volumeUp();
+        } else if (message === "volumeDown") {
+          Airfoil.volumeDown();
         } else {
-          socket.emit("authenticate");
+          socket.emit("error", message);
         }
       });
     });
