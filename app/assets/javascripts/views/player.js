@@ -79,11 +79,8 @@ Spotbox.Views.Player = Ember.View.extend({
     }.property("model.percent")
   }),
 
-  // TODO: Make this queue aware
-  // if in queue, display queued by
-  // otherwise ?
   requestedBy: function() {
     var user = this.getPath("model.meta.user");
-    return Spotbox.displayUser(user);
+    return Spotbox.userName(user);
   }.property("model.user")
 });
