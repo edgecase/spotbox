@@ -1,61 +1,31 @@
-.navbar .container {
-  width: 90%;
-
-  #search-bar {
-    float: right;
-    margin-top: 5px;
-    i { vertical-align: middle; }
-  }
-}
-
 .container-fluid {
   margin: 0 auto;
   padding-top: 60px;
+}
+
+.draghover {
+  .box-shadow(0 0 5px 10px @successBorder);
 }
 
 .table.track-list tr td, .table.queue tr td {
   vertical-align: middle;
 }
 
-#player-container {
-  #control-well {
-    padding: 8px;
-    background-color: #EBEBEB;
+.player {
+  background-color: #EBEBEB;
 
-    .controls {
-      text-align: center;
-
-      #play-control {
-        margin: 0 10px;
-      }
-    }
+  .controls {
+    text-align: center;
   }
 
-  #track-info.well, #control-well.well {
-    &.some-dont-like {
-      background-color: #F0F0BB;
-      .box-shadow(inset 0 0 15px rgba(250,255,0,.8));
-    }
-    &.half-dont-like {
-      background-color: #F0B87B;
-      .box-shadow(inset 0 0 15px rgba(255,100,0,.8));
-    }
-    &.most-dont-like {
-      background-color: #F06565;
-      .box-shadow(inset 0 0 15px rgba(255,0,0,.8));
-    }
-  }
-
-  #track-info {
+  .track-info {
     padding: 15px;
-    background-color: #EBEBEB;
     margin-bottom: 0;
 
     h2 {
       margin: 5px 0 10px 0;
       font-size: 18px;
       line-height: 18px;
-      overflow: hidden;
     }
 
     h3 {
@@ -74,13 +44,5 @@
       width: 80px;
       height: 80px;
     }
-
   }
-}
-
-.spinner {
-  margin-top: 100px;
-  padding: 50px 0;
-  left: 50%;
-  top: 50%;
 }
