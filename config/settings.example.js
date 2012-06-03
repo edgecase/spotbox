@@ -1,26 +1,29 @@
-// Modify this file to your liking.
-//
 module.exports = {
-
-  // We use spotify to stream music. Here is a
-  // playlist that we quite like (sometimes).
-  // Add your own!
-  //
-  spotify: {
-    current_playlist: "spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg",
-    playlists: [
-      "spotify:user:felixflores:playlist:69OIU8YTz5g9XzKKv53vlg"
-    ]
+  session: {
+    secret: "sekrit"
   },
 
-  // We currently use last.fm for album artwork.
-  // Visit http://last.fm/api to obtain your key.
-  //
+  google_auth: {
+    app_id: "12345.apps.googleusercontent.com",
+    app_secret: "12345",
+    domain: "theedgecase.com"
+  },
+
   lastfm: {
-    api_key: ""
+    api_key: "12345"
+  },
+
+  acoustid: {
+    api_key: "12345"
   },
 
   airfoil: {
-    speaker_name: "airtunes"
+    volume: 35,
+    speaker_name: "Computer"
+  },
+
+  mongodb: {
+    host: "",
+    port: ""
   }
 }
