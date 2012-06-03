@@ -24,7 +24,7 @@ module.exports = function(server) {
   server.post("/tracks/", authenticate, function(request, response) {
     var file = request.files.track;
     if (file) {
-      TrackManager.import(file.path, {email: request.session.email || "unknown"}, function(error) {
+      TrackManager.import(file.path, file.filename, {email: request.session.email || "unknown"}, function(error) {
         if (error) {
           console.log("Track upload error:", error);
           response.json(error, 422);

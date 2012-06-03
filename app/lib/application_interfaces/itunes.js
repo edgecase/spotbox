@@ -134,23 +134,21 @@ Itunes.launch = function(hollaback) {
 
 Itunes.metadata = function(id, hollaback) {
   lookup(id, function(error, itunesMeta) {
+    if (error) return hollaback(error);
     db.collection("tracks", function(error, collection) {
+      if (error) return hollaback(error);
       collection.find({id: id}, {limit: 1}).toArray(function(error, docs) {
-        if (error) {
-          hollaback(error);
-        } else if (docs.length === 0) {
+        if (error) return hollaback(error);
+        if (docs.length === 0) {
           hollaback(null, itunesMeta);
         } else {
           var acoustid = docs[0].acoustid;
           if (acoustid && acoustid.id && acoustid.trackId && acoustid.albumId) {
             AcoustidApi.lookup(acoustid.id, acoustid.trackId, acoustid.albumId, function(error, track) {
-              if (error) {
-                hollaback(error);
-              } else {
-                track.id = itunesMeta.id;
-                track.length = itunesMeta.length;
-                hollaback(null, underscore.extend(track, {meta: docs[0]}));
-              }
+              if (error) return hollaback(error);
+              track.id = itunesMeta.id;
+              track.length = itunesMeta.length;
+              hollaback(null, underscore.extend(track, {meta: docs[0]}));
             });
           } else {
             hollaback(null, underscore.extend(itunesMeta, {meta: docs[0]}));

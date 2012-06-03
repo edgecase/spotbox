@@ -206,19 +206,19 @@ TrackManager.retag = function(id, acoustidId, acoustidTrackId, acoustidAlbumId, 
   });
 };
 
-TrackManager.import = function(filepath, user, hollaback) {
-  var mp3filepath = filepath + ".mp3";
-  fs.rename(filepath, mp3filepath, function(error) {
+TrackManager.import = function(filepath, filename, user, hollaback) {
+  var audioFilePath = filepath + "." + underscore.last(filename.split("."));
+  fs.rename(filepath, audioFilePath, function(error) {
     if (error) return hollaback(error);
-    Chromaprint.identify(mp3filepath, function(error, data) {
+    Chromaprint.identify(audioFilePath, function(error, data) {
       if (error) return hollaback(error);
       var fingerprint = data.fingerprint;
       AcoustidApi.fingerprintLookup(data, function(error, acoustidId) {
         if (error) return hollaback(error);
         if (!acoustidId) {
-          importWithoutAcoustid(mp3filepath, fingerprint, user, hollaback);
+          importWithoutAcoustid(audioFilePath, fingerprint, user, hollaback);
         } else {
-          importWithAcoustid(mp3filepath, fingerprint, acoustidId, user, hollaback);
+          importWithAcoustid(audioFilePath, fingerprint, acoustidId, user, hollaback);
         }
       });
     });
@@ -275,14 +275,16 @@ TrackManager.userUploads = function(data, hollaback) {
     collection.find({"user.email": data.email, upload: true}).toArray(function(error, tracks) {
       if (error) return hollaback(error);
       new AsyncRunner(hollaback).run(tracks, function(track, hollaback) {
-        TrackManager.lookup(track.id, hollaback);
+        TrackManager.metadata(track.id, hollaback);
       });
     });
   });
 };
 
-TrackManager.lookup = function(id, hollaback) {
-  getPlayerForId(id).lookup(id, hollaback);
+TrackManager.metadata = function(id, hollaback) {
+  var player = getPlayerForId(id);
+  if (!player) return hollaback({error: "not found", message: "track not found"});
+  player.metadata(id, hollaback);
 };
 
 TrackManager.on = function(key, hollaback) {
