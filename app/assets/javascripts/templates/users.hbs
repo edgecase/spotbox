@@ -1,0 +1,7 @@
+<ul>
+  {{#each view.content}}
+    {{#view view.userView userBinding="this"}}
+      <li>{{view.name}}</li>
+    {{/view}}
+  {{/each}}
+</ul>

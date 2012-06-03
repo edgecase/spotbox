@@ -12,7 +12,7 @@ google.redirectPath('/');
 google.findOrCreateUser(function(session, accessToken, accessTokenExtra, googleUserMetadata) {
   var promise = this.Promise();
   if (googleUserMetadata.email.match("@" + settings.google_auth.domain)) {
-    session.email = googleUserMetadata.email;
+    session.user = {email: googleUserMetadata.email};
   }
   promise.fulfill({});
   return promise;

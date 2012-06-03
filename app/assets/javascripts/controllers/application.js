@@ -3,18 +3,13 @@ Spotbox.Controllers.Application = Ember.Object.create({
   init: function() {
     var self = this;
     Spotbox.socket.on("spotbox/version", function(version) {
-      var oldVersion = self.get("version");
-      if (oldVersion && oldVersion !== version) {
-        window.location.reload();
-      } else {
-        self.set("version", version);
-      }
+      self.set("version", version);
     });
     Spotbox.socket.on("error", function(msg) {
       Spotbox.errorMessage(msg.error, msg.message);
     });
-    Spotbox.socket.on("user", function(user) {
-      self.set("user", user);
+    Spotbox.socket.on("reload", function(user) {
+      window.location.reload();
     });
   }
 });

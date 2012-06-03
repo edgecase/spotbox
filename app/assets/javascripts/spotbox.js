@@ -22,7 +22,7 @@ window.Spotbox = Ember.Application.create({
     );
   },
 
-  userName: function(user) {
+  username: function(user) {
     if (user) {
       return _.map(user.email.split("@")[0].split("."), _.capitalize).join(" ");
     } else {

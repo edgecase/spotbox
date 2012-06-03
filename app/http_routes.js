@@ -8,7 +8,7 @@ function authenticate(request, response, next) {
     next();
   } else {
     if (app.env === "development") {
-      request.session.email = settings["user"]["email"];
+      request.session.user = settings["user"];
       next();
     } else {
       response.redirect("/auth/google");
