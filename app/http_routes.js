@@ -1,12 +1,18 @@
-var path = require("path");
-var app  = require(path.join(__dirname, "..", "config", "app"));
+var path         = require("path");
+var app          = require(path.join(__dirname, "..", "config", "app"));
+var settings     = require(path.join(app.root, "config", "settings"));
 var TrackManager = require(path.join(app.root, "app", "lib", "track_manager"));
 
 function authenticate(request, response, next) {
   if (request.session.email) {
     next();
   } else {
-    response.redirect("/auth/google");
+    if (app.env === "development") {
+      request.session.email = settings["user"]["email"];
+      next();
+    } else {
+      response.redirect("/auth/google");
+    }
   }
 };
 
