@@ -15,6 +15,14 @@ window.Spotbox = Ember.Application.create({
     Spotbox.Views.Alert.create({tagline: tagline, description: description, alertSuccess: true}).appendTo(".messages");
   },
 
+  displayUser: function(user) {
+    if (user) {
+      return _.map(user.email.split("@")[0].split("."), _.capitalize).join(" ");
+    } else {
+      return "";
+    }
+  },
+
   itunesParam: function(str) {
     var lowerCaseWithoutAmpersands = new String(str.toLowerCase().split("&").join("and"));
     return lowerCaseWithoutAmpersands.replace(/[^a-zA-Z0-9]+/g, '');
