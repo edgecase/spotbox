@@ -22,11 +22,13 @@ Spotbox.Views.Player = Ember.View.extend({
   },
 
   thumbsUp: function() {
-    console.log("thumbsup");
+    var track = Spotbox.Controllers.Player.get("content");
+    Spotbox.Controllers.Player.thumbsUp(track);
   },
 
   thumbsDown: function() {
-    console.log("thumbsdown");
+    var track = Spotbox.Controllers.Player.get("content");
+    Spotbox.Controllers.Player.thumbsDown(track);
   },
 
   smallAlbumArtUrl: function() {

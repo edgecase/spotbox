@@ -33,18 +33,15 @@ function request(opts, params, hollaback) {
 
 function cachedRequest(options, params, cacheKey, hollaback) {
   redis.get(cacheKey, function(error, resultString) {
-    if (error) {
-      hollaback(error);
-    } else if (resultString) {
+    if (error) return hollaback(error);
+    if (resultString) {
       hollaback(null, JSON.parse(resultString));
     } else {
       request(options, params, function(error, json) {
-        if (error) {
-          hollaback(error);
-        } else {
-          hollaback(null, json);
-          redis.set(cacheKey, JSON.stringify(json));
-        }
+        if (error) return hollaback(error);
+        if (!json) return hollaback({error: "no data"});
+        hollaback(null, json);
+        redis.set(cacheKey, JSON.stringify(json));
       });
     }
   });
@@ -80,11 +77,8 @@ SpotifyApi.lookup = function(spotifyUri, hollaback) {
   var options = { type: "lookup" };
   var params  = { uri: spotifyUri };
   cachedRequest(options, params, key, function(error, metadata) {
-    if (error) {
-      hollaback(error);
-    } else {
-      hollaback(null, standardizeTrack(metadata.track));
-    }
+    if (error) return hollaback(error);
+    hollaback(null, standardizeTrack(metadata.track));
   });
 };
 

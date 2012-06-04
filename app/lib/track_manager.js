@@ -225,49 +225,12 @@ TrackManager.import = function(filepath, filename, user, hollaback) {
   })
 };
 
-TrackManager.addToPool = function(track, options, hollaback) {
-  underscore.extend(options, {id: track.id, pool: true});
-  db.collection("tracks", function(error, collection) {
-    collection.update({id: track.id}, {$set: options}, {upsert: true});
+// TODO: How does this fit into new playing system?
+TrackManager.markPlayed = function(track, hollaback) {
+  db.collection("played", function(error, collection) {
+    if (error) return hollaback(error);
+    collection.insert(track, {safe: true}, hollaback);
   });
-};
-
-TrackManager.removeFromPool = function(track, hollaback) {
-  db.collection("tracks", function(error, collection) {
-    collection.update({id: track.id}, {$set: {id: track.id, pool: false}}, {upsert: true});
-  });
-};
-
-TrackManager.markPlayed = function(track, data, hollaback) {
-  // TODO: Set created_at date
-  var runner = new AsyncRunner(hollaback);
-  runner.run(track, [
-    function(track, hollaback) {
-      db.collection("played", function(error, collection) {
-        collection.insert(underscore.extend({}, track, data), {});
-        hollaback(error);
-      });
-    },
-    function(track, hollaback) {
-      TrackManager.addToPool(track, {}, hollaback)
-    }
-  ]);
-};
-
-TrackManager.markSkipped = function(track, data, hollaback) {
-  // TODO: Set created_at date
-  var runner = new AsyncRunner(hollaback);
-  runner.run(track, [
-    function(track, hollaback) {
-      db.collection("skipped", function(error, collection) {
-        collection.insert(underscore.extend({}, track, data), {});
-        hollaback(error);
-      });
-    },
-    function(track, hollaback) {
-      TrackManager.removeFromPool(track, hollaback);
-    }
-  ]);
 };
 
 TrackManager.userUploads = function(data, hollaback) {
@@ -285,6 +248,23 @@ TrackManager.metadata = function(id, hollaback) {
   var player = getPlayerForId(id);
   if (!player) return hollaback({error: "not found", message: "track not found"});
   player.metadata(id, hollaback);
+};
+
+TrackManager.rate = function(id, user, rating) {
+  console.log(user, rating, id);
+  db.collection("tracks", function(error, collection) {
+    if (error) return hollaback(error);
+    collection.find({id: id}).toArray(function(error, results) {
+      if (error) return hollaback(error);
+      if (results.length > 0) {
+        var votes = results[0].votes;
+        var key = "votes." + user.email;
+        //collection.update({id: track.id}, {$set: {}});
+      } else {
+        // add track
+      }
+    });
+  });
 };
 
 TrackManager.on = function(key, hollaback) {

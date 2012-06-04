@@ -64,11 +64,11 @@ module.exports = function(io) {
         });
         var jobs = [
           function(element, hollaback) {
-          Itunes.search(element, hollaback);
-        },
-        function(element, hollaback) {
-          Spotify.search(element, hollaback);
-        }
+            Itunes.search(element, hollaback);
+          },
+          function(element, hollaback) {
+            Spotify.search(element, hollaback);
+          }
         ];
         runner.run(message, jobs);
       });
@@ -91,6 +91,14 @@ module.exports = function(io) {
             socket.emit("uploads/list", tracks);
           }
         });
+      });
+
+      socket.on("tracks/rating", function(track, rating) {
+        if (track) {
+          if (rating === "up" || rating === "down") {
+            TrackManager.rate(track.id, user, rating);
+          }
+        }
       });
 
 
@@ -122,7 +130,6 @@ module.exports = function(io) {
     });
 
 
-
     // Inform browser of changes in the queue
     TrackManager.on("queue", function(properties) {
       io.sockets.emit("tracks/queue", properties.queue);
@@ -140,10 +147,6 @@ module.exports = function(io) {
 
     Player.on("track", function(properties) {
       io.sockets.emit("player/track", properties.track);
-    });
-
-    Player.on("votes", function(properties) {
-      io.sockets.emit("player/votes", properties.votes);
     });
 
 

@@ -36,5 +36,13 @@ Spotbox.Controllers.Player = Ember.Object.create({
 
   pause: function() {
     Spotbox.socket.emit("player/command", "pause");
+  },
+
+  thumbsUp: function(track) {
+    Spotbox.socket.emit("tracks/rating", track, "up");
+  },
+
+  thumbsDown: function(track) {
+    Spotbox.socket.emit("tracks/rating", track, "down");
   }
 });

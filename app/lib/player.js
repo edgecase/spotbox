@@ -11,18 +11,11 @@ var Airfoil      = require(path.join(app.root, "app", "lib", "application_interf
 var TrackManager = require(path.join(app.root, "app", "lib", "track_manager"));
 
 
-if (app.env === "development") {
-  var QUOREM_SIZE = 1;
-} else {
-  var QUOREM_SIZE = 4;
-}
-
 var currentPlayer = null;
 var state = new EventedState({
   state: "stopped",
   track: null,
-  progress: "0",
-  votes: {}
+  progress: "0"
 });
 
 function setPlayerBindings(player) {
@@ -84,13 +77,10 @@ function pauseCurrent(hollaback) {
 function play(track, hollaback) {
   var previousTrack = state.properties.track;
   var previousProgress = parseInt(state.properties.progress, 10);
-  state.set("votes", {});
 
   if (previousTrack) {
     if (previousProgress === 0 || previousProgress >= (previousTrack.length - 5)) {
-      TrackManager.markPlayed(previousTrack, {}, function() {});
-    } else {
-      // TrackManager.markSkipped(previousTrack, {progress: previousProgress}, function() {});
+      TrackManager.markPlayed(previousTrack, function() {});
     }
   }
 
@@ -135,14 +125,6 @@ Player.pause = function(hollaback) {
 
 Player.unpause = function(hollaback) {
   unpauseCurrent(hollaback);
-};
-
-Player.vote = function(user) {
-  state.properties.votes[user.email] = true;
-  if (underscore.size(state.properties.votes) >= QUOREM_SIZE) {
-    playNext(function() {});
-  }
-  state.trigger("votes");
 };
 
 Player.properties = function() {

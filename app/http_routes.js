@@ -4,7 +4,7 @@ var settings     = require(path.join(app.root, "config", "settings"));
 var TrackManager = require(path.join(app.root, "app", "lib", "track_manager"));
 
 function authenticate(request, response, next) {
-  if (request.session.email) {
+  if (request.session.user) {
     next();
   } else {
     if (app.env === "development") {
