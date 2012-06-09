@@ -25,5 +25,10 @@ module.exports = {
   mongodb: {
     host: "",
     port: ""
+  },
+
+  // user to use in development instead of actually hitting google auth
+  user: {
+    email: "foo@theedgecase.com"
   }
 }
