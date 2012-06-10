@@ -137,10 +137,10 @@ Itunes.metadata = function(id, hollaback) {
     if (error) return hollaback(error);
     db.collection("tracks", function(error, collection) {
       if (error) return hollaback(error);
-      collection.find({id: id}, {limit: 1}).toArray(function(error, docs) {
+      collection.find({id: id}).limit(1).toArray(function(error, docs) {
         if (error) return hollaback(error);
         if (docs.length === 0) {
-          hollaback(null, itunesMeta);
+          hollaback(null, underscore.extend(itunesMeta, {meta: {}}));
         } else {
           var acoustid = docs[0].acoustid;
           if (acoustid && acoustid.id && acoustid.trackId && acoustid.albumId) {

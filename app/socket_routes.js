@@ -96,7 +96,7 @@ module.exports = function(io) {
       socket.on("tracks/rating", function(track, rating) {
         if (track) {
           if (rating === "up" || rating === "down") {
-            TrackManager.rate(track.id, user, rating);
+            TrackManager.vote(track.id, user, rating, function(error, result) { });
           }
         }
       });

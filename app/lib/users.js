@@ -15,4 +15,8 @@ Users.list = function () {
   return underscore.map(users, function(user) { return {email: user.email}; });
 };
 
+Users.safeEmail = function(user) {
+  return user.email.replace("\.", "_dot_");
+}
+
 module.exports = Users;

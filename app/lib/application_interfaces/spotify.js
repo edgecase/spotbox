@@ -97,11 +97,11 @@ Spotify.launch = function(hollaback) {
 Spotify.metadata = function(id, hollaback) {
   db.collection("tracks", function(error, collection) {
     if (error) return hollaback(error);
-    collection.find({id: id}, {limit: 1}).toArray(function(error, docs) {
+    collection.find({id: id}).limit(1).toArray(function(error, docs) {
       if (error) return hollaback(error);
       SpotifyApi.lookup(id, function(error, track) {
         if (error) return hollaback(error);
-        hollaback(null, underscore.extend(track, {meta: docs[0]}));
+        hollaback(null, underscore.extend(track, {meta: docs[0] || {}}));
       });
     });
   });
