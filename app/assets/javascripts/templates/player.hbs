@@ -21,7 +21,12 @@
       <h2>{{view.model.name}}</h2>
       <h3>{{view.model.artistName}}</h3>
       <h3><em>{{view.model.albumName}} ({{view.model.releaseDate}})</em></h3>
-      <h3>{{view.requestedBy}}</h3>
+      {{#if view.fromPlaylist}}
+        from playlist
+      {{else}}
+        requested by:
+        <h3>{{view.requestedBy}}</h3>
+      {{/if}}
     </div>
   </div>
 </div>

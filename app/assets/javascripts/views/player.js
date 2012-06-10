@@ -81,8 +81,11 @@ Spotbox.Views.Player = Ember.View.extend({
     }.property("model.percent")
   }),
 
+  fromPlaylist: function() {
+    return !this.getPath("model.queue");
+  }.property("model"),
+
   requestedBy: function() {
-    var user = this.getPath("model.meta.user");
-    return Spotbox.username(user);
-  }.property("model.user")
+    return Spotbox.username(this.getPath("model.meta.user"));
+  }.property("model")
 });

@@ -12,15 +12,17 @@
   </head>
   <tbody>
     {{#each view.content}}
-      <tr>
-        <td>{{name}}</td>
-        <td>{{artistName}}</td>
-        <td>{{displayDuration}}</td>
-        <td>{{album.name}}</td>
-        <td>{{album.released}}</td>
-        <td>{{displayUser}}</td>
-        <td>{{eta}}</td>
-      </tr>
+      {{#view view.queueItem contentBinding="this"}}
+        <tr>
+          <td>{{name}}</td>
+          <td>{{artistName}}</td>
+          <td>{{displayDuration}}</td>
+          <td>{{album.name}}</td>
+          <td>{{album.released}}</td>
+          <td>{{view.username}}</td>
+          <td>{{eta}}</td>
+        </tr>
+      {{/view}}
     {{/each}}
   </tbody>
 {{/if}}
