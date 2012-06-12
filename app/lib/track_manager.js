@@ -28,9 +28,12 @@ function trackScore(id, hollaback) {
       var score = underscore.reduce(users, function(memo, user) {
         var vote = track.votes[Users.safeEmail(user)];
         if (vote === "up") {
-          memo++;
+          memo = memo + 1;
         } else if (vote === "down") {
-          memo--;
+          memo = memo - 1;
+        } else {
+          // No vote
+          memo = memo + 0.5;
         }
         return memo;
       }, 0);
@@ -280,6 +283,10 @@ TrackManager.vote = function(id, user, rating, hollaback) {
     vote[voteKey] = rating;
     collection.update({id: id}, {$set: vote}, {safe: true}, hollaback);
   });
+};
+
+TrackManager.score = function(id, hollaback) {
+  trackScore(id, hollaback);
 };
 
 TrackManager.on = function(key, hollaback) {
