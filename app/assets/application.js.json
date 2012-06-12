@@ -3,6 +3,7 @@
     "javascripts/init.js",
     "javascripts/lib/jquery.js",
     "javascripts/lib/underscore.js",
+    "javascripts/lib/handlebars.js",
     "javascripts/lib/",
     "javascripts/spotbox.js",
     "javascripts/models/track.js",

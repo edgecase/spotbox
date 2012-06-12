@@ -4,10 +4,12 @@ var vm                 = require("vm");
 var app                = require(path.join(__dirname, "..", "..", "..", "config", "app"));
 var ember_path         = path.join(app.root, "app", "assets", "javascripts", "lib", "ember.js");
 var ember_context_path = path.join(app.root, "app", "lib", "preprocessors", "ember_context.js");
+var handlebars_path    = path.join(app.root, "app", "assets", "javascripts", "lib", "handlebars.js");
 
 function create_context() {
   var context = vm.createContext({});
   vm.runInContext(fs.readFileSync(ember_context_path, "utf8"), context);
+  vm.runInContext(fs.readFileSync(handlebars_path, "utf8"), context);
   vm.runInContext(fs.readFileSync(ember_path, "utf8"), context);
   return context;
 };
