@@ -1,7 +1,7 @@
 var path              = require("path");
 var underscore        = require("underscore");
 var express           = require("express");
-var parseCookie       = require("connect").utils.parseCookie;
+var cookie            = require("cookie");
 var assetbuilder      = require("asset_builder");
 var socketio          = require("socket.io");
 var everyauth         = require("everyauth");
@@ -56,8 +56,9 @@ function initSockets(server) {
     io.set("transports", ["websocket"]);
     io.disable("log");
     io.set("authorization", function(data, hollaback) {
-      var sessionId = parseCookie(data.headers.cookie)["connect.sid"];
+      var sessionId = cookie.parse(data.headers.cookie)["connect.sid"];
       sessionStore.get(sessionId, function(error, session) {
+        if (!session) return hollaback({error: "no session"});
         data.session = session;
         hollaback(error, true);
       });
