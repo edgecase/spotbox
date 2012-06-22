@@ -84,7 +84,7 @@ Spotify.launch = function(hollaback) {
     } else {
       runner.run({}, [
         function(element, hollaback) {
-          exec("set sound volume to 50", hollaback);
+          exec("set sound volume to 75", hollaback);
         },
         function(element, hollaback) {
           Spotify.pause(hollaback);
