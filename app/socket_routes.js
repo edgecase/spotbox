@@ -117,15 +117,13 @@ module.exports = function(server, sessionStore) {
         });
       });
 
-      // TODO: Just send the ID
-      // TODO: Display current votes
       socket.on("tracks/rating", function(track, rating) {
         if (rating === "up" || rating === "down") {
           TrackManager.vote(track.id, user, rating, function(error, result) {
-            if (track.id === Player.properties.track.id) {
+            if (track.id === Player.properties().track.id) {
               TrackManager.score(track.id, function(error, score) {
                 if (score < 0) {
-                  TrackManager.next(function() {});
+                  Player.next(function() {});
                 }
               });
             }

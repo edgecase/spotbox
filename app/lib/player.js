@@ -119,6 +119,10 @@ Player.play = function(hollaback) {
   }
 };
 
+Player.next = function(hollaback) {
+  playNext(hollaback);
+};
+
 Player.pause = function(hollaback) {
   pauseCurrent(hollaback);
 };
