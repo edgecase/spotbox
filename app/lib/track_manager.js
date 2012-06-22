@@ -26,7 +26,7 @@ function trackScore(id, hollaback) {
       if (!track.votes) return hollaback(null, 0);
       var users = Users.list();
       var score = underscore.reduce(users, function(memo, user) {
-        var vote = track.votes[Users.safeEmail(user)];
+        var vote = track.votes[user.id];
         if (vote === "up") {
           memo = memo + 1;
         } else if (vote === "down") {
@@ -257,7 +257,7 @@ TrackManager.markPlayed = function(track, hollaback) {
 // List tracks that a user has uploaded
 TrackManager.userUploads = function(user, hollaback) {
   db.collection("tracks", function(error, collection) {
-    collection.find({"user.email": user.email, upload: true}).toArray(function(error, tracks) {
+    collection.find({"user.id": user.is, upload: true}).toArray(function(error, tracks) {
       if (error) return hollaback(error);
       new AsyncRunner(hollaback).run(tracks, function(track, hollaback) {
         TrackManager.metadata(track.id, hollaback);
@@ -278,7 +278,7 @@ TrackManager.vote = function(id, user, rating, hollaback) {
   if (!(rating === "up" || rating === "down")) return hollaback({error: "vote", message: "rating " + rating + " must be up or down"});
   db.collection("tracks", function(error, collection) {
     if (error) return hollaback(error);
-    var voteKey = "votes." + Users.safeEmail(user);
+    var voteKey = "votes." + user.id;
     var vote = {};
     vote[voteKey] = rating;
     collection.update({id: id}, {$set: vote}, {safe: true}, hollaback);

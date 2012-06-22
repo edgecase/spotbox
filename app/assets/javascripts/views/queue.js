@@ -10,7 +10,7 @@ Spotbox.Views.Queue = Ember.View.extend({
 
   queueItem: Ember.View.extend({
     username: function() {
-      return Spotbox.username(this.getPath("content.meta.user"));
+      return this.getPath("content.meta.user.name");
     }.property("content")
   })
 });

@@ -4,7 +4,7 @@ Spotbox.Views.Users = Ember.View.extend({
 
   userView: Ember.View.extend({
     name: function() {
-      return Spotbox.username(this.get("user"));
+      return this.getPath("user.name");
     }.property("content")
   })
 });

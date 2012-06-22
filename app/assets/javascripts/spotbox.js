@@ -22,14 +22,6 @@ window.Spotbox = Ember.Application.create({
     );
   },
 
-  username: function(user) {
-    if (user) {
-      return _.map(user.email.split("@")[0].split("."), _.capitalize).join(" ");
-    } else {
-      return "Anonymous Coward";
-    }
-  },
-
   itunesParam: function(str) {
     var lowerCaseWithoutAmpersands = new String(str.toLowerCase().split("&").join("and"));
     return lowerCaseWithoutAmpersands.replace(/[^a-zA-Z0-9]+/g, '');

@@ -86,6 +86,6 @@ Spotbox.Views.Player = Ember.View.extend({
   }.property("model"),
 
   requestedBy: function() {
-    return Spotbox.username(this.getPath("model.meta.user"));
+    return this.getPath("model.meta.user.name");
   }.property("model")
 });
