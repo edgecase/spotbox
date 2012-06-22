@@ -31,4 +31,4 @@ module.exports = {
   user: {
     email: "foo@theedgecase.com"
   }
-}
+};

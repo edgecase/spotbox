@@ -1,23 +1,17 @@
 var path         = require("path");
+var passport     = require("passport");
 var app          = require(path.join(__dirname, "..", "config", "app"));
 var settings     = require(path.join(app.root, "config", "settings"));
 var TrackManager = require(path.join(app.root, "app", "lib", "track_manager"));
-
-function authenticate(request, response, next) {
-  if (request.session.user) {
-    next();
-  } else {
-    if (app.env === "development") {
-      request.session.user = settings["user"];
-      next();
-    } else {
-      response.redirect("/auth/google");
-    }
-  }
-};
+var authSettings = require(path.join(app.root, "config", "authentication"));
 
 module.exports = function(server) {
-  server.get("*", authenticate, function(request, response) {
+  var authenticate = function(request, response, next) {
+    if (request.isAuthenticated()) return next();
+    response.redirect("/authenticate");
+  };
+
+  server.get("/", authenticate, function(request, response) {
     response.render("main");
   });
 

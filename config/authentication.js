@@ -1,19 +1,49 @@
-var path      = require("path");
-var everyauth = require("everyauth");
-var app       = require(path.join(__dirname, "app"));
-var settings  = require(path.join(app.root, "config", "settings"));
+var path       = require("path");
+var underscore = require("underscore");
+var passport   = require("passport")
+var Strategy   = require("passport-google-oauth").OAuth2Strategy;
+var app        = require(path.join(__dirname, "app"));
+var settings   = require(path.join(app.root, "config", "settings"));
+var db         = require(path.join(app.root, "config", "database"));
 
-var google = everyauth.google;
-google.appId(settings.google_auth.app_id);
-google.appSecret(settings.google_auth.app_secret);
-google.scope("https://www.googleapis.com/auth/userinfo.email");
-google.handleAuthCallbackError( function (request, response) { response.send(403); });
-google.redirectPath('/');
-google.findOrCreateUser(function(session, accessToken, accessTokenExtra, googleUserMetadata) {
-  var promise = this.Promise();
-  if (googleUserMetadata.email.match("@" + settings.google_auth.domain)) {
-    session.user = {email: googleUserMetadata.email};
-  }
-  promise.fulfill({});
-  return promise;
+var passportSettings = {
+  callbackURL: "/auth/google/callback",
+  scope: [
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/userinfo.email"
+  ]
+};
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
 });
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
+
+passport.use(new Strategy(underscore.extend(passportSettings, settings.google_auth), function(accessToken, refreshToken, profile, hollaback) {
+  var user = profile["_json"];
+  console.log(user);
+  if (!user.email.match("@" + settings.google_auth.domain)) return hollaback(null, false);
+  db.collection("users", function(error, collection) {
+    if (error) return hollaback(error);
+    collection.update({id: user.id}, user, {safe: true, upsert: true}, function(error) {
+      hollaback(null, user);
+    });
+  });
+}));
+
+// authentication routes
+module.exports = function(server) {
+  server.get("/authenticate", function(request, response, next) {
+    if (app.env === "development") {
+      request.login(settings.user, {}, function() { response.redirect("/")});
+    } else {
+      passport.authenticate("google", {scope: passportSettings.scope})(request, response, next);
+    }
+  }, function() {});
+  server.get("/auth/google/callback", passport.authenticate("google"), function(request, response) {
+    response.redirect("/");
+  });
+};

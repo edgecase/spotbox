@@ -1,5 +1,8 @@
 var path         = require("path");
 var fs           = require("fs");
+var querystring  = require("querystring");
+var socketio     = require("socket.io");
+var cookie       = require("cookie");
 var underscore   = require("underscore");
 var AsyncRunner  = require("async_runner");
 var app          = require(path.join(__dirname, "..", "config", "app"));
@@ -12,12 +15,33 @@ var Itunes       = require(path.join(app.root, "app", "lib", "application_interf
 var Spotify      = require(path.join(app.root, "app", "lib", "application_interfaces", "spotify"));
 var Users        = require(path.join(app.root, "app", "lib", "users"));
 
-module.exports = function(io) {
+module.exports = function(server, sessionStore) {
+  var io = socketio.listen(server);
+  io.configure(function () {
+    io.set("transports", ["websocket"]);
+    io.disable("log");
+    io.set("authorization", function(data, hollaback) {
+      var sid = cookie.parse(data.headers.cookie)["connect.sid"];
+      if (!sid) return hollaback(null, false);
+      sessionStore.get(querystring.unescape(sid), function(error, session) {
+        if (error) return hollaback(error);
+        if (session) {
+          data.session = session;
+          hollaback(null, true);
+        } else {
+          hollaback(null, false);
+        }
+      });
+    });
+  });
+
   function authenticate(socket, hollaback) {
     try {
-      hollaback(null, socket.handshake.session.user);
+      hollaback(null, socket.handshake.session.passport.user);
     } catch (e) {
-      hollaback({error: "authentication"});
+      console.log("error", e);
+      socket.emit("reload");
+      socket.disconnect();
     }
   };
 
