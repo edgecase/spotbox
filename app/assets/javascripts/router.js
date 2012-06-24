@@ -19,6 +19,18 @@ Spotbox.Router = Ember.Router.extend({
       connectOutlets: function(router) {
         router.get("applicationController").connectOutlet("search");
       }
+    }),
+    likes: Ember.Route.extend({
+      route: "/likes",
+      connectOutlets: function(router) {
+        router.get("applicationController").connectOutlet("likes");
+      }
+    }),
+    dislikes: Ember.Route.extend({
+      route: "/dislikes",
+      connectOutlets: function(router) {
+        router.get("applicationController").connectOutlet("dislikes");
+      }
     })
   })
 });

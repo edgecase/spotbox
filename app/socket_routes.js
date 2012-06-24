@@ -45,6 +45,17 @@ module.exports = function(server, sessionStore) {
     }
   };
 
+  function refreshVotes(user, socket) {
+    TrackManager.liked(user, function(error, tracks) {
+      if (error) return socket.emit("error", errors);
+      socket.emit("tracks/liked", tracks);
+    });
+    TrackManager.disliked(user, function(error, tracks) {
+      if (error) return socket.emit("error", errors);
+      socket.emit("tracks/disliked", tracks);
+    });
+  };
+
   io.sockets.on("connection", function(socket) {
     authenticate(socket, function(error, user) {
       if (error || !user) {
@@ -70,6 +81,7 @@ module.exports = function(server, sessionStore) {
         Airfoil.status(function(error, properties) {
           socket.emit("airfoil", properties);
         });
+        refreshVotes(user, socket);
       })();
 
 
@@ -120,6 +132,8 @@ module.exports = function(server, sessionStore) {
       socket.on("tracks/rating", function(track, rating) {
         if (rating === "up" || rating === "down") {
           TrackManager.vote(track.id, user, rating, function(error, result) {
+            if (error) return;
+            refreshVotes(user, socket);
             if (track.id === Player.properties().track.id) {
               TrackManager.score(track.id, function(error, score) {
                 if (score < 0) {

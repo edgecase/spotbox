@@ -74,6 +74,21 @@ function findNextTrack(hollaback) {
   });
 };
 
+function findByUserAndRating(user, rating, hollaback) {
+  db.collection("tracks", function(error, collection) {
+    if (error) return hollaback(error);
+    var voteKey = "votes." + user.id;
+    var search = {};
+    search[voteKey] = rating;
+    collection.find(search).toArray(function(error, tracks) {
+      if (error) return hollaback(error);
+      new AsyncRunner(hollaback).run(tracks, function(track, hollaback) {
+        TrackManager.metadata(track.id, hollaback);
+      });
+    });
+  });
+};
+
 function getPlayerForId(id) {
   var player;
   if (id.match(/itunes/)) {
@@ -283,6 +298,14 @@ TrackManager.vote = function(id, user, rating, hollaback) {
     vote[voteKey] = rating;
     collection.update({id: id}, {$set: vote}, {safe: true}, hollaback);
   });
+};
+
+TrackManager.liked = function(user, hollaback) {
+  findByUserAndRating(user, "up", hollaback);
+};
+
+TrackManager.disliked = function(user, hollaback) {
+  findByUserAndRating(user, "down", hollaback);
 };
 
 TrackManager.score = function(id, hollaback) {
