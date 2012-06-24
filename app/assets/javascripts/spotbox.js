@@ -1,4 +1,11 @@
 window.Spotbox = Ember.Application.create({
+  ready: function() {
+    // Populate initial outlets
+    var ac = Spotbox.router.applicationController;
+    ac.connectOutlet({name: "player", outletName: "player"});
+    ac.connectOutlet({name: "airfoil", outletName: "airfoil"});
+    ac.connectOutlet({name: "users", outletName: "users"});
+  },
   errorMessage: function(tagline, description) {
     // TODO: Convert message container to a message controller with a view etc
     Spotbox.MessageContainer.get("childViews").pushObject(

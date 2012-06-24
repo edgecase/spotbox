@@ -6,11 +6,15 @@ Spotbox.Track = Ember.Object.extend({
   }.property("progress"),
 
   artistName: function() {
-    var artist_name = _.map(this.get('artists'), function(artist) {
+    var name = _.map(this.get('artists'), function(artist) {
       return artist.name;
     }).join(", ");
-    return artist_name;
+    return name;
   }.property("artists"),
+
+  artistAndTrack: function() {
+    return this.get("artistName") + " - " + this.get("name");
+  }.property("artists", "name"),
 
   displayDuration: function() {
     var duration = this.get("length");
@@ -18,17 +22,5 @@ Spotbox.Track = Ember.Object.extend({
     var seconds  = Math.floor(duration % 60);
     if (seconds < 10) { seconds = "0" + seconds; }
     return minutes + ":" + seconds;
-  }.property("length"),
-
-  albumName: function() {
-    return this.getPath("album.name");
-  }.property("album"),
-
-  releaseDate: function() {
-    return this.getPath("album.released");
-  }.property("album"),
-
-  artistAndTrack: function() {
-    return this.get("artistName") + " - " + this.get("name");
-  }.property("artists", "name")
+  }.property("length")
 });

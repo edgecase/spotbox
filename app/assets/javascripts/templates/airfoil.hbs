@@ -3,7 +3,7 @@
     {{#view view.toggleButton}}{{view.connectionStatusText}}{{/view}}
   </div>
   <div class="btn-group">
-    <a {{action "volumeDown"}} class="btn btn-mini"><i class="icon-volume-down"></i></a>
-    <a {{action "volumeUp"}} class="btn btn-mini"><i class="icon-volume-up"></i></a>
+    <a {{action "volumeDown" target="view"}} class="btn btn-mini"><i class="icon-volume-down"></i></a>
+    <a {{action "volumeUp" target="view"}} class="btn btn-mini"><i class="icon-volume-up"></i></a>
   </div>
 </div>

@@ -3,8 +3,8 @@
     {{#view view.playbackControl}}
       <i {{bindAttr class="view.playbackIcon"}}></i>
     {{/view}}
-    <a {{action "thumbsUp"}} class="btn btn-large"><i class="icon-thumbs-up"></i></a>
-    <a {{action "thumbsDown"}} class="btn btn-large"><i class="icon-thumbs-down"></i></a>
+    <a {{action "thumbsUp" target="view"}} class="btn btn-large"><i class="icon-thumbs-up"></i></a>
+    <a {{action "thumbsDown" target="view"}} class="btn btn-large"><i class="icon-thumbs-down"></i></a>
   </div>
 </div>
 
@@ -18,11 +18,11 @@
       <a target="_blank" {{bindAttr href="view.itunesLink"}}><img {{bindAttr src="view.smallAlbumArtUrl"}} /></a>
     </div>
     <div class="span8">
-      <h2>{{view.model.name}}</h2>
-      <h3>{{view.model.artistName}}</h3>
-      <h3><em>{{view.model.albumName}} ({{view.model.releaseDate}})</em></h3>
+      <h2>{{view.controller.content.name}}</h2>
+      <h3>{{view.controller.content.artistName}}</h3>
+      <h3><em>{{view.controller.content.album.name}} ({{view.controller.content.album.released}})</em></h3>
       {{#if view.fromPlaylist}}
-        from playlist
+        playing from pool
       {{else}}
         requested by:
         <h3>{{view.requestedBy}}</h3>

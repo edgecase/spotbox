@@ -2,7 +2,6 @@ Spotbox.PlayerView = Ember.View.extend({
   templateName: "player",
   classNames: ["player", "well"],
   classNameBindings: ["draghover"],
-  modelBinding: "Spotbox.router.playerController.content",
 
   didInsertElement: function() {
     var self = this;
@@ -17,76 +16,74 @@ Spotbox.PlayerView = Ember.View.extend({
   drop: function(event) {
     this.set("draghover", false);
     _.each(event.originalEvent.dataTransfer.files, function(file) {
-      Spotbox.router.get("uploadsController").upload(file);
+      Spotbox.router.uploadsController.upload(file);
     });
   },
 
   thumbsUp: function() {
-    var track = Spotbox.router.getPath("playerController.content");
-    Spotbox.router.get("playerController").thumbsUp(track);
+    var track = this.getPath("controller.content");
+    Spotbox.router.playerController.thumbsUp(track);
   },
 
   thumbsDown: function() {
-    var track = Spotbox.router.getPath("playerController.content");
-    Spotbox.router.get("playerController").thumbsDown(track);
+    var track = this.getPath("controller.content");
+    Spotbox.router.playerController.thumbsDown(track);
   },
 
   smallAlbumArtUrl: function() {
-    var currentTrack = Spotbox.router.getPath("playerController.content");
-    var artwork      = currentTrack.getPath("album.artwork")
+    var artwork = this.getPath("controller.content.album.artwork");
     return artwork && artwork[1]["#text"] || "/images/missing_album_art.jpg";
-  }.property("Spotbox.router.playerController.content.album.artwork"),
+  }.property("controller.content.album.artwork"),
 
   itunesLink: function() {
-    var track = Spotbox.router.getPath("playerController.content");
-    var artist = track.getPath("artistName");
-    var track  = track.getPath("name");
+    var track = this.getPath("controller.content");
+    var artist = track.get("artistName");
+    var track  = track.get("name");
     return "http://itunes.com/" + Spotbox.itunesParam(artist) + "/" + Spotbox.itunesParam(track);
-  }.property("Spotbox.router.playerController.content"),
+  }.property("controller.content"),
 
   playbackControl: Ember.View.extend({
     tagName: "a",
     classNames: ["btn", "btn-large"],
     playbackIcon: "icon-play",
+    playbackStateBinding: "parentView.controller.playbackState",
 
     click: function(event) {
-      event.preventDefault();
-      var playbackState = Spotbox.router.getPath("playerController.playbackState");
+      var playbackState = this.get("playbackState");
 
       if (playbackState === "stopped") {
-        Spotbox.playerController.unpause();
+        Spotbox.router.playerController.unpause();
       } else if (playbackState === "paused") {
-        Spotbox.playerController.unpause();
+        Spotbox.router.playerController.unpause();
       } else if (playbackState === "playing") {
-        Spotbox.playerController.pause();
+        Spotbox.router.playerController.pause();
       }
     },
 
     setPlaybackIcon: function() {
-      var playbackState = Spotbox.router.getPath("playerController.playbackState");
+      var playbackState = this.get("playbackState");
 
       if (playbackState === "stopped" || playbackState === "paused") {
         this.set("playbackIcon", "icon-play");
       } else if (playbackState === "playing") {
         this.set("playbackIcon", "icon-pause");
       }
-    }.observes("Spotbox.router.playerController.playbackState")
+    }.observes("playbackState")
   }),
 
   playbackProgress: Ember.View.extend({
     classNames: ["progress", "progress-success"],
-    modelBinding: "Spotbox.router.playerController.content",
-
+    contentBinding: "parentView.controller.content",
     style: function() {
-      return "width: " + this.getPath("model.percent") + "%;";
-    }.property("model.percent")
+      return "width: " + this.getPath("content.percent") + "%;";
+    }.property("content.percent")
   }),
 
   fromPlaylist: function() {
-    return !this.getPath("model.queue");
-  }.property("model"),
+    return !this.getPath("controller.content.queue");
+  }.property("controller.content"),
 
   requestedBy: function() {
-    return this.getPath("model.meta.user.name");
-  }.property("model")
+    return this.getPath("controller.content.meta.user.name");
+  }.property("controller.content")
 });
