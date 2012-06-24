@@ -11,8 +11,7 @@ Spotbox.SearchFieldView = Ember.TextField.extend({
 
   submit: function(event) {
     Spotbox.router.get("searchController").search(this.get("query"));
-    //TODO: Router
-    // page("/search");
+    Spotbox.router.transitionTo("search");
   },
 
   insertNewline: function(event) {

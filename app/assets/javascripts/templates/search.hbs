@@ -1,0 +1,32 @@
+<table class="table table-striped track-list">
+  <div class"btn-group">
+    {{#view view.categoryButton name="itunes"}}
+      {{view.name}}
+    {{/view}}
+    {{#view view.categoryButton name="spotify"}}
+      {{view.name}}
+    {{/view}}
+  </div>
+  <thead>
+    <tr>
+      <th>Track</th>
+      <th>Artist</th>
+      <th>Time</th>
+      <th>Album</th>
+      <th>Year</th>
+      <th>Actions</th>
+    </tr>
+  </head>
+  <tbody>
+    {{#each controller.content}}
+      {{#view view.searchResultsItem contentBinding="this"}}
+        <td>{{view.content.name}}</td>
+        <td>{{view.content.artistName}}</td>
+        <td>{{view.content.displayDuration}}</td>
+        <td>{{view.content.album.name}}</td>
+        <td>{{view.content.album.released}}</td>
+        <td><a class="btn btn-success" {{action enqueue target="view"}}>Enqueue</a></td>
+      {{/view}}
+    {{/each}}
+  </tbody>
+</table>

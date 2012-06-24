@@ -1,0 +1,24 @@
+<thead>
+  <tr>
+    <th>Name</th>
+    <th>Artist</th>
+    <th>Time</th>
+    <th>Album</th>
+    <th>Year</th>
+    <th>User</th>
+    <th class="span2">ETA</th>
+  </tr>
+</head>
+<tbody>
+  {{#each controller.content}}
+    <tr>
+      <td>{{name}}</td>
+      <td>{{artistName}}</td>
+      <td>{{displayDuration}}</td>
+      <td>{{album.name}}</td>
+      <td>{{album.released}}</td>
+      <td>{{meta.user.name}}</td>
+      <td>{{eta}}</td>
+    </tr>
+  {{/each}}
+</tbody>

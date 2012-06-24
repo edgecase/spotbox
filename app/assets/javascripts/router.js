@@ -11,7 +11,13 @@ Spotbox.Router = Ember.Router.extend({
     queue: Ember.Route.extend({
       route: "/queue",
       connectOutlets: function(router) {
-        router.get("applicationController").connectOutlet("queuedTracks");
+        router.get("applicationController").connectOutlet("queue");
+      }
+    }),
+    search: Ember.Route.extend({
+      route: "/search",
+      connectOutlets: function(router) {
+        router.get("applicationController").connectOutlet("search");
       }
     })
   })

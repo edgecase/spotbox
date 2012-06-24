@@ -1,11 +1,7 @@
-<!-- Header -->
 {{view Spotbox.HeaderView}}
-<!-- End Header -->
 
-<!-- Container -->
 <div class="container-fluid">
 
-  <!-- Row -->
   <div class="row-fluid">
 
     <!-- Player -->
@@ -18,15 +14,16 @@
     </div>
     <!-- End Player -->
 
-    <!-- Lists -->
     <div class="span9">
-      <div class="row-fluid message-container">
-      </div>
+      <ul class="nav nav-tabs">
+        {{#view view.tabView name="queue"}}
+          <a>Queue</a>
+        {{/view}}
+        {{#view view.tabView name="search"}}
+          <a>Search</a>
+        {{/view}}
+      </ul>
       {{outlet}}
     </div>
-    <!-- End Lists -->
-
   </div>
-  <!-- End Row -->
 </div>
-<!-- End Container -->

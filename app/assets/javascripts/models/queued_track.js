@@ -1,8 +1,8 @@
 Spotbox.QueuedTrack = Spotbox.Track.extend({
   eta: function() {
-    var playState = Spotbox.playerController.get("playbackState");
+    var playState = Spotbox.router.getPath("playerController.playbackState");
     if (playState === "playing") {
-      var queuedTracks = Spotbox.queuedTracksController.get("content");
+      var queuedTracks = Spotbox.router.getPath("queuedTracksController.content");
       var index = queuedTracks.indexOf(this);
       var currentTrack = Spotbox.playerController.get("content");
       var seconds = currentTrack.get("length") - currentTrack.get("progress");

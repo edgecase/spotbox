@@ -1,4 +1,4 @@
-Spotbox.QueuedTracksController = Ember.ArrayController.extend({
+Spotbox.QueueController = Ember.ArrayController.extend({
   content: [],
 
   init: function() {
