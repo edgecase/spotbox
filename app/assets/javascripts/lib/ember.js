@@ -153,8 +153,8 @@ window.ember_deprecateFunc  = Ember.deprecateFunc("ember_deprecateFunc is deprec
 
 })();
 
-// Version: v0.9.8.1-423-g84e9626
-// Last commit: 84e9626 (2012-06-22 15:45:46 -0700)
+// Version: v0.9.8.1-425-g3c34892
+// Last commit: 3c34892 (2012-06-23 19:58:59 -0700)
 
 
 (function() {
@@ -15597,6 +15597,7 @@ Ember.Routable = Ember.Mixin.create({
   */
   stashContext: function(manager, context) {
     var serialized = this.serialize(manager, context);
+    Ember.assert('serialize must return a hash', !serialized || typeof serialized === 'object');
 
     manager.setStateMeta(this, 'serialized', serialized);
 
@@ -19957,8 +19958,8 @@ Ember.$(document).ready(
 
 })();
 
-// Version: v0.9.8.1-423-g84e9626
-// Last commit: 84e9626 (2012-06-22 15:45:46 -0700)
+// Version: v0.9.8.1-425-g3c34892
+// Last commit: 3c34892 (2012-06-23 19:58:59 -0700)
 
 
 (function() {
