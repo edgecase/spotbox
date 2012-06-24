@@ -1,0 +1,7 @@
+{{#each controller.content}}
+  {{#view view.itemView contentBinding="this"}}
+    <button class="close" {{action clear target="view"}}>×</button>
+    <strong>{{view.content.title}}</strong>
+    {{view.content.text}}
+  {{/view}}
+{{/each}}

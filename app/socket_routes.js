@@ -39,19 +39,17 @@ module.exports = function(server, sessionStore) {
     try {
       hollaback(null, socket.handshake.session.passport.user);
     } catch (e) {
-      console.log("error", e);
       socket.emit("reload");
-      socket.disconnect();
     }
   };
 
   function refreshVotes(user, socket) {
     TrackManager.liked(user, function(error, tracks) {
-      if (error) return socket.emit("error", errors);
+      if (error) return socket.emit("messages/error", error);
       socket.emit("tracks/liked", tracks);
     });
     TrackManager.disliked(user, function(error, tracks) {
-      if (error) return socket.emit("error", errors);
+      if (error) return socket.emit("messages/error", errors);
       socket.emit("tracks/disliked", tracks);
     });
   };
@@ -112,9 +110,10 @@ module.exports = function(server, sessionStore) {
       socket.on("tracks/enqueue", function(message) {
         TrackManager.enqueue(message, user, function(error, result) {
           if (error) {
-            socket.emit("error", error);
+            socket.emit("messages/error", error);
           } else {
             socket.emit("player/enqueue", result);
+            socket.emit("messages/success", null, "Enqueued track");
           }
         });
       });

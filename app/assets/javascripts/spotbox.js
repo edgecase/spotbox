@@ -5,18 +5,15 @@ window.Spotbox = Ember.Application.create({
     ac.connectOutlet({name: "player", outletName: "player"});
     ac.connectOutlet({name: "airfoil", outletName: "airfoil"});
     ac.connectOutlet({name: "users", outletName: "users"});
-  },
-  errorMessage: function(tagline, description) {
-    // TODO: Convert message container to a message controller with a view etc
-    Spotbox.MessageContainer.get("childViews").pushObject(
-      Spotbox.AlertView.create({tagline: tagline, description: description, alertError: true})
-    );
+    ac.connectOutlet({name: "messages", outletName: "messages"});
   },
 
-  successMessage: function(tagline, description) {
-    Spotbox.MessageContainer.get("childViews").pushObject(
-      Spotbox.AlertView.create({tagline: tagline, description: description, alertSuccess: true})
-    );
+  errorMessage: function(title, text) {
+    Spotbox.router.messagesController.pushObject({"alert-error": true, title: title, text: text});
+  },
+
+  successMessage: function(title, text) {
+    Spotbox.router.messagesController.pushObject({"alert-success": true, title: title, text: text});
   },
 
   itunesParam: function(str) {
