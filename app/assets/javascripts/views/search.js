@@ -11,7 +11,6 @@ Spotbox.SearchView = Ember.View.extend({
       return category === this.get("name");
     }.property("controller.displayCategory")
   }),
-
   itemView: Ember.View.extend({
     tagName: "tr",
     enqueue: function() {

@@ -1,7 +1,6 @@
 Spotbox.UploadsController = Ember.ArrayController.extend({
   content: [],
   active: [],
-
   init: function() {
     var self = this;
     Spotbox.socket.on("uploads", function(results) {
@@ -11,7 +10,6 @@ Spotbox.UploadsController = Ember.ArrayController.extend({
       self.set("content", tracks);
     });
   },
-
   upload: function(file) {
     var self = this;
     var model = Spotbox.Upload.create({file: file});

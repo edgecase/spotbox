@@ -8,7 +8,6 @@ Spotbox.AirfoilController = Ember.Controller.extend({
       self.set("volume", message.volume);
     });
   },
-
   toggleConnection: function() {
     if (this.get("connection")) {
       Spotbox.socket.emit("airfoil", "disconnect");
@@ -16,11 +15,9 @@ Spotbox.AirfoilController = Ember.Controller.extend({
       Spotbox.socket.emit("airfoil", "connect");
     }
   },
-
   volumeUp: function() {
     Spotbox.socket.emit("airfoil", "volumeUp");
   },
-
   volumeDown: function() {
     Spotbox.socket.emit("airfoil", "volumeDown");
   }

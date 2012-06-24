@@ -2,7 +2,6 @@ Spotbox.PlayerView = Ember.View.extend({
   templateName: "player",
   classNames: ["player", "well"],
   classNameBindings: ["draghover"],
-
   didInsertElement: function() {
     var self = this;
     this.$().on("dragover", function() {
@@ -12,7 +11,6 @@ Spotbox.PlayerView = Ember.View.extend({
       self.set("draghover", false);
     });
   },
-
   drop: function(event) {
     event.preventDefault();
     this.set("draghover", false);
@@ -20,35 +18,29 @@ Spotbox.PlayerView = Ember.View.extend({
       Spotbox.router.uploadsController.upload(file);
     });
   },
-
   thumbsUp: function() {
     var track = this.getPath("controller.content");
     Spotbox.router.playerController.thumbsUp(track);
   },
-
   thumbsDown: function() {
     var track = this.getPath("controller.content");
     Spotbox.router.playerController.thumbsDown(track);
   },
-
   smallAlbumArtUrl: function() {
     var artwork = this.getPath("controller.content.album.artwork");
     return artwork && artwork[1]["#text"] || "/images/missing_album_art.jpg";
   }.property("controller.content.album.artwork"),
-
   itunesLink: function() {
     var track = this.getPath("controller.content");
     var artist = track.get("artistName");
     var track  = track.get("name");
     return "http://itunes.com/" + Spotbox.itunesParam(artist) + "/" + Spotbox.itunesParam(track);
   }.property("controller.content"),
-
   playbackControl: Ember.View.extend({
     tagName: "a",
     classNames: ["btn", "btn-large"],
     playbackIcon: "icon-play",
     playbackStateBinding: "parentView.controller.playbackState",
-
     click: function(event) {
       var playbackState = this.get("playbackState");
 
@@ -60,10 +52,8 @@ Spotbox.PlayerView = Ember.View.extend({
         Spotbox.router.playerController.pause();
       }
     },
-
     setPlaybackIcon: function() {
       var playbackState = this.get("playbackState");
-
       if (playbackState === "stopped" || playbackState === "paused") {
         this.set("playbackIcon", "icon-play");
       } else if (playbackState === "playing") {
@@ -71,7 +61,6 @@ Spotbox.PlayerView = Ember.View.extend({
       }
     }.observes("playbackState")
   }),
-
   playbackProgress: Ember.View.extend({
     classNames: ["progress", "progress-success"],
     contentBinding: "parentView.controller.content",
@@ -79,11 +68,9 @@ Spotbox.PlayerView = Ember.View.extend({
       return "width: " + this.getPath("content.percent") + "%;";
     }.property("content.percent")
   }),
-
   fromPlaylist: function() {
     return !this.getPath("controller.content.queue");
   }.property("controller.content"),
-
   requestedBy: function() {
     return this.getPath("controller.content.meta.user.name");
   }.property("controller.content")

@@ -1,6 +1,5 @@
 Spotbox.QueueController = Ember.ArrayController.extend({
   content: [],
-
   init: function() {
     var self = this;
     Spotbox.socket.on("tracks/queue", function(tracks) {
@@ -10,7 +9,6 @@ Spotbox.QueueController = Ember.ArrayController.extend({
       self.set("content", queue);
     });
   },
-
   enqueue: function(track) {
     Spotbox.socket.emit("tracks/enqueue", track.id);
   }

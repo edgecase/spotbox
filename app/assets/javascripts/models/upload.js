@@ -1,7 +1,6 @@
 Spotbox.Upload = Ember.Object.extend({
   file: null,
   status: "active",
-
   upload: function(hollaback) {
     var self = this;
     var file = this.get("file");
@@ -14,13 +13,11 @@ Spotbox.Upload = Ember.Object.extend({
     xhr.onreadystatechange = function(event) { self.updateStatus(event, hollaback) };
     xhr.send(data);
   },
-
   updateStatus: function(event, hollaback) {
     var info = event.target;
     if (info.status && info.status !== 200) {
       this.set("status", "error");
     }
-
     if (info.readyState === 4) {
       if (info.status === 200) {
         this.set("percent", 100);
@@ -33,7 +30,6 @@ Spotbox.Upload = Ember.Object.extend({
       }
     }
   },
-
   progress: function(event) {
     var percent = parseInt(event.loaded / event.total * 100);
     this.set("percent", percent);

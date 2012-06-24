@@ -3,7 +3,6 @@ Spotbox.SearchController = Ember.ArrayController.extend({
   searchResults: {itunes: [], spotify: []},
   searching: false,
   displayCategory: null,
-
   init: function() {
     var self = this;
     Spotbox.socket.on("tracks/search", function(results) {
@@ -27,12 +26,10 @@ Spotbox.SearchController = Ember.ArrayController.extend({
       self.set("searching", false);
     });
   },
-
   search: function(query) {
     this.set("searching", true);
     Spotbox.socket.emit("tracks/search", query);
   },
-
   switchCategory: function() {
     var category = this.get("displayCategory");
     var results = this.get("searchResults")[category];

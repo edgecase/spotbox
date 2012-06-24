@@ -1,6 +1,5 @@
 Spotbox.DislikesController = Ember.ArrayController.extend({
   content: [],
-
   init: function() {
     var self = this;
     Spotbox.socket.on("tracks/disliked", function(tracks) {

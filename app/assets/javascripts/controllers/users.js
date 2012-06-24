@@ -1,7 +1,6 @@
 Spotbox.UsersController = Ember.ArrayController.extend({
   content: [],
   votes: Ember.Object.create(),
-
   init: function() {
     var self = this;
     Spotbox.socket.on("users", function(users) {
