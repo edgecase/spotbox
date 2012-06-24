@@ -1,6 +1,5 @@
 Spotbox.Router = Ember.Router.extend({
-  location: 'hash',
-  enableLogging: true,
+  location: "history",
   root: Ember.Route.extend({
     index: Ember.Route.extend({
       route: "/",

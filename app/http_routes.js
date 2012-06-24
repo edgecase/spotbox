@@ -11,7 +11,7 @@ module.exports = function(server) {
     response.redirect("/authenticate");
   };
 
-  server.get("/", authenticate, function(request, response) {
+  server.get("*", authenticate, function(request, response) {
     response.render("main");
   });
 
