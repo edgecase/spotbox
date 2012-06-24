@@ -269,18 +269,6 @@ TrackManager.markPlayed = function(track, hollaback) {
   });
 };
 
-// List tracks that a user has uploaded
-TrackManager.userUploads = function(user, hollaback) {
-  db.collection("tracks", function(error, collection) {
-    collection.find({"user.id": user.is, upload: true}).toArray(function(error, tracks) {
-      if (error) return hollaback(error);
-      new AsyncRunner(hollaback).run(tracks, function(track, hollaback) {
-        TrackManager.metadata(track.id, hollaback);
-      });
-    });
-  });
-};
-
 // Retrieve metadata on a track without having to know where it came from
 TrackManager.metadata = function(id, hollaback) {
   var player = getPlayerForId(id);
@@ -300,16 +288,32 @@ TrackManager.vote = function(id, user, rating, hollaback) {
   });
 };
 
+// Tracks the user has liked
 TrackManager.liked = function(user, hollaback) {
   findByUserAndRating(user, "up", hollaback);
 };
 
+// Tracks the user had disliked
 TrackManager.disliked = function(user, hollaback) {
   findByUserAndRating(user, "down", hollaback);
 };
 
+// Compute the score (likes vs dislikes) for the track
 TrackManager.score = function(id, hollaback) {
   trackScore(id, hollaback);
+};
+
+// List tracks that a user has uploaded
+TrackManager.userUploads = function(user, hollaback) {
+  db.collection("tracks", function(error, collection) {
+    if (error) return hollaback(error);
+    collection.find({"user.id": user.id, upload: true}).toArray(function(error, tracks) {
+      if (error) return hollaback(error);
+      new AsyncRunner(hollaback).run(tracks, function(track, hollaback) {
+        TrackManager.metadata(track.id, hollaback);
+      });
+    });
+  });
 };
 
 TrackManager.on = function(key, hollaback) {

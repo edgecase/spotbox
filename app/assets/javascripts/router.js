@@ -30,6 +30,12 @@ Spotbox.Router = Ember.Router.extend({
       connectOutlets: function(router) {
         router.get("applicationController").connectOutlet("dislikes");
       }
+    }),
+    uploads: Ember.Route.extend({
+      route: "/uploads",
+      connectOutlets: function(router) {
+        router.get("applicationController").connectOutlet("uploads");
+      }
     })
   })
 });

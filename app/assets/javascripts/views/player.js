@@ -14,6 +14,7 @@ Spotbox.PlayerView = Ember.View.extend({
   },
 
   drop: function(event) {
+    event.preventDefault();
     this.set("draghover", false);
     _.each(event.originalEvent.dataTransfer.files, function(file) {
       Spotbox.router.uploadsController.upload(file);

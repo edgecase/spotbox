@@ -54,6 +54,13 @@ module.exports = function(server, sessionStore) {
     });
   };
 
+  function refreshUploads(user, socket) {
+    TrackManager.userUploads(user, function(error, tracks) {
+      if (error) return socket.emit("messages/error", error);
+      socket.emit("uploads", tracks);
+    });
+  };
+
   io.sockets.on("connection", function(socket) {
     authenticate(socket, function(error, user) {
       if (error || !user) {
@@ -80,6 +87,7 @@ module.exports = function(server, sessionStore) {
           socket.emit("airfoil", properties);
         });
         refreshVotes(user, socket);
+        refreshUploads(user, socket);
       })();
 
 
@@ -119,13 +127,7 @@ module.exports = function(server, sessionStore) {
       });
 
       socket.on("tracks/uploads", function(message) {
-        TrackManager.userUploads(user, function(error, tracks) {
-          if (error) {
-            socket.emit("error", message);
-          } else {
-            socket.emit("uploads/list", tracks);
-          }
-        });
+        refreshUploads(user, socket);
       });
 
       socket.on("tracks/rating", function(track, rating) {
