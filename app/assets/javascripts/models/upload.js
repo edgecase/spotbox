@@ -1,4 +1,4 @@
-Spotbox.Models.Upload = Ember.Object.extend({
+Spotbox.Upload = Ember.Object.extend({
   file: null,
   status: "active",
 

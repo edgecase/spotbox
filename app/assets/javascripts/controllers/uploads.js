@@ -1,11 +1,11 @@
-Spotbox.Controllers.Uploads = Ember.ArrayController.create({
+Spotbox.UploadsController = Ember.ArrayController.extend({
   content: [],
 
   init: function() {
     var self = this;
     Spotbox.socket.on("uploads/list", function(results) {
       var tracks = _.map(results, function(track) {
-        return Spotbox.Models.Track.create(track);
+        return Spotbox.Track.create(track);
       });
       self.set("content", tracks);
     });
@@ -17,7 +17,7 @@ Spotbox.Controllers.Uploads = Ember.ArrayController.create({
 
   upload: function(file) {
     var self = this;
-    var model = Spotbox.Models.Upload.create({file: file});
+    var model = Spotbox.Upload.create({file: file});
     this.unshiftObject(model);
     model.upload(function(error, data) {
       self.removeObjects(model);

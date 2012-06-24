@@ -1,4 +1,4 @@
-Spotbox.Controllers.Users = Ember.ArrayController.create({
+Spotbox.UsersController = Ember.ArrayController.extend({
   content: [],
 
   init: function() {

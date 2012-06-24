@@ -1,12 +1,12 @@
-Spotbox.Views.Queue = Ember.View.extend({
-  templateName: "queue",
+Spotbox.QueuedTracksView = Ember.View.extend({
+  templateName: "queued_tracks",
   tagName: "table",
   classNames: ["table", "table-striped", "track-list", "active"],
-  contentBinding: "Spotbox.Controllers.QueuedTracks.content",
+  contentBinding: "Spotbox.queuedTracksController.content",
 
-  showContent: function() {
-    return this.get("content").length > 0;
-  }.property("content"),
+  didInsertElement: function() {
+    console.log("inserted view");
+  },
 
   queueItem: Ember.View.extend({
     username: function() {

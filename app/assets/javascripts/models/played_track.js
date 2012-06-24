@@ -1,4 +1,4 @@
-Spotbox.Models.PlayedTrack = Spotbox.Models.Track.extend({
+Spotbox.PlayedTrack = Spotbox.Track.extend({
   playedAgo: function() {
     var now = new Date();
     var date = new Date(this.get("created_at"));

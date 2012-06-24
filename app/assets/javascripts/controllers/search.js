@@ -1,9 +1,8 @@
-Spotbox.Controllers.Search = Ember.ArrayController.create({
+Spotbox.SearchController = Ember.ArrayController.extend({
   content: [],
   searchResults: {itunes: [], spotify: []},
   searching: false,
   displayCategory: null,
-  sortKey: null,
 
   init: function() {
     var self = this;
@@ -13,10 +12,10 @@ Spotbox.Controllers.Search = Ember.ArrayController.create({
         return _.include(result.availability.territories.split(" "), "US");
       });
       searchResults.spotify = _.map(spotifyResults, function(result) {
-        return Spotbox.Models.Track.create(result);
+        return Spotbox.Track.create(result);
       });
       searchResults.itunes = _.map(results.itunes, function(result) {
-        return Spotbox.Models.Track.create(result);
+        return Spotbox.Track.create(result);
       });
       self.set("searchResults", searchResults);
       var category = self.get("displayCategory");
@@ -33,22 +32,6 @@ Spotbox.Controllers.Search = Ember.ArrayController.create({
     this.set("searching", true);
     Spotbox.socket.emit("tracks/search", query);
   },
-
-  sortContent: function() {
-    var key     = this.get("sortKey");
-    var results = this.get("content");
-
-    if (_.isNull(key)) {
-      // TODO: Temp Hack
-      // For some reason reverse by itself doesn't force a render.
-      // Perhaps something to do with reverse happening in place?
-      this.set("content", results.slice().reverse());
-    } else {
-      this.set("content", _.sortBy(results, function(result) {
-        return result.get(key);
-      }));
-    }
-  }.observes("sortKey"),
 
   switchCategory: function() {
     var category = this.get("displayCategory");

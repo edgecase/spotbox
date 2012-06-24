@@ -1,4 +1,4 @@
-Spotbox.Controllers.Application = Ember.Object.create({
+Spotbox.ApplicationController = Ember.Controller.extend({
   version: null,
   init: function() {
     var self = this;

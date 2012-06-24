@@ -11,7 +11,7 @@
     "javascripts/controllers/",
     "javascripts/views/extensions.js",
     "javascripts/views/",
-    "javascripts/tab_manager.js",
+    "javascripts/router.js",
     "javascripts/"
   ]
 }

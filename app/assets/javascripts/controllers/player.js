@@ -1,7 +1,7 @@
-Spotbox.Controllers.Player = Ember.Object.create({
+Spotbox.PlayerController = Ember.Controller.extend({
   playbackState: null,
 
-  content: Spotbox.Models.Track.create({
+  content: Spotbox.Track.create({
     name: "Nothing Playing",
     length: 0.00,
     album: { name: "Chalet", released: "2005" },
@@ -17,7 +17,7 @@ Spotbox.Controllers.Player = Ember.Object.create({
 
     Spotbox.socket.on("player/track", function(track) {
       if (track) {
-        self.set("content", Spotbox.Models.Track.create(track));
+        self.set("content", Spotbox.Track.create(track));
         document.title = track.name + " - " + _.pluck(track.artists, "name").join(",");
       }
     });

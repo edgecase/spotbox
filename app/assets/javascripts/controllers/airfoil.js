@@ -1,4 +1,4 @@
-Spotbox.Controllers.Airfoil = Ember.Object.create({
+Spotbox.AirfoilController = Ember.Controller.extend({
   volume: 0,
   connection: "disconnected",
   init: function() {
@@ -10,29 +10,18 @@ Spotbox.Controllers.Airfoil = Ember.Object.create({
   },
 
   toggleConnection: function() {
-    // Immediate feedback
     if (this.get("connection")) {
       Spotbox.socket.emit("airfoil", "disconnect");
-      this.set("connection", false);
     } else {
       Spotbox.socket.emit("airfoil", "connect");
-      this.set("connection", true);
     }
   },
 
   volumeUp: function() {
-    // Immediate feedback
-    volume = this.get("volume");
-    volume += 5;
-    this.set("volume", volume);
     Spotbox.socket.emit("airfoil", "volumeUp");
   },
 
   volumeDown: function() {
-    // Immediate feedback
-    volume = this.get("volume");
-    volume -= 5;
-    this.set("volume", volume);
     Spotbox.socket.emit("airfoil", "volumeDown");
   }
 });

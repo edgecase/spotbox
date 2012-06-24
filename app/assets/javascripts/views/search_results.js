@@ -1,19 +1,18 @@
-Spotbox.Views.SearchResults = Ember.View.extend({
+Spotbox.SearchResultsView = Ember.View.extend({
   templateName: "search_results",
-  contentBinding: "Spotbox.Controllers.Search.content",
+  contentBinding: "Spotbox.searchController.content",
 
   showContent: function() {
-    return (Spotbox.Controllers.Search.get("content").length > 0) && !Spotbox.Controllers.Search.get("searching");
-  }.property("Spotbox.Controllers.Search.content", "Spotbox.Controllers.Search.searching"),
+    return (Spotbox.searchController.get("content").length > 0) && !Spotbox.searchController.get("searching");
+  }.property("Spotbox.searchController.content", "Spotbox.searchController.searching"),
 
   setSortKey: function(event) {
-    event.preventDefault();
     var key = $(event.target).data("key");
 
-    if (key === Spotbox.Controllers.Search.get("sortKey")) {
-      Spotbox.Controllers.Search.set("sortKey", null);
+    if (key === Spotbox.searchController.get("sortKey")) {
+      Spotbox.searchController.set("sortKey", null);
     } else {
-      Spotbox.Controllers.Search.set("sortKey", key);
+      Spotbox.searchController.set("sortKey", key);
     }
   },
 
@@ -21,18 +20,18 @@ Spotbox.Views.SearchResults = Ember.View.extend({
     classNames: "btn",
     classNameBindings: ["active"],
     click: function(event) {
-      Spotbox.Controllers.Search.set("displayCategory", this.get("name"));
+      Spotbox.searchController.set("displayCategory", this.get("name"));
     },
     active: function() {
-      var category = Spotbox.Controllers.Search.get("displayCategory");
+      var category = Spotbox.searchController.get("displayCategory");
       return category === this.get("name");
-    }.property("Spotbox.Controllers.Search.displayCategory")
+    }.property("Spotbox.searchController.displayCategory")
   }),
 
   searchResultsItem: Ember.View.extend({
     tagName: "tr",
     enqueue: function() {
-      Spotbox.Controllers.QueuedTracks.enqueue(this.get("content"));
+      Spotbox.queuedTracksController.enqueue(this.get("content"));
       this.remove();
     }
   })

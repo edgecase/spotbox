@@ -1,4 +1,4 @@
-Spotbox.Models.Track = Ember.Object.extend({
+Spotbox.Track = Ember.Object.extend({
   progress: 0,
 
   percent: function() {

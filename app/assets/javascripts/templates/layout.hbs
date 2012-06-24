@@ -1,5 +1,5 @@
 <!-- Header -->
-{{view Spotbox.Views.Header}}
+{{view Spotbox.HeaderView}}
 <!-- End Header -->
 
 <!-- Container -->
@@ -11,10 +11,10 @@
     <!-- Player -->
     <div class="span3">
       <div class="well">
-        {{view Spotbox.Views.Airfoil}}
-        {{view Spotbox.Views.Player}}
+        {{view Spotbox.AirfoilView}}
+        {{view Spotbox.PlayerView}}
       </div>
-      {{view Spotbox.Views.Users}}
+      {{view Spotbox.UsersView}}
     </div>
     <!-- End Player -->
 
@@ -22,15 +22,7 @@
     <div class="span9">
       <div class="row-fluid message-container">
       </div>
-
-      <!-- Tab Bar -->
-      {{view Spotbox.Views.TabBar}}
-      <!-- End Tab Bar -->
-
-      <!-- Tab Content -->
-      <div class="tab-content"></div>
-      <!-- End Tab Content -->
-
+      {{outlet}}
     </div>
     <!-- End Lists -->
 

@@ -1,4 +1,4 @@
-Spotbox.Views.SearchField = Ember.TextField.extend({
+Spotbox.SearchFieldView = Ember.TextField.extend({
   classNames: ["search-query"],
   placeholder: "Search",
   query: "",
@@ -6,16 +6,16 @@ Spotbox.Views.SearchField = Ember.TextField.extend({
   attributeBindings: ["disabled"],
 
   disabled: function() {
-    return Spotbox.Controllers.Search.get("searching");
-  }.property("Spotbox.Controllers.Search.searching"),
+    return Spotbox.router.getPath("searchController.searching");
+  }.property("Spotbox.router.searchController.searching"),
 
   submit: function(event) {
-    Spotbox.Controllers.Search.search(this.get("query"));
-    page("/search");
+    Spotbox.router.get("searchController").search(this.get("query"));
+    //TODO: Router
+    // page("/search");
   },
 
   insertNewline: function(event) {
-    event.preventDefault();
     this.submit(function() {});
   }
 });

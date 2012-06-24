@@ -1,10 +1,10 @@
-Spotbox.Models.QueuedTrack = Spotbox.Models.Track.extend({
+Spotbox.QueuedTrack = Spotbox.Track.extend({
   eta: function() {
-    var playState = Spotbox.Controllers.Player.get("playbackState");
+    var playState = Spotbox.playerController.get("playbackState");
     if (playState === "playing") {
-      var queuedTracks = Spotbox.Controllers.QueuedTracks.get("content");
+      var queuedTracks = Spotbox.queuedTracksController.get("content");
       var index = queuedTracks.indexOf(this);
-      var currentTrack = Spotbox.Controllers.Player.get("content");
+      var currentTrack = Spotbox.playerController.get("content");
       var seconds = currentTrack.get("length") - currentTrack.get("progress");
       var i;
       for (i = 0; i < index; i++) {
@@ -18,5 +18,5 @@ Spotbox.Models.QueuedTrack = Spotbox.Models.Track.extend({
     } else {
       return "---";
     }
-  }.property("Spotbox.Controllers.Player.content.progress", "Spotbox.Controllers.Player.playbackState")
+  }.property("Spotbox.playerController.content.progress", "Spotbox.playerController.playbackState")
 });
