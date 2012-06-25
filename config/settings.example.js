@@ -4,8 +4,8 @@ module.exports = {
   },
 
   google_auth: {
-    app_id: "12345.apps.googleusercontent.com",
-    app_secret: "12345",
+    clientID: "12345.apps.googleusercontent.com",
+    clientSecret: "12345",
     domain: "theedgecase.com"
   },
 
@@ -29,6 +29,11 @@ module.exports = {
 
   // user to use in development instead of actually hitting google auth
   user: {
-    email: "foo@theedgecase.com"
+    id: "123456789012345678901",
+    email: "tappy@theedgecase.com",
+    verified_email: true,
+    name: "Tappy Cardinal",
+    given_name: "Tappy",
+    family_name: "Cardinal"
   }
 };
