@@ -57,7 +57,7 @@ module.exports = function(server, sessionStore) {
   function refreshVotes(track, socket) {
     TrackManager.metadata(track.id, function(error, track) {
       if (error) return;
-      socket.emit("votes", track.meta.votes);
+      socket.emit("votes", track.meta.votes || {});
     });
   };
 
