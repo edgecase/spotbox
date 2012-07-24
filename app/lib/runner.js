@@ -12,7 +12,7 @@ Runner.exec = function(command, args, hollaback) {
   child.stderr.on("data", function(chunk) {
     error += chunk.toString();
   });
-  child.on("exit", function(code) {
+  child.on("close", function(code) {
     if (error) {
       hollaback(error);
     } else {

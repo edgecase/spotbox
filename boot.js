@@ -1,5 +1,6 @@
 var path              = require("path");
 var underscore        = require("underscore");
+var http              = require("http");
 var express           = require("express");
 var assetbuilder      = require("asset_builder");
 var passport          = require("passport");
@@ -18,8 +19,10 @@ var Airfoil           = require(path.join(app.root, "app", "lib", "application_i
 var sessionStore = new express.session.MemoryStore;
 
 function initExpress() {
-  var server = express.createServer();
-  server.configure(function() {
+  var application = express();
+  var server = http.createServer(application);
+  var router = express
+  application.configure(function() {
     this.use(express.errorHandler({
       showStack: true,
       dumpExceptions: true
@@ -32,14 +35,14 @@ function initExpress() {
     this.use(express.session(underscore.extend({store: sessionStore}, settings.session)));
     this.use(passport.initialize());
     this.use(passport.session());
-    this.use(express.router(authentication));
-    this.use(express.router(httpRoutes));
+    authentication(application);
+    httpRoutes(application);
     this.set("views", path.join("app", "views"));
     this.set("view engine", "jade");
-    this.set("view options", {layout: false });
+    this.set("view options", {layout: false});
   });
 
-  assetbuilder.registerViewHelpers(server);
+  assetbuilder.registerViewHelpers(application);
   assetbuilder.registerPreprocessor(emberPreprocessor);
   assetbuilder.configure({ env: app.env });
 

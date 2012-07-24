@@ -23,7 +23,8 @@ module.exports = function(server, sessionStore) {
     io.set("authorization", function(data, hollaback) {
       var sid = cookie.parse(data.headers.cookie)["connect.sid"];
       if (!sid) return hollaback(null, false);
-      sessionStore.get(querystring.unescape(sid), function(error, session) {
+      var parsedSessionId = sid.match(/s:([^.]*)/)[1];
+      sessionStore.get(parsedSessionId, function(error, session) {
         if (error) return hollaback(error);
         if (session) {
           data.session = session;
@@ -54,10 +55,10 @@ module.exports = function(server, sessionStore) {
     });
   };
 
-  function refreshVotes(track, socket) {
+  function refreshVotes(track) {
     TrackManager.metadata(track.id, function(error, track) {
       if (error) return;
-      socket.emit("votes", track.meta.votes || {});
+      io.sockets.emit("votes", track.meta.votes || {});
     });
   };
 
@@ -143,7 +144,7 @@ module.exports = function(server, sessionStore) {
             if (error) return;
             refreshLikes(user, socket);
             if (track.id === Player.properties().track.id) {
-              refreshVotes(Player.properties().track, socket);
+              refreshVotes(Player.properties().track);
               TrackManager.score(track.id, function(error, score) {
                 if (score < 0) {
                   Player.next(function() {});
@@ -200,7 +201,7 @@ module.exports = function(server, sessionStore) {
 
     Player.on("track", function(properties) {
       io.sockets.emit("player/track", properties.track);
-      refreshVotes(properties.track, socket);
+      refreshVotes(properties.track);
     });
 
 

@@ -24,7 +24,6 @@ passport.deserializeUser(function(obj, done) {
 
 passport.use(new Strategy(underscore.extend(passportSettings, settings.google_auth), function(accessToken, refreshToken, profile, hollaback) {
   var user = profile["_json"];
-  console.log(user);
   if (!user.email.match("@" + settings.google_auth.domain)) return hollaback(null, false);
   db.collection("users", function(error, collection) {
     if (error) return hollaback(error);
