@@ -4,6 +4,7 @@
   "author": "Andrew Grieser <agrieser@gmail.com>, Tony Schneider <tonywok@gmail.com>",
   "description": "Jukebox",
   "dependencies": {
+    "nlogger":               "0.4.0",
     "express":               "3.0.0beta4",
     "cookie":                "0.0.4",
     "passport":              "0.1.10",

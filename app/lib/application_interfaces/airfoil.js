@@ -8,6 +8,7 @@ var EventedState     = require(path.join(app.root, "app", "lib", "evented_state"
 var settings         = require(path.join(app.root, "config", "settings"));
 var Spotbox          = require(path.join(app.root, "app", "lib", "spotbox"));
 var Applescript      = require(path.join(app.root, "app", "lib", "applescript"));
+var logger           = require('nlogger').logger(module);
 
 var state = new EventedState({
   volume: settings.airfoil.volume || 50,
@@ -31,6 +32,7 @@ var Airfoil = function() {};
 Airfoil.launch = function(hollaback) {
   exec("launch", function(error) {
     if (error) {
+      logger.error(error);
       hollaback(error);
     } else {
       runner = new AsyncRunner(hollaback);
@@ -52,6 +54,7 @@ Airfoil.connect = function(hollaback) {
   command += "connected of myspeaker";
   exec(command, function(error, result) {
     if (error) {
+      logger.error(error);
       hollaback(error);
     } else {
       if (result === "true") {
@@ -72,6 +75,7 @@ Airfoil.disconnect = function(hollaback) {
   command += "connected of myspeaker";
   exec(command, function(error, result) {
     if (error) {
+      logger.error(error);
       hollaback(error);
     } else {
       if (result === "true") {
@@ -90,6 +94,7 @@ Airfoil.status = function(hollaback) {
   command += "connected of myspeaker";
   exec(command, function(error, result) {
     if (error) {
+      logger.error(error);
       hollaback(error);
     } else {
       if (result === "true") {
@@ -100,6 +105,7 @@ Airfoil.status = function(hollaback) {
       command = "volume of first speaker whose name is \"" + settings.airfoil.speaker_name + "\"";
       exec(command, function(error, result) {
         if (error) {
+          logger.error(error);
           hollaback(error);
         } else {
           state.set("volume", result * 100);

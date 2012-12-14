@@ -3,14 +3,14 @@ var fs         = require("fs");
 var underscore = require("underscore");
 var app        = require(path.join(__dirname, "..", "..", "config", "app"));
 var Runner     = require(path.join(app.root, "app", "lib", "runner"));
+var logger     = require('nlogger').logger(module);
 
 var Applescript = function() {};
 
 Applescript.run = function(applescriptString, hollaback) {
   var child = Runner.exec("osascript", ["-"], function(error, result) {
     if (error) {
-      console.error("applescript error executing:", applescriptString);
-      console.error(error);
+      logger.error(error);
     } else {
       result = result.trim();
     }

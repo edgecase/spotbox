@@ -1,3 +1,4 @@
+
 var path         = require("path");
 var fs           = require("fs");
 var underscore   = require("underscore");
@@ -12,6 +13,8 @@ var Itunes       = require(path.join(app.root, "app", "lib", "application_interf
 var Chromaprint  = require(path.join(app.root, "app", "lib", "application_interfaces", "chromaprint"));
 var AcoustidApi  = require(path.join(app.root, "app", "lib", "apis", "acoustid_api"));
 var Users        = require(path.join(app.root, "app", "lib", "users"));
+var logger        = require('nlogger').logger(module);
+
 
 var state = new EventedState({
   queue: []
@@ -20,6 +23,7 @@ var state = new EventedState({
 function trackScore(id, hollaback) {
   db.collection("tracks", function(error, collection) {
     collection.find({id: id}).toArray(function(error, results) {
+      if (error) logger.error(error);
       if (error) return hollaback(error);
       if (results.length === 0) return hollaback({error: "track score", message: "track " + id + " does not exist"});
       var track = results[0];
@@ -45,8 +49,10 @@ function trackScore(id, hollaback) {
 function reloadPool(hollaback) {
   var key = Spotbox.namespace("pool");
   db.collection("tracks", function(error, collection) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     collection.find().toArray(function(error, tracks) {
+      if (error) logger.error(error);
       if (error) return hollaback(error);
       if (tracks.length === 0) return hollaback({error: "reload pool", message: "no tracks available"});
       redis.rpush(key, underscore.shuffle(underscore.pluck(tracks, "id")), hollaback);
@@ -56,6 +62,7 @@ function reloadPool(hollaback) {
 
 function findNextTrack(hollaback) {
   redis.rpop(Spotbox.namespace("pool"), function(error, trackId) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     if (!trackId) {
       reloadPool(function(error) {
@@ -64,6 +71,7 @@ function findNextTrack(hollaback) {
       });
     }
     trackScore(trackId, function(error, score) {
+      if (error) logger.error(error);
       if (error) return hollaback(error);
       if (score >= 0) {
         TrackManager.metadata(trackId, hollaback);
@@ -76,11 +84,13 @@ function findNextTrack(hollaback) {
 
 function findByUserAndRating(user, rating, hollaback) {
   db.collection("tracks", function(error, collection) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     var voteKey = "votes." + user.id;
     var search = {};
     search[voteKey] = rating;
     collection.find(search).toArray(function(error, tracks) {
+      if (error) logger.error(error);
       if (error) return hollaback(error);
       new AsyncRunner(hollaback).run(tracks, function(track, hollaback) {
         TrackManager.metadata(track.id, hollaback);
@@ -102,14 +112,17 @@ function getPlayerForId(id) {
 function addTrack(track, user, additionalAttrs, hollaback) {
   var attrs = underscore.extend({}, additionalAttrs, {createdAt: new Date(), id: track.id, user: user});
   db.collection("tracks", function(error, collection) {
+    if (error) logger.error(error);
     collection.update({id: attrs.id}, {$set: attrs}, {safe: true, upsert: true}, hollaback);
   });
 };
 
 function findByFingerprint(fingerprint, hollaback) {
   db.collection("tracks", function(error, collection) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     collection.find({fingerprint: fingerprint}).limit(1).toArray(function(error, tracks) {
+      if (error) logger.error(error);
       if (error) return hollaback(error);
       hollaback(null, tracks[0]);
     });
@@ -118,8 +131,10 @@ function findByFingerprint(fingerprint, hollaback) {
 
 function findByAcoustidId(acoustidId, hollaback) {
   db.collection("tracks", function(error, collection) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     collection.find({acoustid: {id: acoustidId}}).limit(1).toArray(function(error, tracks) {
+      if (error) logger.error(error);
       if (error) return hollaback(error);
       hollaback(null, tracks[0]);
     });
@@ -128,6 +143,7 @@ function findByAcoustidId(acoustidId, hollaback) {
 
 function findByFingerprintOrAcoustidId(fingerprint, acoustidId, hollaback) {
   var runner = new AsyncRunner(function(errors, results) {
+    if (error) logger.error(error);
     if (errors) return hollaback(errors);
     hollaback(null, underscore.compact(results)[0]);
   });
@@ -143,9 +159,11 @@ function findByFingerprintOrAcoustidId(fingerprint, acoustidId, hollaback) {
 
 function importWithoutAcoustid(filepath, fingerprint, user, hollaback) {
   findByFingerprint(findByFingerprint, function(error, result) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     if (result) return hollaback({error: "import", message: "duplicate track"});
     Itunes.import(filepath, function(error, itunesMeta) {
+      if (error) logger.error(error);
       if (error) return hollaback(error);
       addTrack(itunesMeta, user, {fingerprint: fingerprint, upload: true}, hollaback);
     });
@@ -154,11 +172,14 @@ function importWithoutAcoustid(filepath, fingerprint, user, hollaback) {
 
 function importWithAcoustid(filepath, fingerprint, acoustidId, user, hollaback) {
   findByFingerprintOrAcoustidId(fingerprint, acoustidId, function(error, result) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     if (result) return hollaback({error: "import", message: "duplicate track"});
     Itunes.import(filepath, function(error, itunesMeta) {
+      if (error) logger.error(error);
       if (error) return hollaback(error);
       AcoustidApi.bestMatchLookup(acoustidId, itunesMeta, function(error, track) {
+        if (error) logger.error(error);
         if (error) return hollaback(error);
         if (!track) {
           var attrs = { acoustid: {id: acoustidId}, fingerprint: fingerprint, upload: true };
@@ -199,10 +220,12 @@ TrackManager.enqueue = function(id, user, hollaback) {
   var exists = underscore.find(state.properties.queue, function(t) { return t.id === id });
   if (exists) return hollaback({error: "enqueue", message: "duplicate"});
   TrackManager.metadata(id, function(error, track) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     addTrack(track, user, {}, function(error) {
       TrackManager.vote(id, user, "up", function(error) {
         TrackManager.metadata(id, function(error, track) {
+          if (error) logger.error(error);
           if (error) return hollaback(error);
           state.properties.queue.push(track);
           state.trigger("queue");
@@ -221,9 +244,11 @@ TrackManager.queue = function() {
 // Change a tracks musicbrainz id
 TrackManager.retag = function(id, acoustidId, acoustidTrackId, acoustidAlbumId, hollaback) {
   AcoustidApi.lookup(acoustidId, acoustidTrackId, acoustidAlbumId, function(error, track) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     if (!track) return hollaback({error: "retag", message: "combination does not exist"});
     db.collection("tracks", function(error, collection) {
+      if (error) logger.error(error);
       var acoustid = {
         id: acoustidId,
         trackId: acoustidTrackId,
@@ -238,11 +263,14 @@ TrackManager.retag = function(id, acoustidId, acoustidTrackId, acoustidAlbumId, 
 TrackManager.import = function(filepath, filename, user, hollaback) {
   var audioFilePath = filepath + "." + underscore.last(filename.split("."));
   fs.rename(filepath, audioFilePath, function(error) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     Chromaprint.identify(audioFilePath, function(error, data) {
+      if (error) logger.error(error);
       if (error) return hollaback(error);
       var fingerprint = data.fingerprint;
       AcoustidApi.fingerprintLookup(data, function(error, acoustidId) {
+        if (error) logger.error(error);
         if (error) return hollaback(error);
         if (!acoustidId) {
           importWithoutAcoustid(audioFilePath, fingerprint, user, hollaback);
@@ -257,9 +285,12 @@ TrackManager.import = function(filepath, filename, user, hollaback) {
 // Refresh track with latest info (votes, etc) and save in "played" collection
 TrackManager.markPlayed = function(track, hollaback) {
   db.collection("played", function(error, playedCollection) {
+    if (error) logger.error(error);
     db.collection("tracks", function(error, tracksCollection) {
+      if (error) logger.error(error);
       if (error) return hollaback(error);
       tracksCollection.find({id: track.id}).toArray(function(error, results) {
+        if (error) logger.error(error);
         if (error) return hollaback(error);
         if (results.length === 0) return hollaback({error: "mark played", message: "track " + track.id + " not found"});
         track = results[0];
@@ -280,6 +311,7 @@ TrackManager.metadata = function(id, hollaback) {
 TrackManager.vote = function(id, user, rating, hollaback) {
   if (!(rating === "up" || rating === "down")) return hollaback({error: "vote", message: "rating " + rating + " must be up or down"});
   db.collection("tracks", function(error, collection) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     var voteKey = "votes." + user.id;
     var vote = {};
@@ -306,8 +338,10 @@ TrackManager.score = function(id, hollaback) {
 // List tracks that a user has uploaded
 TrackManager.userUploads = function(user, hollaback) {
   db.collection("tracks", function(error, collection) {
+    if (error) logger.error(error);
     if (error) return hollaback(error);
     collection.find({"user.id": user.id, upload: true}).toArray(function(error, tracks) {
+      if (error) logger.error(error);
       if (error) return hollaback(error);
       new AsyncRunner(hollaback).run(tracks, function(track, hollaback) {
         TrackManager.metadata(track.id, hollaback);

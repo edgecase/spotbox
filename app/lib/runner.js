@@ -1,11 +1,12 @@
 var child_process = require("child_process");
+var logger        = require('nlogger').logger(module);
 
 var Runner = function() {};
 
 Runner.exec = function(command, args, hollaback) {
   var child = child_process.spawn(command, args);
   var result = "";
-  var error = ""
+  var error = "";
   child.stdout.on("data", function(chunk) {
     result += chunk.toString();
   });
@@ -14,6 +15,7 @@ Runner.exec = function(command, args, hollaback) {
   });
   child.on("close", function(code) {
     if (error) {
+      logger.error(error);
       hollaback(error);
     } else {
       hollaback(null, result);

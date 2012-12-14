@@ -8,6 +8,8 @@ var EventedState = require(path.join(app.root, "app", "lib", "evented_state"));
 var db           = require(path.join(app.root, "config", "database"));
 var SpotifyApi   = require(path.join(app.root, "app", "lib", "apis", "spotify_api"));
 var Applescript  = require(path.join(app.root, "app", "lib", "applescript"));
+var logger       = require('nlogger').logger(module);
+
 
 var pollingId = null;
 
@@ -40,7 +42,7 @@ function getProgress(hollaback) {
 function updateStatus() {
   getState(function(error, playerState) {
     if (error) {
-      hollaback(error);
+      logger.error(error);
     } else {
       // Check if player stopped by itself
       if (state.properties.state === "playing" && state.properties.intendedState === "playing" && playerState === "stopped") {
@@ -50,7 +52,9 @@ function updateStatus() {
       state.set("state", playerState);
       if (playerState !== "paused" && playerState !== "stopped") {
         getTrackId(function(error, trackId) {
-          if (!error) {
+          if (error) {
+            logger.error(error);
+          } else {
             // Check if player automatically went to the next track
             if (state.properties.track.id !== trackId) {
               if (state.properties.intendedState === "playing") {
@@ -80,6 +84,7 @@ Spotify.launch = function(hollaback) {
   var runner = new AsyncRunner(hollaback);
   exec("launch", function(error) {
     if (error) {
+      logger.error(error);
       hollaback(error);
     } else {
       runner.run({}, [
@@ -96,11 +101,20 @@ Spotify.launch = function(hollaback) {
 
 Spotify.metadata = function(id, hollaback) {
   db.collection("tracks", function(error, collection) {
-    if (error) return hollaback(error);
+    if (error) {
+      logger.error(error);
+      return hollaback(error);
+    }
     collection.find({id: id}).limit(1).toArray(function(error, docs) {
-      if (error) return hollaback(error);
+      if (error) {
+        logger.error(error);
+        return hollaback(error);
+      }
       SpotifyApi.lookup(id, function(error, track) {
-        if (error) return hollaback(error);
+        if (error) {
+          logger.error(error);
+          return hollaback(error);
+        }
         hollaback(null, underscore.extend(track, {meta: docs[0] || {}}));
       });
     });
