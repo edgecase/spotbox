@@ -8,7 +8,7 @@ var authSettings = require(path.join(app.root, "config", "authentication"));
 module.exports = function(server) {
   var authenticate = function(request, response, next) {
     if (request.isAuthenticated()) return next();
-    response.redirect("/authenticate");
+    response.redirect("/login");
   };
 
   server.get("*", authenticate, function(request, response) {

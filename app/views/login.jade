@@ -1,0 +1,15 @@
+!!! 5
+html
+  head
+    title Spotbox
+    link(rel="stylesheet", type="text/css", href=stylesheetUrl)
+
+  body
+    block flash
+
+    form(action="/login", method="POST")
+      label(for="username") Username
+      input#username(type="text", name="username")
+      label(for="email") Username
+      input#password(type="password", name="password")
+      input(type="submit") Let's do this

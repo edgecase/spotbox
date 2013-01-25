@@ -35,11 +35,12 @@ function initExpress() {
     this.use(express.session(underscore.extend({store: sessionStore}, settings.session)));
     this.use(passport.initialize());
     this.use(passport.session());
-    authentication(application);
-    httpRoutes(application);
     this.set("views", path.join("app", "views"));
     this.set("view engine", "jade");
     this.set("view options", {layout: false});
+    authentication(application);
+    httpRoutes(application);
+
   });
 
   assetbuilder.registerViewHelpers(application);

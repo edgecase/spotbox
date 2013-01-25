@@ -8,6 +8,7 @@
     "express":               "3.0.0beta4",
     "cookie":                "0.0.4",
     "passport":              "0.1.10",
+    "passport-local":        "0.1.6",
     "passport-google-oauth": "0.1.4",
     "jade":                  "0.26.3",
     "socket.io":             "0.9.6",
